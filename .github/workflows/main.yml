@@ -45,17 +45,17 @@ jobs:
       - name: Run the downloader
         run: pipenv run python rs-skin-downloader.py
       - name: Rename the zip to include the version
-        run: mv "RS-Skins.zip" "RS-Skins-$GITHUB_REF.zip"
+        run: mv "RS-Skins.zip" "RS-Skins-$GITHUB_REF_NAME.zip"
       - name: Package to Exe installer
         run: |
           cp rs-skins.nsi Staging/
           cd Staging
           makensis rs-skins.nsi
-          mv "RS Skins.exe" "RS Skins $GITHUB_REF.exe"
+          mv "RS Skins.exe" "RS Skins $GITHUB_REF_NAME.exe"
       - name: Release to Github Releases
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            Staging/RS Skins $GITHUB_REF.exe
-            RS-Skins-$GITHUB_REF.zip
+            Staging/RS Skins $GITHUB_REF_NAME.exe
+            RS-Skins-$GITHUB_REF_NAME.zip
