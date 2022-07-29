@@ -98,8 +98,8 @@ def main():
     #     "f-15c"         : "GOOGLE-DRIVE-SHARED-FOLDER-ID"
     # }
     ##
-    Folders_RS = json.load(os.environ['GOOGLE_DRIVE_RS_SKINS'])
-    Folders_RSC = json.load(os.environ['GOOGLE_DRIVE_RSC_SKINS'])
+    Folders_RS = json.loads(os.environ['GOOGLE_DRIVE_RS_SKINS'])
+    Folders_RSC = json.loads(os.environ['GOOGLE_DRIVE_RSC_SKINS'])
     # Future skin categories if added here must be added a few lines below (dl_list loop)
 
     ray.init()
