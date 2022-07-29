@@ -32,6 +32,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
+      - name: Install nsis
+        run: sudo apt install -y nsis
       - name: Install pipenv
         run: python -m pip install pipenv
       - name: sync pipenv
@@ -39,20 +41,16 @@ jobs:
       - name: credentials.json
         run: echo "$GOOGLE_CREDS" > credentials.json
       - name: Run the downloader
-        run: echo pipenv run python rs-skin-downloader.py
+        run: pipenv run python rs-skin-downloader.py
       - name: Package to Exe installer
         run: |
-          mkdir Staging
           cp rs-skins.nsi Staging/
           cd Staging
-          echo $PWD
-      - name: Check current dir # TODO REMOVE
-        run: echo $PWD
-
-      # - name: Release
-      #   uses: softprops/action-gh-release@v1
-      #   if: startsWith(github.ref, 'refs/tags/')
-      #   with:
-      #     files: |
-      #       Release.txt
-      #       LICENSE
+          makensis rs-skins.nsi
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            "Staging/RS Skins.exe"
+            "RS-Skins.zip"
