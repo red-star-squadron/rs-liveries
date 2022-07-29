@@ -7,8 +7,7 @@ on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -45,15 +44,18 @@ jobs:
         run: echo "$GOOGLE_CREDS" > credentials.json
       - name: Run the downloader
         run: pipenv run python rs-skin-downloader.py
+      - name: Rename the zip to include the version
+        run: mv "RS-Skins.zip" "RS-Skins-${{ env.GITHUB_REF_NAME }}.zip"
       - name: Package to Exe installer
         run: |
           cp rs-skins.nsi Staging/
           cd Staging
           makensis rs-skins.nsi
-      - name: Release
+          mv "RS Skins.exe" "RS Skins ${{ env.GITHUB_REF_NAME }}.exe"
+      - name: Release to Github Releases
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            "Staging/RS Skins.exe"
-            "RS-Skins.zip"
+            "Staging/RS Skins ${{ env.GITHUB_REF_NAME }}.exe"
+            "RS-Skins-${{ env.GITHUB_REF_NAME }}.zip"

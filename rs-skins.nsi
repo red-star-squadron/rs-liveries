@@ -34,7 +34,7 @@ Page instfiles
 ;--------------------------------
 
 ; Old and unused skin folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
-Section "Clean old Red Star skins"
+Section "Delete Red Star skins"
   RMDir /r "$INSTDIR\mig-29s\RED STAR MiG-29S"
   RMDir /r "$INSTDIR\mig-29a\RED STAR MiG-29A"
   RMDir /r "$INSTDIR\mig-29g\RED STAR MiG-29G"
@@ -47,7 +47,7 @@ Section "Clean old Red Star skins"
 SectionEnd
 
 ; Old and unused skin folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
-Section "Clean old Red Star BLACK SQUADRON skins"
+Section "Delete Red Star BLACK SQUADRON skins"
   RMDir /r "$INSTDIR\mig-21bis\RED STAR MiG-21 BLACK SQUADRON"
   RMDir /r "$INSTDIR\mig-29s\RED STAR MiG-29S BLACK SQUADRON"
   RMDir /r "$INSTDIR\mig-29a\RED STAR MiG-29A BLACK SQUADRON"
