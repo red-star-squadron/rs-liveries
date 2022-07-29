@@ -58,43 +58,78 @@ Section "Delete Red Star BLACK SQUADRON skins"
   RMDir /r "$INSTDIR\fa-18c_hornet\RED STAR FA-18C BLACK SQUADRON"
 SectionEnd
 
-Section "Red Star"
-  SetOutPath $INSTDIR\mig-29s
-  File /r "mig-29s\RED STAR MiG-29S"
-  SetOutPath $INSTDIR\mig-29a
-  File /r "mig-29a\RED STAR MiG-29A"
-  SetOutPath $INSTDIR\mig-29g
-  File /r "mig-29g\RED STAR MiG-29G"
-  SetOutPath $INSTDIR\jf-17
-  File /r "jf-17\RED STAR JF-17"
-  SetOutPath $INSTDIR\j-11a
-  File /r "j-11a\RED STAR J-11A"
-  SetOutPath $INSTDIR\su-27
-  File /r "su-27\RED STAR SU-27"
-  SetOutPath $INSTDIR\f-16c_50
-  File /r "f-16c_50\RED STAR F-16C_50"
-  SetOutPath $INSTDIR\fa-18c_hornet
-  File /r "fa-18c_hornet\RED STAR FA-18C"
-  SetOutPath $INSTDIR\f-15c
-  File /r "f-15c\RED STAR F15C"
-SectionEnd
+SectionGroup "Red Star"
+  Section "MiG-29S"
+    SetOutPath $INSTDIR\mig-29s
+    File /r "mig-29s\RED STAR MiG-29S"
+  SectionEnd
+  Section "MiG-29A"
+    SetOutPath $INSTDIR\mig-29a
+    File /r "mig-29a\RED STAR MiG-29A"
+  SectionEnd
+  Section "MiG-29G"
+    SetOutPath $INSTDIR\mig-29g
+    File /r "mig-29g\RED STAR MiG-29G"
+  SectionEnd
+  Section "JF-17"
+    SetOutPath $INSTDIR\jf-17
+    File /r "jf-17\RED STAR JF-17"
+  SectionEnd
+  Section "J-11A"
+    SetOutPath $INSTDIR\j-11a
+    File /r "j-11a\RED STAR J-11A"
+  SectionEnd
+  Section "SU-27"
+    SetOutPath $INSTDIR\su-27
+    File /r "su-27\RED STAR SU-27"
+  SectionEnd
+  Section "F-16C_50"
+    SetOutPath $INSTDIR\f-16c_50
+    File /r "f-16c_50\RED STAR F-16C_50"
+  SectionEnd
+  Section "FA-18C"
+    SetOutPath $INSTDIR\fa-18c_hornet
+    File /r "fa-18c_hornet\RED STAR FA-18C"
+  SectionEnd
+  Section "F15C"
+    SetOutPath $INSTDIR\f-15c
+    File /r "f-15c\RED STAR F15C"
+  SectionEnd
+SectionGroupEnd
 
 
-Section "Red Star BLACK SQUADRON"
-  SetOutPath $INSTDIR\mig-21bis
-  File /r "mig-21bis\RED STAR MiG-21 BLACK SQUADRON"
-  SetOutPath $INSTDIR\mig-29s
-  File /r "mig-29s\RED STAR MiG-29S BLACK SQUADRON"
-  SetOutPath $INSTDIR\mig-29a
-  File /r "mig-29a\RED STAR MiG-29A BLACK SQUADRON"
-  SetOutPath $INSTDIR\mig-29g
-  File /r "mig-29g\RED STAR MiG-29G BLACK SQUADRON"
-  SetOutPath $INSTDIR\f-16c_50
-  File /r "f-16c_50\RED STAR F-16C_50 BLACK SQUADRON"
-  SetOutPath $INSTDIR\j-11a
-  File /r "j-11a\RED STAR J-11A BLACK SQUADRON"
-  SetOutPath $INSTDIR\su-27
-  File /r "su-27\RED STAR SU-27 BLACK SQUADRON"
-  SetOutPath $INSTDIR\fa-18c_hornet
-  File /r "fa-18c_hornet\RED STAR FA-18C BLACK SQUADRON"
-SectionEnd
+
+SectionGroup "Red Star BLACK SQUADRON"
+  Section "MiG-21"
+    SetOutPath $INSTDIR\mig-21bis
+    File /r "mig-21bis\RED STAR MiG-21 BLACK SQUADRON"
+  SectionEnd
+  Section "MiG-29S"
+    SetOutPath $INSTDIR\mig-29s
+    File /r "mig-29s\RED STAR MiG-29S BLACK SQUADRON"
+  SectionEnd
+  Section "MiG-29A"
+    SetOutPath $INSTDIR\mig-29a
+    File /r "mig-29a\RED STAR MiG-29A BLACK SQUADRON"
+  SectionEnd
+  Section "MiG-29G"
+    SetOutPath $INSTDIR\mig-29g
+    File /r "mig-29g\RED STAR MiG-29G BLACK SQUADRON"
+  SectionEnd
+  Section "F-16C_50"
+    SetOutPath $INSTDIR\f-16c_50
+    File /r "f-16c_50\RED STAR F-16C_50 BLACK SQUADRON"
+  SectionEnd
+  Section "J-11A"
+    SetOutPath $INSTDIR\j-11a
+    File /r "j-11a\RED STAR J-11A BLACK SQUADRON"
+  SectionEnd
+  Section "SU-27"
+    SetOutPath $INSTDIR\su-27
+    File /r "su-27\RED STAR SU-27 BLACK SQUADRON"
+  SectionEnd
+  Section "FA-18C"
+    SetOutPath $INSTDIR\fa-18c_hornet
+    File /r "fa-18c_hornet\RED STAR FA-18C BLACK SQUADRON"
+  SectionEnd
+SectionGroupEnd
