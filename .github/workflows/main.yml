@@ -38,8 +38,21 @@ jobs:
         run: pipenv sync
       - name: credentials.json
         run: echo "$GOOGLE_CREDS" > credentials.json
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Run the downloader
+        run: echo pipenv run python rs-skin-downloader.py
+      - name: Package to Exe installer
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          mkdir Staging
+          cp rs-skins.nsi Staging/
+          cd Staging
+          echo $PWD
+      - name: Check current dir # TODO REMOVE
+        run: echo $PWD
+
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   if: startsWith(github.ref, 'refs/tags/')
+      #   with:
+      #     files: |
+      #       Release.txt
+      #       LICENSE
