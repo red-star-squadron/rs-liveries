@@ -50,7 +50,7 @@ jobs:
         run: |
           cp rs-skins.nsi Staging/
           cd Staging
-          makensis rs-skins.nsi
+          makensis -DVERSION=$GITHUB_REF rs-skins.nsi
           mv "RS Skins.exe" "RS_Skins_$GITHUB_REF_NAME.exe"
       - name: Release to Github Releases
         uses: softprops/action-gh-release@v1
