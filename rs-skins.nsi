@@ -11,6 +11,7 @@ SetCompressorDictSize 128
 
 ; The name of the installer
 Name "RS Skins"
+VIProductVersion ${VERSION}
 
 ; The file to write
 OutFile "RS Skins.exe"
