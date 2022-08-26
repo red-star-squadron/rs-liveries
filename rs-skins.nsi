@@ -129,7 +129,7 @@ SectionGroup "Red Star BLACK SQUADRON"
   SectionEnd
   Section "JF-17"
     SetOutPath $INSTDIR\jf-17
-    File /r "j-11a\RED STAR JF-17 BLACK SQUADRON"
+    File /r "jf-17\RED STAR JF-17 BLACK SQUADRON"
   SectionEnd
   Section "F-15C"
     SetOutPath $INSTDIR\f-15c
