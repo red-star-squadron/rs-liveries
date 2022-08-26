@@ -55,6 +55,7 @@ Section "Delete Red Star BLACK SQUADRON skins"
   RMDir /r "$INSTDIR\mig-29s\RED STAR MiG-29S BLACK SQUADRON"
   RMDir /r "$INSTDIR\su-27\RED STAR SU-27 BLACK SQUADRON"
   RMDir /r "$INSTDIR\j-11a\RED STAR J-11A BLACK SQUADRON"
+  RMDir /r "$INSTDIR\jf-17\RED STAR JF-17 BLACK SQUADRON"
   RMDir /r "$INSTDIR\fa-15c\RED STAR F15C BLACK SQUADRON"
   RMDir /r "$INSTDIR\f-16c_50\RED STAR F-16C_50 BLACK SQUADRON"
   RMDir /r "$INSTDIR\fa-18c_hornet\RED STAR FA-18C BLACK SQUADRON"
@@ -85,6 +86,10 @@ SectionGroup "Red Star"
     SetOutPath $INSTDIR\jf-17
     File /r "jf-17\RED STAR JF-17"
   SectionEnd
+  Section "F15C"
+    SetOutPath $INSTDIR\f-15c
+    File /r "f-15c\RED STAR F15C"
+  SectionEnd
   Section "F-16C_50"
     SetOutPath $INSTDIR\f-16c_50
     File /r "f-16c_50\RED STAR F-16C_50"
@@ -92,10 +97,6 @@ SectionGroup "Red Star"
   Section "FA-18C"
     SetOutPath $INSTDIR\fa-18c_hornet
     File /r "fa-18c_hornet\RED STAR FA-18C"
-  SectionEnd
-  Section "F15C"
-    SetOutPath $INSTDIR\f-15c
-    File /r "f-15c\RED STAR F15C"
   SectionEnd
 SectionGroupEnd
 
@@ -125,6 +126,10 @@ SectionGroup "Red Star BLACK SQUADRON"
   Section "J-11A"
     SetOutPath $INSTDIR\j-11a
     File /r "j-11a\RED STAR J-11A BLACK SQUADRON"
+  SectionEnd
+  Section "JF-17"
+    SetOutPath $INSTDIR\jf-17
+    File /r "j-11a\RED STAR JF-17 BLACK SQUADRON"
   SectionEnd
   Section "F-15C"
     SetOutPath $INSTDIR\f-15c
