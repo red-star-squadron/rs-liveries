@@ -44,8 +44,8 @@ jobs:
         run: echo "$GOOGLE_CREDS" > credentials.json
       - name: Run the downloader
         run: pipenv run python rs-skin-downloader.py
-      - name: Rename the zip to include the version
-        run: mv "RS-Skins.zip" "RS_Skins_$GITHUB_REF_NAME.zip"
+      # - name: Rename the zip to include the version
+      #   run: mv "RS-Skins.zip" "RS_Skins_$GITHUB_REF_NAME.zip"
       - name: Package to Exe installer
         run: |
           cp rs-skins.nsi Staging/
