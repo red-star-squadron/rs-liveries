@@ -6,11 +6,11 @@
 ; This might help with large installs
 FileBufSize 256
 
-; Let's compress as much as possible
-SetCompressor /FINAL  zlib
+; Let's compress as much as possible. /GLOBAL breaks the installer. Too many big files!
+SetCompressor /FINAL lzma
 
 ; LZMA compression only
-; SetCompressorDictSize 128
+SetCompressorDictSize 128
 
 
 ; The name of the installer
