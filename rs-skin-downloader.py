@@ -111,8 +111,8 @@ def main():
     ray.wait(ray_obj_refs, num_returns=len(ray_obj_refs))
     print("Finished waiting for parallel downloads.")
 
-    print("Zipping now...")
-    zipped = zipfile.ZipFile('../RS-Skins.zip', 'w', zipfile.ZIP_DEFLATED)
+    # print("Zipping now...")
+    # zipped = zipfile.ZipFile('../RS-Skins.zip', 'w', zipfile.ZIP_DEFLATED)
 
     for root, dirs, files in os.walk(os.getcwd()):
         for name in files:
@@ -120,7 +120,7 @@ def main():
                 print("Removing %s" % os.path.join(root, name))
                 os.remove(os.path.join(root, name))
             else:
-                zipped.write(os.path.join(root, name), arcname=os.path.relpath(os.path.join(root, name), os.getcwd())) # Add to zip
+                # zipped.write(os.path.join(root, name), arcname=os.path.relpath(os.path.join(root, name), os.getcwd())) # Add to zip
                 # os.remove(os.path.join(root, name)) # Remove after zipping
                 pass
 

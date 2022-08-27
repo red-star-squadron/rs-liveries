@@ -58,4 +58,3 @@ jobs:
         with:
           files: |
             Staging/RS_Skins_${{ github.ref_name }}.exe
-            RS_Skins_${{ github.ref_name }}.zip

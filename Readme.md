@@ -7,15 +7,13 @@ This software comes with absolutely no warranty. Use at your own risk.
 This repo packages RS skins for the Digital Combat Simulator (DCS World)
 
 ## How to download?
-[Releases page](../../releases) contains the Downloads links. Each release offers the `.exe` installer (nullsoft installer, super optimized), or a large `.zip`. 
+[Releases page](../../releases) contains the Downloads link. Each release offers the `.exe` installer.
 
 ## Install options
 
 By far, the easiest method of installation is to download the exe from the [releases page](../../releases) which provides a simple interface of installing/updating/removing RS skins.
 
-If you are not comfortable with downloading the `.exe`, we also offer the flat `.zip` file which you'll have to unzip to `Saved Games\DCS\Liveries` or `Saved Games\DCS Open Beta\Liveries`
-
-There is also a third option which is to download the `.exe` and Extract it using the popular 7-Zip archive utility. This is useful if you are on a slow internet connection as the `.exe` is about 3x smaller than the `.zip`
+If you are not comfortable running the `.exe`, you can extract it using the popular [7-Zip](https://www.7-zip.org/) archive utility to `Saved Games\DCS\Liveries` or `Saved Games\DCS.openbeta\Liveries`
 
 ## Security concerns
 
