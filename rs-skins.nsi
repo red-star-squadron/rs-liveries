@@ -7,8 +7,10 @@
 FileBufSize 256
 
 ; Let's compress as much as possible
-SetCompressor /FINAL /SOLID lzma
-SetCompressorDictSize 128
+SetCompressor /FINAL /SOLID bzip2
+
+; LZMA compression only
+; SetCompressorDictSize 128
 
 
 ; The name of the installer
