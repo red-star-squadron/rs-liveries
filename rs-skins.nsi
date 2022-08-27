@@ -3,6 +3,8 @@
 
 ;--------------------------------
 
+; This might help with large installs
+FileBufSize 256
 
 ; Let's compress as much as possible
 SetCompressor /FINAL /SOLID lzma
