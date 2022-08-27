@@ -7,7 +7,7 @@
 FileBufSize 256
 
 ; Let's compress as much as possible
-SetCompressor /FINAL /SOLID zlib
+SetCompressor /FINAL  zlib
 
 ; LZMA compression only
 ; SetCompressorDictSize 128
