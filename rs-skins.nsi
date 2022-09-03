@@ -46,6 +46,8 @@ Section "Delete Red Star skins"
   RMDir /r "$INSTDIR\su-27\RED STAR SU-27"
   RMDir /r "$INSTDIR\j-11a\RED STAR J-11A"
   RMDir /r "$INSTDIR\jf-17\RED STAR JF-17"
+  RMDir /r "$INSTDIR\f-14a-135-gr\RED STAR F14A-135-GR"
+  RMDir /r "$INSTDIR\f-14b\RED STAR F14B"
   RMDir /r "$INSTDIR\f-15c\RED STAR F15C"
   RMDir /r "$INSTDIR\f-16c_50\RED STAR F-16C_50"
   RMDir /r "$INSTDIR\fa-18c_hornet\RED STAR FA-18C"
@@ -91,6 +93,14 @@ SectionGroup "Red Star"
   Section "JF-17"
     SetOutPath $INSTDIR\jf-17
     File /r "jf-17\RED STAR JF-17"
+  SectionEnd
+  Section "F-14A-135-GR"
+    SetOutPath $INSTDIR\f-14a-135-gr
+    File /r "f-14a-135-gr\RED STAR F-14A-135-GR"
+  SectionEnd
+  Section "F-14B"
+    SetOutPath $INSTDIR\f-14b
+    File /r "f-14b\RED STAR F-14B"
   SectionEnd
   Section "F15C"
     SetOutPath $INSTDIR\f-15c
