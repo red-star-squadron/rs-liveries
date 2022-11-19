@@ -41,8 +41,8 @@ jobs:
         run: pipenv sync
       - name: credentials.json
         run: echo "$GOOGLE_CREDS" > credentials.json
-      - name: gdrive_secret.json
-        run: echo "$GOOGLE_DRIVE_SKINS" > gdrive_secret.json
+      - name: gdrive_secret.yml
+        run: echo "$GOOGLE_DRIVE_SKINS" > gdrive_secret.yml
       - name: Run the downloader
         run: pipenv run python rs-skin-downloader.py
       # - name: Rename the zip to include the version
