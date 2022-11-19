@@ -3,3 +3,5 @@ RS-Skins.zip
 credentials.json
 Staging
 .DS_Store
+gdrive_secret.yml
+rs-skins-rendered.nsi

@@ -13,9 +13,10 @@ import logging
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from googleapiclient import discovery
 import google.auth
-import ray
 import time
-import json
+import yaml
+from jinja2 import Environment, FileSystemLoader
+import ray
 
 # To list folders
 def listfolders(service, filid, des):
@@ -24,19 +25,20 @@ def listfolders(service, filid, des):
         fields="nextPageToken, files(id, name, mimeType)").execute()
     folder = results.get('files', [])
     for item in folder:
+        fullpath = os.path.join(des, item['name'])
         if str(item['mimeType']) == str('application/vnd.google-apps.folder'):
-            if not os.path.isdir(des+"/"+item['name']):
-                os.mkdir(path=des+"/"+item['name'])
-            print(item['name'])
-            listfolders(service, item['id'], des+"/"+item['name'])  # LOOP un-till the files are found
+            if not os.path.isdir(fullpath):
+                os.mkdir(path=fullpath)
+            print("Creating folder %s" % fullpath)
+            listfolders(service, item['id'], fullpath)  # LOOP un-till the files are found
         else:
-            downloadfiles(service, item['id'], item['name'], des)
-            print(item['name'])
+            ray_futures.append(downloadfiles.remote(service, item['id'], fullpath))
+            print("Downloaded %s" % fullpath)
     return folder
 
-
-# To Download Files
-def downloadfiles(service, dowid, name,dfilespath):
+ray_futures = []
+@ray.remote
+def downloadfiles(service, dowid, dfilespath):
     request = service.files().get_media(fileId=dowid)
     fh = io.BytesIO()
     downloader = MediaIoBaseDownload(fh, request)
@@ -44,12 +46,11 @@ def downloadfiles(service, dowid, name,dfilespath):
     while done is False:
         status, done = downloader.next_chunk()
         # print("Download %d%%." % int(status.progress() * 100))
-    with io.open(dfilespath + "/" + name, 'wb') as f:
+    with io.open(dfilespath, 'wb') as f:
         fh.seek(0)
         f.write(fh.read())
 
-@ray.remote
-def downloadfolder(rootfolder, folderid, service):
+def download_root_folder(rootfolder, folderid, service):
     folderid="'"+folderid+"'" # surrounding ' Needed for the "q" parameter to google drive's "list" API call
     results = service.files().list(
         pageSize=1000, q=folderid+" in parents", fields="nextPageToken, files(id, name, mimeType)").execute()
@@ -59,21 +60,46 @@ def downloadfolder(rootfolder, folderid, service):
     else:
         # print('Files:')
         for item in items:
-            if not os.path.isdir(rootfolder):
+            if rootfolder and not os.path.isdir(rootfolder): # If rootfolder is defined, and if the directory does not exist
                 os.mkdir(rootfolder)
-            bfolderpath = os.getcwd()+"/%s/" % rootfolder
-            if not os.path.isdir(bfolderpath + item['name']):
-                os.mkdir(bfolderpath + item['name'])
+            fullpath = os.path.join(os.getcwd(), rootfolder, item['name'])
             if item['mimeType'] == 'application/vnd.google-apps.folder':
-                folderpath = bfolderpath + item['name']
-                listfolders(service, item['id'], folderpath)
+                if not os.path.isdir(fullpath):
+                    os.mkdir(fullpath)
+                listfolders(service, item['id'], fullpath)
             else:
-                filepath = bfolderpath + item['name']
-                downloadfiles(service, item['id'], item['name'], filepath)
+                ray_futures.append(downloadfiles.remote(service, item['id'], fullpath))
+                print("Downloaded %s" % fullpath)
+
+def directory_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
+    pilots = set()        
+    liveries = []
+    for dcs_airframe_codename in dcs_airframe_codenames:
+        livery_dirs = []
+        for livery in livery_directories:          
+            if dcs_airframe_codename in livery:
+                livery_dirs.append((livery.removeprefix(dcs_airframe_codename)))      
+        if not livery_dirs: # Depending on whether looping rs/RSC liveries, we can end up with empty list, which means we need to continue with the next loop
+            continue
+        smallest_dirname = min(livery_dirs, key = len)
+        liveries.append({
+                "dcs_airframe_codename" : os.path.basename(dcs_airframe_codename),
+                "dirname": os.path.basename(smallest_dirname)
+            })
+        if len(livery_dirs) > 1:
+            livery_dirs.remove(smallest_dirname)
+            for liv in livery_dirs:
+                pilots.add(liv.removeprefix(smallest_dirname))
+    
+    return pilots, liveries
+
+
 
 def main():
     creds, _ = google.auth.default()
     service = build('drive', 'v3', credentials=creds)
+    with open('gdrive_secret.yml', 'r') as file:
+        Folders = yaml.safe_load(file)
 
     if os.path.isdir("Staging"):
         shutil.rmtree("Staging")
@@ -81,38 +107,16 @@ def main():
         os.remove("../RS-Skins.zip")
     os.mkdir("Staging")
     os.chdir("Staging")
+    staging_dir = os.getcwd()
 
-    ##
-    ##       !!!!! If updating these values with new skins, please ensure to update the .nsi script !!!!!!!
-    ##
-    ## Format of the ingested env vars looks like this:
-    # {
-    #     "mig-29s"       : "GOOGLE-DRIVE-SHARED-FOLDER-ID",
-    #     "mig-29a"       : "GOOGLE-DRIVE-SHARED-FOLDER-ID",
-    #     "mig-29g"       : "GOOGLE-DRIVE-SHARED-FOLDER-ID",
-    #     "jf-17"         : "GOOGLE-DRIVE-SHARED-FOLDER-ID",
-    #     "j-11a"         : "GOOGLE-DRIVE-SHARED-FOLDER-ID",
-    #     "su-27"         : "GOOGLE-DRIVE-SHARED-FOLDER-ID",
-    #     "f-16c_50"      : "GOOGLE-DRIVE-SHARED-FOLDER-ID",
-    #     "fa-18c_hornet" : "GOOGLE-DRIVE-SHARED-FOLDER-ID",
-    #     "f-15c"         : "GOOGLE-DRIVE-SHARED-FOLDER-ID"
-    # }
-    ##
-    Folders_RS = json.loads(os.environ['GOOGLE_DRIVE_RS_SKINS'])
-    Folders_RSC = json.loads(os.environ['GOOGLE_DRIVE_RSC_SKINS'])
-    # Future skin categories if added here must be added a few lines below (dl_list loop)
 
-    ray.init()
-    ray_obj_refs = []
-    for dl_list in [Folders_RS, Folders_RSC]:
-        for rootfolder, Folder_id in dl_list.items():
-           ray_obj_refs.append(downloadfolder.remote(rootfolder, Folder_id, service))
-    print("Started waiting for parallel downloads...")
-    ray.wait(ray_obj_refs, num_returns=len(ray_obj_refs))
-    print("Finished waiting for parallel downloads.")
-
-    # print("Zipping now...")
-    # zipped = zipfile.ZipFile('../RS-Skins.zip', 'w', zipfile.ZIP_DEFLATED)
+    ray.init(num_cpus=16)
+    for dl_list in [Folders["Folders_RS"], Folders["Folders_RSC"], Folders["Folders_BIN"]]:
+        for item in dl_list:
+            download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
+    
+    # wait for downloads:
+    ray.get(ray_futures)
 
     for root, dirs, files in os.walk(os.getcwd()):
         for name in files:
@@ -120,9 +124,50 @@ def main():
                 print("Removing %s" % os.path.join(root, name))
                 os.remove(os.path.join(root, name))
             else:
-                # zipped.write(os.path.join(root, name), arcname=os.path.relpath(os.path.join(root, name), os.getcwd())) # Add to zip
-                # os.remove(os.path.join(root, name)) # Remove after zipping
                 pass
+
+
+    dcs_airframe_codenames = []
+    MAX_DEPTH = 2
+    MIN_DEPTH = 1
+    for root, dirs, files in os.walk(staging_dir, topdown=True):
+        if root.count(os.sep) - staging_dir.count(os.sep) < MIN_DEPTH:
+            continue
+        if root.count(os.sep) - staging_dir.count(os.sep) == MAX_DEPTH - 1:
+            del dirs[:]  
+     
+        if "RED STAR BIN" not in root:
+            dcs_airframe_codenames.append(root)
+
+
+    rs_livery_directories = []
+    rsc_livery_directories = []
+    MAX_DEPTH = 3
+    MIN_DEPTH = 2
+    for root, dirs, files in os.walk(staging_dir, topdown=True):
+        if root.count(os.sep) - staging_dir.count(os.sep) < MIN_DEPTH:
+            continue
+        if root.count(os.sep) - staging_dir.count(os.sep) == MAX_DEPTH - 1:
+            del dirs[:]  
+        if "BLACK SQUADRON" in root:
+            rsc_livery_directories.append(root)
+        else:
+            rs_livery_directories.append(root)
+
+    pilots = set()
+    rs_pilots, rs_liveries = directory_pilot_and_livery_parser(dcs_airframe_codenames, rs_livery_directories)
+    rsc_pilots, rsc_liveries = directory_pilot_and_livery_parser(dcs_airframe_codenames, rsc_livery_directories)
+    pilots.update(rs_pilots, rsc_pilots)
+
+
+    os.chdir("..")
+    print(os.getcwd())
+    file_loader = FileSystemLoader('templates')
+    env = Environment(loader=file_loader)
+    template = env.get_template('rs-skins.nsi.j2')
+    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries)
+    with open('Staging/rs-skins-rendered.nsi', 'w+') as f:
+        f.write(output)
 
 if __name__ == '__main__':
     main()
