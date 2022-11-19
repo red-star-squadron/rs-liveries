@@ -17,14 +17,14 @@ on:
 env:
   GOOGLE_APPLICATION_CREDENTIALS: credentials.json
   GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
-  GOOGLE_DRIVE_RSC_SKINS: ${{ secrets.GOOGLE_DRIVE_RSC_SKINS }}
-  GOOGLE_DRIVE_RS_SKINS: ${{ secrets.GOOGLE_DRIVE_RS_SKINS }}
+  GOOGLE_DRIVE_SKINS: ${{ secrets.GOOGLE_DRIVE_SKINS }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   package-and-release:
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
+    # runs-on: self-hosted
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -42,15 +42,16 @@ jobs:
         run: pipenv sync
       - name: credentials.json
         run: echo "$GOOGLE_CREDS" > credentials.json
+      - name: gdrive_secret.yml
+        run: echo "$GOOGLE_DRIVE_SKINS" > gdrive_secret.yml
       - name: Run the downloader
         run: pipenv run python rs-skin-downloader.py
       # - name: Rename the zip to include the version
       #   run: mv "RS-Skins.zip" "RS_Skins_$GITHUB_REF_NAME.zip"
       - name: Package to Exe installer
         run: |
-          cp rs-skins.nsi Staging/
           cd Staging
-          makensis -DVERSION=$GITHUB_REF rs-skins.nsi
+          makensis -V4 -DVERSION=$GITHUB_REF rs-skins-rendered.nsi
           mv "RS Skins.exe" "RS_Skins_$GITHUB_REF_NAME.exe"
       - name: Release to Github Releases
         uses: softprops/action-gh-release@v1
