@@ -160,7 +160,7 @@ def main():
     env = Environment(loader=file_loader)
     template = env.get_template('rs-skins.nsi.j2')
     output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries)
-    with open('rs-skins-rendered.nsi', 'w+') as f:
+    with open('Staging/rs-skins-rendered.nsi', 'w+') as f:
         f.write(output)
 
 if __name__ == '__main__':
