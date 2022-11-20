@@ -15,6 +15,7 @@ from googleapiclient import discovery
 import google.auth
 import time
 import yaml
+from jinja2 import Environment, FileSystemLoader
 
 # To list folders
 def listfolders(service, filid, des):
@@ -68,22 +69,48 @@ def download_root_folder(rootfolder, folderid, service):
                 downloadfiles(service, item['id'], fullpath)
                 print("Downloaded %s" % fullpath)
 
+def directory_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
+    pilots = set()        
+    liveries = []
+    for dcs_airframe_codename in dcs_airframe_codenames:
+        livery_dirs = []
+        for livery in livery_directories:          
+            if dcs_airframe_codename in livery:
+                livery_dirs.append((livery.removeprefix(dcs_airframe_codename)))      
+        if not livery_dirs: # Depending on whether looping rs/RSC liveries, we can end up with empty list, which means we need to continue with the next loop
+            continue
+        smallest_dirname = min(livery_dirs, key = len)
+        liveries.append({
+                "dcs_airframe_codename" : os.path.basename(dcs_airframe_codename),
+                "dirname": os.path.basename(smallest_dirname)
+            })
+        if len(livery_dirs) > 1:
+            livery_dirs.remove(smallest_dirname)
+            for liv in livery_dirs:
+                pilots.add(liv.removeprefix(smallest_dirname))
+    
+    return pilots, liveries
+
+
+
 def main():
     creds, _ = google.auth.default()
     service = build('drive', 'v3', credentials=creds)
     with open('gdrive_secret.yml', 'r') as file:
         Folders = yaml.safe_load(file)
 
-    if os.path.isdir("Staging"):
-        shutil.rmtree("Staging")
-    if os.path.isfile("../RS-Skins.zip"):
-        os.remove("../RS-Skins.zip")
-    os.mkdir("Staging")
+    # if os.path.isdir("Staging"):
+    #     shutil.rmtree("Staging")
+    # if os.path.isfile("../RS-Skins.zip"):
+    #     os.remove("../RS-Skins.zip")
+    # os.mkdir("Staging")
     os.chdir("Staging")
+    staging_dir = os.getcwd()
 
-    for dl_list in [Folders["Folders_RS"], Folders["Folders_RSC"], Folders["Folders_BIN"]]:
-        for item in dl_list:
-            download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
+
+    # for dl_list in [Folders["Folders_RS"], Folders["Folders_RSC"], Folders["Folders_BIN"]]:
+    #     for item in dl_list:
+    #         download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
     
     for root, dirs, files in os.walk(os.getcwd()):
         for name in files:
@@ -92,6 +119,49 @@ def main():
                 os.remove(os.path.join(root, name))
             else:
                 pass
+
+
+    dcs_airframe_codenames = []
+    MAX_DEPTH = 2
+    MIN_DEPTH = 1
+    for root, dirs, files in os.walk(staging_dir, topdown=True):
+        if root.count(os.sep) - staging_dir.count(os.sep) < MIN_DEPTH:
+            continue
+        if root.count(os.sep) - staging_dir.count(os.sep) == MAX_DEPTH - 1:
+            del dirs[:]  
+     
+        if "RED STAR BIN" not in root:
+            dcs_airframe_codenames.append(root)
+
+
+    rs_livery_directories = []
+    rsc_livery_directories = []
+    MAX_DEPTH = 3
+    MIN_DEPTH = 2
+    for root, dirs, files in os.walk(staging_dir, topdown=True):
+        if root.count(os.sep) - staging_dir.count(os.sep) < MIN_DEPTH:
+            continue
+        if root.count(os.sep) - staging_dir.count(os.sep) == MAX_DEPTH - 1:
+            del dirs[:]  
+        if "BLACK SQUADRON" in root:
+            rsc_livery_directories.append(root)
+        else:
+            rs_livery_directories.append(root)
+
+    pilots = set()
+    rs_pilots, rs_liveries = directory_pilot_and_livery_parser(dcs_airframe_codenames, rs_livery_directories)
+    rsc_pilots, rsc_liveries = directory_pilot_and_livery_parser(dcs_airframe_codenames, rsc_livery_directories)
+    pilots.update(rs_pilots, rsc_pilots)
+
+
+    os.chdir("..")
+    print(os.getcwd())
+    file_loader = FileSystemLoader('templates')
+    env = Environment(loader=file_loader)
+    template = env.get_template('rs-skins.nsi.j2')
+    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries)
+    with open('rs-skins-rendered.nsi', 'w+') as f:
+        f.write(output)
 
 if __name__ == '__main__':
     main()

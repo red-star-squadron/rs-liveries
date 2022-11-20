@@ -1,0 +1,76 @@
+; rs-skins.nsi
+
+
+;--------------------------------
+
+; This might help with large installs
+FileBufSize 256
+
+; Let's compress as much as possible. /GLOBAL breaks the installer. Too many big files!
+SetCompressor /FINAL lzma
+
+; LZMA compression only
+SetCompressorDictSize 128
+
+
+; The name of the installer
+Name "RS Skins"
+VIProductVersion ${VERSION}
+
+; The file to write
+OutFile "RS Skins.exe"
+
+; Request application privileges for Windows Vista
+RequestExecutionLevel user
+
+; Build Unicode installer
+Unicode True
+
+; The default installation directory
+InstallDir "$PROFILE\Saved Games\DCS.openbeta\Liveries"
+
+;--------------------------------
+
+; Pages
+Page components
+Page directory
+Page instfiles
+
+;--------------------------------
+
+; Old and unused skin folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
+
+
+Section "un.Delete Red Star Liveries"
+    RMDir /r "$INSTDIR\RED STAR BIN"
+  {%- for livery in rs_liveries %}
+    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}*"
+  {%- endfor %}
+  {%- for livery in rsc_liveries %}
+    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}*"
+  {%- endfor %}
+SectionEnd
+
+
+Section "-Red Star Required Assets"
+    SetOutPath $INSTDIR
+    File /r "RED STAR BIN"
+SectionEnd
+
+SectionGroup "Red Star"
+  {%- for livery in rs_liveries %}
+  Section "{{ livery["dirname"] }}"
+    SetOutPath $INSTDIR\{{ livery["dcs_airframe_codename"] }}
+    File /r "{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}*"
+  SectionEnd 
+  {%- endfor %}
+SectionGroupEnd
+
+SectionGroup "Red Star BLACK SQUADRON"
+  {%- for livery in rsc_liveries %}
+  Section "{{ livery["dirname"] }}"
+    SetOutPath $INSTDIR\{{ livery["dcs_airframe_codename"] }}
+    File /r "{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}*"
+  SectionEnd 
+  {%- endfor %}
+SectionGroupEnd
