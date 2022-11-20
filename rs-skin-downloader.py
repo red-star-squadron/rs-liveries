@@ -27,11 +27,11 @@ def listfolders(service, filid, des):
         if str(item['mimeType']) == str('application/vnd.google-apps.folder'):
             if not os.path.isdir(fullpath):
                 os.mkdir(path=fullpath)
-            print(item['name'])
+            print("Creating folder %s" % fullpath)
             listfolders(service, item['id'], fullpath)  # LOOP un-till the files are found
         else:
             downloadfiles(service, item['id'], fullpath)
-            print(item['name'])
+            print("Downloaded %s" % fullpath)
     return folder
 
 # To Download Files
@@ -66,7 +66,7 @@ def download_root_folder(rootfolder, folderid, service):
                 listfolders(service, item['id'], fullpath)
             else:
                 downloadfiles(service, item['id'], fullpath)
-                print(fullpath) # TODO Make a normal print
+                print("Downloaded %s" % fullpath)
 
 def main():
     creds, _ = google.auth.default()
