@@ -27,14 +27,15 @@ RequestExecutionLevel user
 ; Build Unicode installer
 Unicode True
 
+Function DetectInstallDir
+IfFileExists "$PROFILE\Saved Games\DCS" file_found file_not_found
+file_found:
+InstallDir "$PROFILE\Saved Games\DCS\Liveries"
+goto end_of_test ;<== important for not continuing on the else branch
+file_not_found:
 ; The default installation directory
 InstallDir "$PROFILE\Saved Games\DCS.openbeta\Liveries"
-
-
-Function DetectInstallDir
-${If} ${FileExists} "$PROFILE\Saved Games\DCS"
-    definstdir "$PROFILE\Saved Games\DCS\Liveries"
-${EndIf}
+end_of_test:
 FunctionEnd
 
 ;--------------------------------
