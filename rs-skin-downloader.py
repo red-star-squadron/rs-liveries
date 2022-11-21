@@ -110,7 +110,7 @@ def main():
     staging_dir = os.getcwd()
 
 
-    ray.init(num_cpus=32)
+    ray.init(num_cpus=16)
     for dl_list in [Folders["Folders_RS"], Folders["Folders_RSC"], Folders["Folders_BIN"]]:
         for item in dl_list:
             download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
