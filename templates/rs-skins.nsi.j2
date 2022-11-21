@@ -7,7 +7,8 @@
 FileBufSize 256
 
 ; Let's compress as much as possible. /GLOBAL breaks the installer. Too many big files!
-SetCompressor /FINAL lzma
+SetCompressor /FINAL zlib
+; SetCompressor /FINAL lzma
 
 ; LZMA compression only
 SetCompressorDictSize 128
@@ -29,11 +30,18 @@ Unicode True
 ; The default installation directory
 InstallDir "$PROFILE\Saved Games\DCS.openbeta\Liveries"
 
+
+Function DetectInstallDir
+${If} ${FileExists} "$PROFILE\Saved Games\DCS"
+    definstdir "$PROFILE\Saved Games\DCS\Liveries"
+${EndIf}
+FunctionEnd
+
 ;--------------------------------
 
 ; Pages
+Page directory DetectInstallDir
 Page components
-Page directory
 Page instfiles
 
 ;--------------------------------

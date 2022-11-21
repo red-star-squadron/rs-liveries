@@ -16,6 +16,7 @@ import google.auth
 import time
 import yaml
 from jinja2 import Environment, FileSystemLoader
+import ray
 
 # To list folders
 def listfolders(service, filid, des):
@@ -31,11 +32,12 @@ def listfolders(service, filid, des):
             print("Creating folder %s" % fullpath)
             listfolders(service, item['id'], fullpath)  # LOOP un-till the files are found
         else:
-            downloadfiles(service, item['id'], fullpath)
+            ray_futures.append(downloadfiles.remote(service, item['id'], fullpath))
             print("Downloaded %s" % fullpath)
     return folder
 
-# To Download Files
+ray_futures = []
+@ray.remote
 def downloadfiles(service, dowid, dfilespath):
     request = service.files().get_media(fileId=dowid)
     fh = io.BytesIO()
@@ -66,7 +68,7 @@ def download_root_folder(rootfolder, folderid, service):
                     os.mkdir(fullpath)
                 listfolders(service, item['id'], fullpath)
             else:
-                downloadfiles(service, item['id'], fullpath)
+                ray_futures.append(downloadfiles.remote(service, item['id'], fullpath))
                 print("Downloaded %s" % fullpath)
 
 def directory_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
@@ -99,19 +101,22 @@ def main():
     with open('gdrive_secret.yml', 'r') as file:
         Folders = yaml.safe_load(file)
 
-    # if os.path.isdir("Staging"):
-    #     shutil.rmtree("Staging")
-    # if os.path.isfile("../RS-Skins.zip"):
-    #     os.remove("../RS-Skins.zip")
-    # os.mkdir("Staging")
+    if os.path.isdir("Staging"):
+        shutil.rmtree("Staging")
+    if os.path.isfile("../RS-Skins.zip"):
+        os.remove("../RS-Skins.zip")
+    os.mkdir("Staging")
     os.chdir("Staging")
     staging_dir = os.getcwd()
 
 
-    # for dl_list in [Folders["Folders_RS"], Folders["Folders_RSC"], Folders["Folders_BIN"]]:
-    #     for item in dl_list:
-    #         download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
+    for dl_list in [Folders["Folders_RS"], Folders["Folders_RSC"], Folders["Folders_BIN"]]:
+        for item in dl_list:
+            download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
     
+    # wait for downloads:
+    ray.get(ray_futures)
+
     for root, dirs, files in os.walk(os.getcwd()):
         for name in files:
             if fnmatch.fnmatch(name.lower(), 'readme*.txt'): # Don't zip readmes
