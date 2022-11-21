@@ -51,7 +51,7 @@ jobs:
       - name: Package to Exe installer
         run: |
           cd Staging
-          makensis -V4 -DVERSION=$GITHUB_REF rs-skins=rendered.nsi
+          makensis -V4 -DVERSION=$GITHUB_REF rs-skins-rendered.nsi
           mv "RS Skins.exe" "RS_Skins_$GITHUB_REF_NAME.exe"
       - name: Release to Github Releases
         uses: softprops/action-gh-release@v1
