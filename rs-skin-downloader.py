@@ -74,6 +74,7 @@ def download_root_folder(rootfolder, folderid, service):
 def directory_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
     pilots = set()        
     liveries = []
+    liveries_with_pilotnames = []
     for dcs_airframe_codename in dcs_airframe_codenames:
         livery_dirs = []
         for livery in livery_directories:          
@@ -86,12 +87,17 @@ def directory_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories
                 "dcs_airframe_codename" : os.path.basename(dcs_airframe_codename),
                 "dirname": os.path.basename(smallest_dirname)
             })
+        for livdir in livery_dirs:
+            liveries_with_pilotnames.append({
+                "dcs_airframe_codename" : os.path.basename(dcs_airframe_codename),
+                "dirname": os.path.basename(livdir)
+            })
         if len(livery_dirs) > 1:
             livery_dirs.remove(smallest_dirname)
             for liv in livery_dirs:
                 pilots.add(liv.removeprefix(smallest_dirname))
     
-    return pilots, liveries
+    return pilots, liveries, liveries_with_pilotnames
 
 
 
@@ -101,22 +107,26 @@ def main():
     with open('gdrive_secret.yml', 'r') as file:
         Folders = yaml.safe_load(file)
 
-    if os.path.isdir("Staging"):
-        shutil.rmtree("Staging")
-    if os.path.isfile("../RS-Skins.zip"):
-        os.remove("../RS-Skins.zip")
-    os.mkdir("Staging")
-    os.chdir("Staging")
-    staging_dir = os.getcwd()
+    if os.environ['SKIP_DOWNLOADS'].lower() != "true":
+        if os.path.isdir("Staging"):
+            shutil.rmtree("Staging")
+        if os.path.isfile("../RS-Skins.zip"):
+            os.remove("../RS-Skins.zip")
+        os.mkdir("Staging")
+        os.chdir("Staging")
+        staging_dir = os.getcwd()
 
 
-    ray.init(num_cpus=16)
-    for dl_list in [Folders["Folders_RS"], Folders["Folders_RSC"], Folders["Folders_BIN"]]:
-        for item in dl_list:
-            download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
-    
-    # wait for downloads:
-    ray.get(ray_futures)
+        ray.init(num_cpus=16)
+        for dl_list in [Folders["Folders_RS"], Folders["Folders_RSC"], Folders["Folders_BIN"]]:
+            for item in dl_list:
+                download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
+
+        # wait for downloads:
+        ray.get(ray_futures)
+    else:
+        os.chdir("Staging")
+        staging_dir = os.getcwd()
 
     for root, dirs, files in os.walk(os.getcwd()):
         for name in files:
@@ -155,8 +165,8 @@ def main():
             rs_livery_directories.append(root)
 
     pilots = set()
-    rs_pilots, rs_liveries = directory_pilot_and_livery_parser(dcs_airframe_codenames, rs_livery_directories)
-    rsc_pilots, rsc_liveries = directory_pilot_and_livery_parser(dcs_airframe_codenames, rsc_livery_directories)
+    rs_pilots, rs_liveries, rs_liveries_with_pilotnames = directory_pilot_and_livery_parser(dcs_airframe_codenames, rs_livery_directories)
+    rsc_pilots, rsc_liveries, rsc_liveries_with_pilotnames = directory_pilot_and_livery_parser(dcs_airframe_codenames, rsc_livery_directories)
     pilots.update(rs_pilots, rsc_pilots)
 
 
@@ -164,10 +174,16 @@ def main():
     print(os.getcwd())
     file_loader = FileSystemLoader('templates')
     env = Environment(loader=file_loader)
+
+    pilots_list = list(pilots)
+    pilots_list.sort()
+    # rs-skins
     template = env.get_template('rs-skins.nsi.j2')
-    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries)
+    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries, pilots=pilots_list, rs_liveries_with_pilotnames=rs_liveries_with_pilotnames, rsc_liveries_with_pilotnames=rsc_liveries_with_pilotnames)
     with open('Staging/rs-skins-rendered.nsi', 'w+') as f:
         f.write(output)
+
+    shutil.copy("rs-skins-pilot-priorities.ps1", "Staging/rs-skins-pilot-priorities.ps1")
 
 if __name__ == '__main__':
     main()
