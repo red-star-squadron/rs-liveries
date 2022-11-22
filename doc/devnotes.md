@@ -2,9 +2,20 @@
 
 Assumes you have the credentials.json. I think I used  google's IAM console to create a user with no permissions which can be assumed to use anonymous-access google drives.
 
+```shell
 export GOOGLE_APPLICATION_CREDENTIALS=credentials.json
+```
 
-## gdrive secrets
+## Skipping downloads
+
+During testing, it is good to skip download is they have already been performed once and known good.
+To do this, use the following environment variable:
+
+```shell
+export SKIP_DOWNLOADS=true
+```
+
+## Google Drive secrets
 
 The program expects to see a yaml file in gdrive_secret.yml
 
@@ -29,4 +40,5 @@ Folders_BIN:
 
 ```
 
-Note that BIN currently has only one shared folder
+BIN folder is unique. It contains various assets shared across multiple aircraft
+

@@ -1,5 +1,13 @@
 ; rs-skins.nsi
 
+;--------------------------------
+;Include Modern UI
+!include MUI2.nsh
+; LogicLib is a requirement for nsDialogs (I think...)
+!include LogicLib.nsh
+!include nsDialogs.nsh
+
+;--------------------------------
 
 ;--------------------------------
 
@@ -27,24 +35,54 @@ RequestExecutionLevel user
 ; Build Unicode installer
 Unicode True
 
-; Function DetectInstallDir
-; IfFileExists "$PROFILE\Saved Games\DCS" file_found file_not_found
-; file_found:
-; InstallDir "$PROFILE\Saved Games\DCS\Liveries"
-; goto end_of_test ;<== important for not continuing on the else branch
-; file_not_found:
-; ; The default installation directory
-; InstallDir "$PROFILE\Saved Games\DCS.openbeta\Liveries"
-; end_of_test:
-; FunctionEnd
+Var Dialog
+Var Label
+Var Pilot
+Var PilotSelected
+
+
+Function nsDialogsPage
+	nsDialogs::Create 1018
+	Pop $Dialog
+
+	${If} $Dialog == error
+		Abort
+	${EndIf}
+
+	${NSD_CreateLabel} 0 0 100% 12u "Who are you?"
+	Pop $Label
+	${NSD_CreateDropList} 0 20 100% 12u ""
+	Pop $Pilot
+  ${NSD_CB_AddString} $Pilot "-- RS SQUAD BUT NOT IN LIST --"
+  ${NSD_CB_AddString} $Pilot "-- STREAMER / YOUTUBER --"
+  {%- for pilot in pilots %}
+  ${NSD_CB_AddString} $Pilot "{{ pilot | trim }}"
+  {%- endfor %}
+
+	nsDialogs::Show
+FunctionEnd
+
+Function nsDialogsPageLeave
+	${NSD_GetText} $Pilot $PilotSelected
+FunctionEnd
+
+Function .onInit
+  # Detect which Save/liveries directory to use. If multiple exist, use the most bottom one from this list.
+  ${If} ${FileExists} "$PROFILE\Saved Games\DCS"
+    StrCpy $InstDir "$PROFILE\Saved Games\DCS\Liveries"
+  ${ElseIf} ${FileExists} "$PROFILE\Saved Games\DCS.openbeta"
+    StrCpy $InstDir "$PROFILE\Saved Games\DCS.openbeta\Liveries"
+  ${EndIf}
+FunctionEnd
 
 ;--------------------------------
 
-; Pages
-Page directory
-Page components
-Page instfiles
+!insertmacro MUI_PAGE_DIRECTORY
+Page custom nsDialogsPage nsDialogsPageLeave
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_INSTFILES
 
+!insertmacro MUI_LANGUAGE "English"
 ;--------------------------------
 
 ; Old and unused skin folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
@@ -52,16 +90,16 @@ Page instfiles
 
 Section "Delete Red Star Liveries"
     RMDir /r "$INSTDIR\RED STAR BIN"
-  {%- for livery in rs_liveries %}
-    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}*"
+  {%- for livery in rs_liveries_with_pilotnames %}
+    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}"
   {%- endfor %}
-  {%- for livery in rsc_liveries %}
-    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}*"
+  {%- for livery in rsc_liveries_with_pilotnames %}
+    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}"
   {%- endfor %}
 SectionEnd
 
 
-Section "-Red Star Required Assets"
+Section "!Red Star Required Assets"
     SetOutPath $INSTDIR
     File /r "RED STAR BIN"
 SectionEnd
@@ -83,3 +121,10 @@ SectionGroup "Red Star BLACK SQUADRON"
   SectionEnd 
   {%- endfor %}
 SectionGroupEnd
+
+Section "!Modify Pilot Priority"
+  SetOutPath "$PLUGINSDIR\NSISTemp"
+  File /oname=$PLUGINSDIR\rs-skins-pilot-priorities.ps1 rs-skins-pilot-priorities.ps1
+  nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\rs-skins-pilot-priorities.ps1" -dcs_liveries "$InstDir" -pilot "$PilotSelected"  '
+  ; MessageBox MB_OK "$PilotSelected"
+SectionEnd
