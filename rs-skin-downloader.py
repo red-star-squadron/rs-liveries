@@ -1,19 +1,11 @@
 from __future__ import print_function
-from genericpath import isfile
 import os
 import shutil
 import fnmatch
-import zipfile
 from googleapiclient.discovery import build
-from google.auth.transport.requests import Request
 import io
-from googleapiclient import errors
-from googleapiclient import http
-import logging
-from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
-from googleapiclient import discovery
+from googleapiclient.http import MediaIoBaseDownload
 import google.auth
-import time
 import yaml
 from jinja2 import Environment, FileSystemLoader
 import ray
@@ -110,8 +102,6 @@ def main():
     if os.environ['SKIP_DOWNLOADS'].lower() != "true":
         if os.path.isdir("Staging"):
             shutil.rmtree("Staging")
-        if os.path.isfile("../RS-Skins.zip"):
-            os.remove("../RS-Skins.zip")
         os.mkdir("Staging")
         os.chdir("Staging")
         staging_dir = os.getcwd()
