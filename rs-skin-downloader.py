@@ -161,7 +161,6 @@ def main():
 
 
     os.chdir("..")
-    print(os.getcwd())
     file_loader = FileSystemLoader('templates')
     env = Environment(loader=file_loader)
 
