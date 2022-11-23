@@ -163,13 +163,12 @@ def main():
 
     pilots_list = list(pilots)
     pilots_list.sort()
-    # rs-skins
-    template = env.get_template('rs-skins.nsi.j2')
+    template = env.get_template('rs-liveries.nsi.j2')
     output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries, pilots=pilots_list)
-    with open('Staging/rs-skins-rendered.nsi', 'w+') as f:
+    with open('Staging/rs-liveries-rendered.nsi', 'w+') as f:
         f.write(output)
 
-    shutil.copy("rs-skins-pilot-priorities.ps1", "Staging/rs-skins-pilot-priorities.ps1")
+    shutil.copy("rs-liveries-pilot-priorities.ps1", "Staging/rs-liveries-pilot-priorities.ps1")
     shutil.copy("rs.ico", "Staging/rs.ico")
     shutil.copy("rssplash.bmp", "Staging/rssplash.bmp")
 
