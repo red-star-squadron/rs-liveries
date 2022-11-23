@@ -75,21 +75,19 @@ def directory_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories
         if not livery_dirs: # Depending on whether looping rs/RSC liveries, we can end up with empty list, which means we need to continue with the next loop
             continue
         smallest_dirname = min(livery_dirs, key = len)
+        pilot_dirs = livery_dirs.copy()
+        pilot_dirs.remove(smallest_dirname)
         liveries.append({
                 "dcs_airframe_codename" : os.path.basename(dcs_airframe_codename),
-                "dirname": os.path.basename(smallest_dirname)
-            })
-        for livdir in livery_dirs:
-            liveries_with_pilotnames.append({
-                "dcs_airframe_codename" : os.path.basename(dcs_airframe_codename),
-                "dirname": os.path.basename(livdir)
+                "livery_base_dirname": os.path.basename(smallest_dirname),
+                "livery_pilot_dirs": [os.path.basename(pilot_dir) for pilot_dir in pilot_dirs]
             })
         if len(livery_dirs) > 1:
             livery_dirs.remove(smallest_dirname)
             for liv in livery_dirs:
                 pilots.add(liv.removeprefix(smallest_dirname))
     
-    return pilots, liveries, liveries_with_pilotnames
+    return pilots, liveries
 
 
 
@@ -155,8 +153,8 @@ def main():
             rs_livery_directories.append(root)
 
     pilots = set()
-    rs_pilots, rs_liveries, rs_liveries_with_pilotnames = directory_pilot_and_livery_parser(dcs_airframe_codenames, rs_livery_directories)
-    rsc_pilots, rsc_liveries, rsc_liveries_with_pilotnames = directory_pilot_and_livery_parser(dcs_airframe_codenames, rsc_livery_directories)
+    rs_pilots, rs_liveries = directory_pilot_and_livery_parser(dcs_airframe_codenames, rs_livery_directories)
+    rsc_pilots, rsc_liveries = directory_pilot_and_livery_parser(dcs_airframe_codenames, rsc_livery_directories)
     pilots.update(rs_pilots, rsc_pilots)
 
 
@@ -168,7 +166,7 @@ def main():
     pilots_list.sort()
     # rs-skins
     template = env.get_template('rs-skins.nsi.j2')
-    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries, pilots=pilots_list, rs_liveries_with_pilotnames=rs_liveries_with_pilotnames, rsc_liveries_with_pilotnames=rsc_liveries_with_pilotnames)
+    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries, pilots=pilots_list)
     with open('Staging/rs-skins-rendered.nsi', 'w+') as f:
         f.write(output)
 
