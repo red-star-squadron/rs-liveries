@@ -1,17 +1,17 @@
-# RS Skins
+# RS Liveries
 
 ## DISCLAIMER
 This software comes with absolutely no warranty. Use at your own risk.
 
 ## Description
-This repo packages RS skins for the Digital Combat Simulator (DCS World)
+This repo packages RS liveries for the Digital Combat Simulator (DCS World)
 
 ## How to download?
 [Releases page](../../releases) contains the Downloads link. Each release offers the `.exe` installer.
 
 ## Install options
 
-By far, the easiest method of installation is to download the exe from the [releases page](../../releases) which provides a simple interface of installing/updating/removing RS skins.
+By far, the easiest method of installation is to download the exe from the [releases page](../../releases) which provides a simple interface of installing/updating/removing RS liveries.
 
 If you are not comfortable running the `.exe`, you can extract it using the popular [7-Zip](https://www.7-zip.org/) archive utility to `Saved Games\DCS\Liveries` or `Saved Games\DCS.openbeta\Liveries`
 
@@ -27,4 +27,4 @@ Q: But, you can still have flat DCS livery files that contain viruses.
 A: This is true. However, we assume that Github and your Antivirus will scan for potential threats (as well as us during testing). 
 
 Q: What's the biggest threat?  
-A: There is a possibility for DCS to somehow trigger a virus through lua files contained in liveries, but the lua files are available for review by extracting the skins in a safe location.
+A: There is a possibility for DCS to somehow trigger a virus through lua files contained in liveries, but the lua files are available for review by extracting the liveries in a safe location.

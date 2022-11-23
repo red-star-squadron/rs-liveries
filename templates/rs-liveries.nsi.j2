@@ -1,4 +1,4 @@
-; rs-skins.nsi
+; rs-liveries.nsi.j2
 
 ;--------------------------------
 ;Include Modern UI
@@ -26,11 +26,11 @@ SetCompressorDictSize 128
 
 
 ; The name of the installer
-Name "RS Skins"
+Name "RS Liveries"
 VIProductVersion ${VERSION}
 
 ; The file to write
-OutFile "RS Skins.exe"
+OutFile "RS Liveries.exe"
 
 ; Request application privileges for Windows Vista
 RequestExecutionLevel user
@@ -92,7 +92,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
 
 ;--------------------------------
 
-; Old and unused skin folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
+; Old and unused livery folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
 
 
 Section "Delete Red Star Liveries"
@@ -143,7 +143,7 @@ SectionGroupEnd
 
 Section "!Modify Pilot Priority"
   SetOutPath "$PLUGINSDIR\NSISTemp"
-  File /oname=$PLUGINSDIR\rs-skins-pilot-priorities.ps1 rs-skins-pilot-priorities.ps1
-  nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\rs-skins-pilot-priorities.ps1" -dcs_liveries "$InstDir" -pilot "$PilotSelected"  '
+  File /oname=$PLUGINSDIR\rs-liveries-pilot-priorities.ps1 rs-liveries-pilot-priorities.ps1
+  nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries "$InstDir" -pilot "$PilotSelected"  '
   ; MessageBox MB_OK "$PilotSelected"
 SectionEnd

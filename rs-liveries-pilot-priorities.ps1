@@ -1,14 +1,12 @@
 param($dcs_liveries, $pilot)
 #
-# Red Star Skins - Livery priorities
+# Red Star Liveries - Livery priorities
 # This script changes the livery priorities based on user choice selected in the installer
 #
 
 #
 # NO WARRANTY WHATSOEVER
 #
-
-# https://github.com/Kaurin/rs-skins
 
 # Exit on any error
 $ErrorActionPreference = "Stop"
