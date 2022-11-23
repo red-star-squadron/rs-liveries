@@ -84,7 +84,7 @@ def directory_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories
         if len(livery_dirs) > 1:
             livery_dirs.remove(smallest_dirname)
             for liv in livery_dirs:
-                pilots.add(liv.removeprefix(smallest_dirname))
+                pilots.add(liv.removeprefix(smallest_dirname).strip())
     
     return pilots, liveries
 
@@ -170,6 +170,8 @@ def main():
         f.write(output)
 
     shutil.copy("rs-skins-pilot-priorities.ps1", "Staging/rs-skins-pilot-priorities.ps1")
+    shutil.copy("rs.ico", "Staging/rs.ico")
+    shutil.copy("rssplash.bmp", "Staging/rssplash.bmp")
 
 if __name__ == '__main__':
     main()
