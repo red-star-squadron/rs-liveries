@@ -7,7 +7,8 @@
 !include LogicLib.nsh
 !include nsDialogs.nsh
 !define MUI_COMPONENTSPAGE_NODESC
-
+!define MUI_ICON rs.ico
+Icon "rs.ico"
 
 ;--------------------------------
 
@@ -58,7 +59,7 @@ Function nsDialogsPage
   ${NSD_CB_AddString} $Pilot "-- RS SQUAD BUT NOT IN LIST --"
   ${NSD_CB_AddString} $Pilot "-- STREAMER / YOUTUBER --"
   {%- for pilot in pilots %}
-  ${NSD_CB_AddString} $Pilot "{{ pilot | trim }}"
+  ${NSD_CB_AddString} $Pilot "{{ pilot }}"
   {%- endfor %}
 
 	nsDialogs::Show
@@ -75,6 +76,9 @@ Function .onInit
   ${ElseIf} ${FileExists} "$PROFILE\Saved Games\DCS.openbeta"
     StrCpy $InstDir "$PROFILE\Saved Games\DCS.openbeta\Liveries"
   ${EndIf}
+  InitPluginsDir
+  File "/oname=$PluginsDir\rssplash.bmp" "rssplash.bmp"
+  advsplash::show 1000 600 400 "0x333333" $PluginsDir\rssplash
 FunctionEnd
 
 ;--------------------------------
@@ -85,6 +89,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
 !insertmacro MUI_PAGE_INSTFILES
 
 !insertmacro MUI_LANGUAGE "English"
+
 ;--------------------------------
 
 ; Old and unused skin folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
