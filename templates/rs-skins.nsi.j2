@@ -90,11 +90,17 @@ Page custom nsDialogsPage nsDialogsPageLeave
 
 Section "Delete Red Star Liveries"
     RMDir /r "$INSTDIR\RED STAR BIN"
-  {%- for livery in rs_liveries_with_pilotnames %}
-    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}"
+  {%- for livery in rs_liveries %}
+    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}"
+    {%- for pilot_dir in livery["livery_pilot_dirs"] %}
+    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}"
+    {%- endfor %}
   {%- endfor %}
-  {%- for livery in rsc_liveries_with_pilotnames %}
-    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}"
+  {%- for livery in rsc_liveries %}
+    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}"
+    {%- for pilot_dir in livery["livery_pilot_dirs"] %}
+    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}"
+    {%- endfor %}
   {%- endfor %}
 SectionEnd
 
@@ -106,18 +112,24 @@ SectionEnd
 
 SectionGroup "Red Star"
   {%- for livery in rs_liveries %}
-  Section "{{ livery["dirname"] }}"
+  Section "{{ livery["livery_base_dirname"] }}"
     SetOutPath $INSTDIR\{{ livery["dcs_airframe_codename"] }}
-    File /r "{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}*"
+    File /r "{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}"
+    {%- for pilot_dir in livery["livery_pilot_dirs"] %}
+    File /r "{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}"
+    {%- endfor %}
   SectionEnd 
   {%- endfor %}
 SectionGroupEnd
 
 SectionGroup "Red Star BLACK SQUADRON"
   {%- for livery in rsc_liveries %}
-  Section "{{ livery["dirname"] }}"
+  Section "{{ livery["livery_base_dirname"] }}"
     SetOutPath $INSTDIR\{{ livery["dcs_airframe_codename"] }}
-    File /r "{{ livery["dcs_airframe_codename"] }}\{{ livery["dirname"] }}*"
+    File /r "{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}"
+    {%- for pilot_dir in livery["livery_pilot_dirs"] %}
+    File /r "{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}"
+    {%- endfor %}
   SectionEnd 
   {%- endfor %}
 SectionGroupEnd
