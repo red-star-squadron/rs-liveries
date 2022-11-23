@@ -6,6 +6,8 @@
 ; LogicLib is a requirement for nsDialogs (I think...)
 !include LogicLib.nsh
 !include nsDialogs.nsh
+!define MUI_COMPONENTSPAGE_NODESC
+
 
 ;--------------------------------
 
@@ -83,7 +85,6 @@ Page custom nsDialogsPage nsDialogsPageLeave
 !insertmacro MUI_PAGE_INSTFILES
 
 !insertmacro MUI_LANGUAGE "English"
-!insertmacro MUI_COMPONENTSPAGE_NODESC
 ;--------------------------------
 
 ; Old and unused skin folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
