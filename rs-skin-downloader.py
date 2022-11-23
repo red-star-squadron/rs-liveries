@@ -66,7 +66,6 @@ def download_root_folder(rootfolder, folderid, service):
 def directory_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
     pilots = set()        
     liveries = []
-    liveries_with_pilotnames = []
     for dcs_airframe_codename in dcs_airframe_codenames:
         livery_dirs = []
         for livery in livery_directories:          
