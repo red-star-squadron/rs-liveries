@@ -77,8 +77,13 @@ Function .onInit
     StrCpy $InstDir "$PROFILE\Saved Games\DCS.openbeta\Liveries"
   ${EndIf}
   InitPluginsDir
+  File "/oname=$PluginsDir\mig29flyby.wav" "mig29flyby.wav"
   File "/oname=$PluginsDir\rssplash.bmp" "rssplash.bmp"
-  advsplash::show 1000 600 400 "0x333333" $PluginsDir\rssplash
+  newadvsplash::play "$PluginsDir\mig29flyby.wav"
+  newadvsplash::show 8200 1000 1000 "0x333333" /PASSIVE $PluginsDir\rssplash.bmp
+  ; If there is ever a problem with the newadvsplash download, use the old advsplash plugin
+  ; The old plugin does not have working fade-in and fade-out effects
+  ; advsplash::show 1000 600 400 "0x333333" $PluginsDir\rssplash
 FunctionEnd
 
 ;--------------------------------

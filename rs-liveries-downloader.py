@@ -171,6 +171,7 @@ def main():
     shutil.copy("rs-liveries-pilot-priorities.ps1", "Staging/rs-liveries-pilot-priorities.ps1")
     shutil.copy("rs.ico", "Staging/rs.ico")
     shutil.copy("rssplash.bmp", "Staging/rssplash.bmp")
+    shutil.copy("mig29flyby.wav", "Staging/mig29flyby.wav")
 
 if __name__ == '__main__':
     main()
