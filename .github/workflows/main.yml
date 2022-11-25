@@ -51,7 +51,7 @@ jobs:
       - name: gdrive_secret.yml
         run: echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
       - name: Run the downloader
-        run: pipenv run python rs-liveries-downloader.py
+        run: pipenv run python rs_liveries_downloader.py
       - name: Package to Exe installer
         run: |
           cd Staging
