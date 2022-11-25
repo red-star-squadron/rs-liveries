@@ -170,7 +170,7 @@ def main():
     dcs_airframe_codenames = []
     max_depth = 2
     min_depth = 1
-    for root, dirs, files in os.walk(staging_dir, topdown=True):
+    for root, dirs, _ in os.walk(staging_dir, topdown=True):
         if root.count(os.sep) - staging_dir.count(os.sep) < min_depth:
             continue
         if root.count(os.sep) - staging_dir.count(os.sep) == max_depth - 1:
@@ -183,7 +183,7 @@ def main():
     rsc_livery_directories = []
     max_depth = 3
     min_depth = 2
-    for root, dirs, files in os.walk(staging_dir, topdown=True):
+    for root, dirs, _ in os.walk(staging_dir, topdown=True):
         if root.count(os.sep) - staging_dir.count(os.sep) < min_depth:
             continue
         if root.count(os.sep) - staging_dir.count(os.sep) == max_depth - 1:
@@ -206,12 +206,20 @@ def main():
 
     pilots_list = list(pilots)
     pilots_list.sort()
+
     template = env.get_template('rs-liveries.nsi.j2')
     output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries, pilots=pilots_list)
-    with open('Staging/rs-liveries-rendered.nsi', 'w+', encoding=getpreferredencoding()) as file:
+    with open('Staging/rs-liveries-rendered.nsi',
+              'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
 
-    shutil.copy("rs-liveries-pilot-priorities.ps1", "Staging/rs-liveries-pilot-priorities.ps1")
+    template = env.get_template('rs-liveries-pilot-priorities.ps1.j2')
+    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries)
+    with open('Staging/rs-liveries-pilot-priorities.ps1',
+              'w+', encoding=getpreferredencoding()) as file:
+        file.write(output)
+
+    shutil.copy("psexec.nsh", "Staging/psexec.nsh")
     shutil.copy("rs.ico", "Staging/rs.ico")
     shutil.copy("rssplash.bmp", "Staging/rssplash.bmp")
     shutil.copy("mig29flyby.wav", "Staging/mig29flyby.wav")
