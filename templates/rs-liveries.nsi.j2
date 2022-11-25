@@ -6,6 +6,8 @@
 ; LogicLib is a requirement for nsDialogs (I think...)
 !include LogicLib.nsh
 !include nsDialogs.nsh
+; Get powershell output in install log. Source: https://nsis.sourceforge.io/PowerShell_support
+!include psexec.nsh
 !define MUI_COMPONENTSPAGE_NODESC
 !define MUI_ICON rs.ico
 Icon "rs.ico"
@@ -149,6 +151,7 @@ SectionGroupEnd
 Section "!Modify Pilot Priority"
   SetOutPath "$PLUGINSDIR\NSISTemp"
   File /oname=$PLUGINSDIR\rs-liveries-pilot-priorities.ps1 rs-liveries-pilot-priorities.ps1
-  nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries "$InstDir" -pilot "$PilotSelected"  '
+  ${PowerShellExecFileLog} '"$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
+  ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   ; MessageBox MB_OK "$PilotSelected"
 SectionEnd
