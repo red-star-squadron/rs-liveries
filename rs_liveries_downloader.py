@@ -104,19 +104,20 @@ def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
         Is a set of strings
         Each string corresponds to a pilot, like "SQuID"
     * liveries
-        Is a list of strings
-        Each string is like "RED STAR FA-18C BLACK SQUADRON SQuID"
+        Is a list of dictionaries. Each dict structure:
+            * dcs_airframe_codename - string like mig-29s
+            * livery_base_dirname - string like "RED STAR FA-18C BLACK SQUADRON"
+            * livery_pilot_dirs - list of strings like "RED STAR FA-18C BLACK SQUADRON SQuID"
     '''
     pilots = set()
     liveries = []
     for dcs_airframe_codename in dcs_airframe_codenames:
         livery_dirs = []
         for livery in livery_directories:
-            if dcs_airframe_codename in livery:
-                livery_dirs.append((livery.removeprefix(dcs_airframe_codename)))
-        # Depending on whether looping rs/RSC liveries,
-        # we can end up with empty list,
-        # which means we need to continue with the next loop
+            if f"{ dcs_airframe_codename }/" in livery:
+                livery_dirs.append(livery.removeprefix(dcs_airframe_codename))
+        # Depending on whether looping regular (RS) or competitive (RSC) liveries,
+        # we can end up with empty list, which means we need to continue with the next loop
         if not livery_dirs:
             continue
         smallest_dirname = min(livery_dirs, key=len)
@@ -133,6 +134,26 @@ def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
                 pilots.add(liv.removeprefix(smallest_dirname).strip())
     return pilots, liveries
 
+def dir_roughmet_parser(roughmet_directories):
+    '''
+    Inputs:
+    * livery_directories - list of strings where each string
+        is a directory path
+    Outputs:
+    * roughmet_aircrafts
+        Is a dict of lists. Dict is an identifier like "F-15C RoughMet"
+        Each nested list is a list of strings with elements like "f15_wing_r_RoughMet_RS.dds"
+    '''
+    roughmet_aircrafts = dict()
+    for roughmet_directory in roughmet_directories:
+        roughmet_directory_basename = os.path.basename(roughmet_directory)
+
+        if roughmet_directory_basename not in roughmet_aircrafts:
+            roughmet_aircrafts[roughmet_directory_basename] = []
+
+        roughmet_aircrafts[roughmet_directory_basename].extend(os.listdir(roughmet_directory))
+
+    return roughmet_aircrafts
 
 def main():
     '''Main loop'''
@@ -149,19 +170,22 @@ def main():
         staging_dir = os.getcwd()
 
         ray.init(num_cpus=16)
-        for dl_list in [folders["Folders_RS"], folders["Folders_RSC"], folders["Folders_BIN"]]:
+        for dl_list in [
+            folders["Folders_RS"],
+            folders["Folders_RSC"],
+            folders["Folders_Bin"],
+            folders["Folders_RoughMets"]]:
             for item in dl_list:
                 download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
 
-        # wait for downloads:
-        ray.get(ray_downloadfiles_futures)
+        ray.get(ray_downloadfiles_futures) # Wait for downloads
     else:
         os.chdir("Staging")
         staging_dir = os.getcwd()
 
     for root, dirs, files in os.walk(os.getcwd()):
         for name in files:
-            if fnmatch.fnmatch(name.lower(), 'readme*.txt'):  # Don't zip readmes
+            if fnmatch.fnmatch(name.lower(), 'readme*.txt'):  # Remove readmes
                 print(f"Removing {os.path.join(root, name)}")
                 os.remove(os.path.join(root, name))
             else:
@@ -176,11 +200,12 @@ def main():
         if root.count(os.sep) - staging_dir.count(os.sep) == max_depth - 1:
             del dirs[:]
 
-        if "RED STAR BIN" not in root:
+        if "RED STAR BIN" not in root and "RED STAR ROUGHMETS" not in root:
             dcs_airframe_codenames.append(root)
 
-    rs_livery_directories = []
-    rsc_livery_directories = []
+    dirs_rs_liveries = []
+    dirs_rsc_liveries = []
+    dirs_roughmets = []
     max_depth = 3
     min_depth = 2
     for root, dirs, _ in os.walk(staging_dir, topdown=True):
@@ -189,16 +214,22 @@ def main():
         if root.count(os.sep) - staging_dir.count(os.sep) == max_depth - 1:
             del dirs[:]
         if "BLACK SQUADRON" in root:
-            rsc_livery_directories.append(root)
+            dirs_rsc_liveries.append(root)
+        elif "RED STAR ROUGHMETS" in root:
+            dirs_roughmets.append(root)
+        elif "RED STAR BIN" not in root:
+            dirs_rs_liveries.append(root)
         else:
-            rs_livery_directories.append(root)
+            pass # Red Star Bin
 
     pilots = set()
     rs_pilots, rs_liveries = dir_pilot_and_livery_parser(dcs_airframe_codenames,
-                                                         rs_livery_directories)
+                                                         dirs_rs_liveries)
     rsc_pilots, rsc_liveries = dir_pilot_and_livery_parser(dcs_airframe_codenames,
-                                                           rsc_livery_directories)
+                                                           dirs_rsc_liveries)
     pilots.update(rs_pilots, rsc_pilots)
+
+    roughmets = dir_roughmet_parser(dirs_roughmets)
 
     os.chdir("..")
     file_loader = FileSystemLoader('templates')
@@ -208,13 +239,17 @@ def main():
     pilots_list.sort()
 
     template = env.get_template('rs-liveries.nsi.j2')
-    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries, pilots=pilots_list)
+    output = template.render(
+        rs_liveries=rs_liveries,
+        rsc_liveries=rsc_liveries,
+        pilots=pilots_list,
+        roughmets=roughmets)
     with open('Staging/rs-liveries-rendered.nsi',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
 
     template = env.get_template('rs-liveries-pilot-priorities.ps1.j2')
-    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries)
+    output = template.render(rs_liveries=rs_liveries,rsc_liveries=rsc_liveries)
     with open('Staging/rs-liveries-pilot-priorities.ps1',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
