@@ -49,10 +49,10 @@ jobs:
         run: |
           choco install wget unzip
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
-          unzip D:\a\rs-skins\rs-skins\NewAdvSplash.zip
-          cd "C:\Program Files (x86)\NSIS"         
-          dir "C:\Program Files (x86)\NSIS\Contrib"
-          cd D:\a\rs-skins\rs-skins
+          unzip NewAdvSplash.zip
+          Copy-Item  Contrib\NewAdvSplash             "C:\Program Files (x86)\NSIS\Contrib\"
+          Copy-Item  Plugins\newadvsplash.dll         "C:\Program Files (x86)\NSIS\Plugins\x86-ansi\"
+          Copy-Item  Unicode\plugins/newadvsplash.dll "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
       - name: Makensis
         run: |
           cd Staging
