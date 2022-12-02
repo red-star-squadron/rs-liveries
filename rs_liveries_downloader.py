@@ -182,6 +182,10 @@ def main():
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
     print(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
     print(os.path.dirname(argv[0]))
+    print(os.path.dirname(argv[0]))
+    print(os.path.dirname(argv[0]))
+    print(os.path.dirname(argv[0]))
+    print(os.path.dirname(argv[0]))
     with open('gdrive_secret.yml', 'r', encoding=getpreferredencoding()) as file:
         folders = yaml.safe_load(file)
 
