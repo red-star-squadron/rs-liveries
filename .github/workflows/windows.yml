@@ -53,3 +53,8 @@ jobs:
       #       Staging/RS_Liveries_${{ github.ref_name }}.exe
       #       Staging/rs-liveries-rendered.nsi
       #       Staging/rs-liveries-pilot-priorities.ps1
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Liveries Installer
+          path: Staging\RS_Liveries_{{ GITHUB_REF_NAME }}.exe
+          retention-days: 1
