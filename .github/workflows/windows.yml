@@ -56,7 +56,7 @@ jobs:
       - name: Makensis
         run: |
           cd Staging
-          "C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DVERSION=%GITHUB_REF% rs-liveries-rendered.nsi
+          & "C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DVERSION=%GITHUB_REF% rs-liveries-rendered.nsi
           Move-Item "RS Liveries.exe" "RS_Liveries_%GITHUB_REF_NAME%.exe"
       # - name: Release to Github Releases
       #   uses: softprops/action-gh-release@v1
