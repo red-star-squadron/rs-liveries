@@ -41,5 +41,5 @@ jobs:
       - run: |
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
           unzip NewAdvSplash.zip
-          cd
-          dir "C:\Program Files (x86)\"
+          dir D:\a\rs-skins\rs-skins
+          # dir "C:\Program Files (x86)\"
