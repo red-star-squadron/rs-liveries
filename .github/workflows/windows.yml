@@ -23,7 +23,8 @@ env:
 jobs:
   package-and-release:
     # The type of runner that the job will run on
-    runs-on: windows-latest
+    # runs-on: windows-latest
+    runs-on: self-hosted
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -47,9 +48,8 @@ jobs:
           pipenv run python rs_liveries_downloader.py
       - name: Prep Makensis
         run: |
-          choco install wget unzip
-          wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
-          unzip NewAdvSplash.zip
+          Invoke-WebRequest -Uri https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip -OutFile NewAdvSplash.zip
+          Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD/NewAdvSplash.zip", "$PWD")
           Copy-Item  Contrib\NewAdvSplash             "C:\Program Files (x86)\NSIS\Contrib\"
           Copy-Item  Plugins\newadvsplash.dll         "C:\Program Files (x86)\NSIS\Plugins\x86-ansi\"
           Copy-Item  Unicode\plugins/newadvsplash.dll "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
