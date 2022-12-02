@@ -41,6 +41,8 @@ jobs:
           wget https://bootstrap.pypa.io/get-pip.py
           python3.10 get-pip.py
           python3.10 -m pip install pipenv
+          ls /mnt
+          cd /mnt/d/a/rs-skins/rs-skins
           pipenv sync
           pipenv run python rs_liveries_downloader.py
       - name: Prep Makensis
