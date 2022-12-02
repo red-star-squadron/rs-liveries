@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Run Downloader in WSL bash
-        shell: bash.exe
+        shell: bash
         run: |
           wget https://bootstrap.pypa.io/get-pip.py
           python3.10 get-pip.py
