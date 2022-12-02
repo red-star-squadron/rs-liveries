@@ -37,15 +37,15 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - run: choco install nsis wget unzip
+      - run: choco --limit-output install nsis wget unzip
       - run: |
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
           cd "C:\Program Files (x86)\NSIS"
           unzip D:\a\rs-skins\rs-skins\NewAdvSplash.zip
           cd D:\a\rs-skins\rs-skins
           python -m pip install pipenv
-          pipenv sync
+          pipenv install
           echo %GOOGLE_CREDS% > credentials.json
           echo %GOOGLE_DRIVE_FOLDERS% > gdrive_secret.yml
           pipenv run python rs_liveries_downloader.py
-          
+
