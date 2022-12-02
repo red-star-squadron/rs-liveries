@@ -31,8 +31,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Run Downloader in WSL bash
+      - name: Run Downloader
         run: |
+          python --version
+          python3.10 --version
           python -m pip install pipenv
           echo %GOOGLE_CREDS% > credentials.json
           echo %GOOGLE_DRIVE_FOLDERS% > gdrive_secret.yml
