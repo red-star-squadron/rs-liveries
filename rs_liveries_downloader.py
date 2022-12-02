@@ -14,9 +14,6 @@ from googleapiclient.http import MediaIoBaseDownload
 import google.auth
 import yaml
 from jinja2 import Environment, FileSystemLoader
-import ray
-
-ray_downloadfiles_futures = []
 
 
 def listfolders(service, filid, des):
@@ -37,12 +34,11 @@ def listfolders(service, filid, des):
             print(f"Creating folder {fullpath}")
             listfolders(service, item['id'], fullpath)  # LOOP un-till the files are found
         else:
-            ray_downloadfiles_futures.append(downloadfiles.remote(service, item['id'], fullpath))
+            downloadfiles(service, item['id'], fullpath)
             print(f"Downloaded {fullpath}")
     return folder
 
 
-@ray.remote
 def downloadfiles(service, dowid, dfilespath):
     '''
     Downloads a single google drive file
@@ -87,8 +83,7 @@ def download_root_folder(rootfolder, folderid, service):
                     os.mkdir(fullpath)
                 listfolders(service, item['id'], fullpath)
             else:
-                ray_downloadfiles_futures.append(downloadfiles.remote(service, item['id'],
-                                                                      fullpath))
+                downloadfiles(service, item['id'], fullpath)
                 print(f"Downloaded {fullpath}")
 
 
@@ -169,7 +164,6 @@ def main():
         os.chdir("Staging")
         staging_dir = os.getcwd()
 
-        ray.init(num_cpus=16)
         for dl_list in [
             folders["Folders_RS"],
             folders["Folders_RSC"],
@@ -178,7 +172,6 @@ def main():
             for item in dl_list:
                 download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
 
-        ray.get(ray_downloadfiles_futures) # Wait for downloads
     else:
         os.chdir("Staging")
         staging_dir = os.getcwd()

@@ -16,7 +16,6 @@ on:
 env:
   GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
   GOOGLE_DRIVE_FOLDERS: ${{ secrets.GOOGLE_DRIVE_FOLDERS }}
-  WSLENV: GOOGLE_CREDS:GOOGLE_DRIVE_FOLDERS
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -28,23 +27,15 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v3
-      - uses: Vampire/setup-wsl@v1
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-            distribution: Ubuntu-22.04
-            additional-packages:
-              python3.10
-              wget
+          python-version: "3.10"
       - name: Run Downloader in WSL bash
-        shell: wsl-bash {0}
         run: |
-          wget https://bootstrap.pypa.io/get-pip.py
-          python3.10 get-pip.py
-          python3.10 -m pip install pipenv
-          ls /mnt
-          cd /mnt/d/a/rs-skins/rs-skins
-          pwd
-          echo "$GOOGLE_CREDS" > credentials.json
-          echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
+          python -m pip install pipenv
+          echo %GOOGLE_CREDS% > credentials.json
+          echo %GOOGLE_DRIVE_FOLDERS% > gdrive_secret.yml
           pipenv sync
           pipenv run python rs_liveries_downloader.py
       - name: Prep Makensis
