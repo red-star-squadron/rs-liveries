@@ -44,6 +44,7 @@ jobs:
           unzip D:\a\rs-skins\rs-skins\NewAdvSplash.zip
           cd D:\a\rs-skins\rs-skins
           python -m pip install pipenv
+          del Pipenv.lock
           pipenv install
           echo %GOOGLE_CREDS% > credentials.json
           echo %GOOGLE_DRIVE_FOLDERS% > gdrive_secret.yml
