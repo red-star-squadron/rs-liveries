@@ -37,7 +37,7 @@ jobs:
           unzip D:\a\rs-skins\rs-skins\NewAdvSplash.zip
           dir "C:\Program Files (x86)\NSIS\Contrib"
           cd D:\a\rs-skins\rs-skins
-      - shell: wslbash
+      - shell: wsl-bash
         run: |
           python -m pip install pipenv
           pipenv sync
