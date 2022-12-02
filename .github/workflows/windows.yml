@@ -25,23 +25,30 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: Vampire/setup-wsl@v1
         with:
-          python-version: "3.10"
-      - run: choco install wget unzip
-      - run: |
+            distribution: Ubuntu 22.04
+            additional-packages:
+              python3.10
+              wget
+      - name: Run Downloader in WSL bash
+        shell: wsl-bash {0}
+        run: |
+          echo "$GOOGLE_CREDS" > credentials.json
+          echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
+          wget https://bootstrap.pypa.io/get-pip.py
+          python3.10 get-pip.py
+          python3.10 -m pip install pipenv
+          pipenv sync
+          pipenv run python rs_liveries_downloader.py
+      - name: Prep Makensis
+        run: |
+          choco install wget unzip
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
           cd "C:\Program Files (x86)\NSIS"
           unzip D:\a\rs-skins\rs-skins\NewAdvSplash.zip
           dir "C:\Program Files (x86)\NSIS\Contrib"
           cd D:\a\rs-skins\rs-skins
-      - run: |
-          docker build . -t python_runner
-          echo %GOOGLE_CREDS% > credentials.json
-          echo %GOOGLE_DRIVE_FOLDERS% > gdrive_secret.yml
-          docker run --rm -it -v ${PWD}:/work python rs_liveries_downloader.py
       - name: Makensis
         run: |
           cd Staging
