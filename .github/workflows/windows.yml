@@ -32,6 +32,7 @@ jobs:
       - uses: Vampire/setup-wsl@v1
         with:
             distribution: Ubuntu-22.04
+            use-cache: false
             additional-packages:
               python3.10
               wget
