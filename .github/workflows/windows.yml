@@ -36,14 +36,14 @@ jobs:
       - name: Run Downloader in WSL bash
         shell: wsl-bash {0}
         run: |
-          echo "$GOOGLE_CREDS" > credentials.json
-          echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
           wget https://bootstrap.pypa.io/get-pip.py
           python3.10 get-pip.py
           python3.10 -m pip install pipenv
           ls /mnt
           cd /mnt/d/a/rs-skins/rs-skins
-          ls
+          pwd
+          echo "$GOOGLE_CREDS" > credentials.json
+          echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
           pipenv sync
           pipenv run python rs_liveries_downloader.py
       - name: Prep Makensis
