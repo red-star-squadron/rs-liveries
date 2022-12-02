@@ -19,33 +19,59 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  package-and-release:
+  linux-template:
     # The type of runner that the job will run on
-    runs-on: windows-latest
+    runs-on: ubuntu-22.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # - name: Maximize build space
-      #   uses: easimon/maximize-build-space@master
-      #   with:
-      #     root-reserve-mb: 20480
-      #     swap-size-mb: 1024
-      #     remove-dotnet: 'true'
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
+      - name: Install pipenv
+        run: python -m pip install pipenv
+      - name: sync pipenv
+        run: pipenv sync
+      - name: credentials.json
+        run: echo "$GOOGLE_CREDS" > credentials.json
+      - name: gdrive_secret.yml
+        run: echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
+      - name: Run the downloader
+        run: pipenv run python rs_liveries_downloader.py
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Staging
+          path: Staging
+          retention-days: 1
+  windows-run-nsis:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/download-artifact@master
+        with:
+          name: Staging
+          path: Staging
+      - run: dir Staging
       - run: choco install nsis wget unzip
       - run: |
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
           cd "C:\Program Files (x86)\NSIS"
           unzip D:\a\rs-skins\rs-skins\NewAdvSplash.zip
-          cd D:\a\rs-skins\rs-skins
-          python -m pip install pipenv
-          del Pipfile.lock
-          pipenv install
-          echo %GOOGLE_CREDS% > credentials.json
-          echo %GOOGLE_DRIVE_FOLDERS% > gdrive_secret.yml
-          pipenv run python rs_liveries_downloader.py
+          cd D:\a\rs-skins\rs-skins\Staging
+      - name: Makensis
+        run: |
+          "C:\Program Files (x86)\NSIS\makensis.exe" -V4 -DVERSION=%GITHUB_REF% rs-liveries-rendered.nsi
+          move "RS Liveries.exe" "RS_Liveries_%GITHUB_REF_NAME%.exe"
+      - name: Release to Github Releases
+        uses: softprops/action-gh-release@v1
+        # if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            Staging/RS_Liveries_${{ github.ref_name }}.exe
+            Staging/rs-liveries-rendered.nsi
+            Staging/rs-liveries-pilot-priorities.ps1
