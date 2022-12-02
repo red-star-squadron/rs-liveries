@@ -43,6 +43,7 @@ jobs:
           python3.10 -m pip install pipenv
           ls /mnt
           cd /mnt/d/a/rs-skins/rs-skins
+          ls
           pipenv sync
           pipenv run python rs_liveries_downloader.py
       - name: Prep Makensis
