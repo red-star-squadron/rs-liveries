@@ -29,15 +29,8 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v3
-      - uses: Vampire/setup-wsl@v1
-        with:
-            distribution: Ubuntu-20.04
-            use-cache: false
-            additional-packages:
-              python3.10
-              wget
       - name: Run Downloader in WSL bash
-        shell: wsl-bash {0}
+        shell: bash.exe
         run: |
           wget https://bootstrap.pypa.io/get-pip.py
           python3.10 get-pip.py
