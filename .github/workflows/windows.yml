@@ -37,13 +37,11 @@ jobs:
           unzip D:\a\rs-skins\rs-skins\NewAdvSplash.zip
           dir "C:\Program Files (x86)\NSIS\Contrib"
           cd D:\a\rs-skins\rs-skins
-      - shell: bash
-        run: |
-          python -m pip install pipenv
-          pipenv sync
-          echo "$GOOGLE_CREDS" > credentials.json
-          echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
-          pipenv run python rs_liveries_downloader.py
+      - run: |
+          docker build . -t python_runner
+          echo %GOOGLE_CREDS% > credentials.json
+          echo %GOOGLE_DRIVE_FOLDERS% > gdrive_secret.yml
+          docker run --rm -it -v ${PWD}:/work python rs_liveries_downloader.py
       - name: Makensis
         run: |
           cd Staging
