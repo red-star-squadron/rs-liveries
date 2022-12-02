@@ -16,6 +16,8 @@ on:
 env:
   GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
   GOOGLE_DRIVE_FOLDERS: ${{ secrets.GOOGLE_DRIVE_FOLDERS }}
+  WSLENV: GOOGLE_CREDS:GOOGLE_DRIVE_FOLDERS
+
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
