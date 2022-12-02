@@ -22,6 +22,7 @@ from jinja2 import Environment, FileSystemLoader
 thread_local = threading.local()
 executor_files = ThreadPoolExecutor(max_workers=16)
 executor_subdirs = ThreadPoolExecutor(max_workers=8)
+current_dir = os.getcwd()
 
 def listfolders(filid, des):
     '''
@@ -178,14 +179,9 @@ def get_service():
 def main():
     '''Main loop'''
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(
-        os.path.dirname(argv[0]),
+        current_dir,
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
     print(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-    print(os.path.dirname(argv[0]))
-    print(os.path.dirname(argv[0]))
-    print(os.path.dirname(argv[0]))
-    print(os.path.dirname(argv[0]))
-    print(os.path.dirname(argv[0]))
     with open('gdrive_secret.yml', 'r', encoding=getpreferredencoding()) as file:
         folders = yaml.safe_load(file)
 
