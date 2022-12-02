@@ -40,6 +40,8 @@ jobs:
       - run: choco install nsis wget unzip
       - run: |
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
-          unzip NewAdvSplash.zip
-          dir D:\a\rs-skins\rs-skins
-          # dir "C:\Program Files (x86)\"
+          cd "C:\Program Files (x86)\NSIS"
+          unzip D:\a\rs-skins\rs-skins\NewAdvSplash.zip
+          dir
+          cd D:\a\rs-skins\rs-skins
+          dir
