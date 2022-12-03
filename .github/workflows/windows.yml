@@ -28,21 +28,34 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - run: wsl -u root -d Ubuntu-22.04 -- apt update
-      - run: wsl -u root -d Ubuntu-22.04 -- apt install python3.10 wget
-      - run: wsl -u root -d Ubuntu-22.04 -- wget https://bootstrap.pypa.io/get-pip.py
-      - run: wsl -u root -d Ubuntu-22.04 -- python3.10 get-pip.py
-      - run: wsl -u root -d Ubuntu-22.04 -- python3.10 -m pip install pipenv
-      - run: Set-Content -Path google_creds.json -Value $Env:GOOGLE_CREDS         -Encoding UTF8
-      - run: Set-Content -Path gdrive_secret.yml -Value $Env:GOOGLE_DRIVE_FOLDERS -Encoding UTF8
-      - run: bash -c "pipenv sync"
-      - run: bash -c "pipenv run python rs_liveries_downloader.py"
-      - run: Invoke-WebRequest -Uri https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip -OutFile NewAdvSplash.zip
-      - run: Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD/NewAdvSplash.zip", "$PWD")
-      - run: Copy-Item  Contrib\NewAdvSplash             "C:\Program Files (x86)\NSIS\Contrib\"
-      - run: Copy-Item  Plugins\newadvsplash.dll         "C:\Program Files (x86)\NSIS\Plugins\x86-ansi\"
-      - run: Copy-Item  Unicode\plugins/newadvsplash.dll "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
-      - name: Makensis
+      - name: apt update
+        run: wsl -u root -d Ubuntu-22.04 -- apt update
+      - name: Get python 3 and wget
+        run: wsl -u root -d Ubuntu-22.04 -- apt install python3.10 wget
+      - name: Get the pip bootstrap script
+        run: wsl -u root -d Ubuntu-22.04 -- wget https://bootstrap.pypa.io/get-pip.py
+      - name: Install pip
+        run: wsl -u root -d Ubuntu-22.04 -- python3.10 get-pip.py
+      - name: Install pipenv
+        run: wsl -u test -d Ubuntu-22.04 -- python3.10 -m pip --user install pipenv
+      - name: Generate google_creds.json
+        run: Set-Content -Path google_creds.json -Value $Env:GOOGLE_CREDS         -Encoding UTF8
+      - name: Generate gdrive_secret.yml
+        run: Set-Content -Path gdrive_secret.yml -Value $Env:GOOGLE_DRIVE_FOLDERS -Encoding UTF8
+      - name: pipenv sync
+        run: bash -c "pipenv sync"
+      - name: Run the liveries downloader
+        run: bash -c "pipenv run python rs_liveries_downloader.py"
+      - name: Download advsplash for nsis
+        run: Invoke-WebRequest -Uri https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip -OutFile NewAdvSplash.zip
+      - name: Unzip advsplash
+        run: Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD/NewAdvSplash.zip", "$PWD")
+      - name: Copy advsplash files
+        run: |
+          Copy-Item  Contrib\NewAdvSplash             "C:\Program Files (x86)\NSIS\Contrib\"
+          Copy-Item  Plugins\newadvsplash.dll         "C:\Program Files (x86)\NSIS\Plugins\x86-ansi\"
+          Copy-Item  Unicode\plugins/newadvsplash.dll "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
+      - name: Run Makensis
         shell: cmd
         run: |
           cd Staging
