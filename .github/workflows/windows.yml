@@ -36,8 +36,8 @@ jobs:
           wsl -u root -d Ubuntu-22.04 -- wget https://bootstrap.pypa.io/get-pip.py
           wsl -u root -d Ubuntu-22.04 -- python3.10 get-pip.py
           wsl -u root -d Ubuntu-22.04 -- python3.10 -m pip install pipenv
-          bash -c "echo `"$Env:GOOGLE_CREDS`" > google_creds.json"
-          bash -c "echo `"$Env:GOOGLE_DRIVE_FOLDERS`" > gdrive_secret.yml"
+          bash -c "echo $Env:GOOGLE_CREDS > google_creds.json"
+          bash -c "echo $Env:GOOGLE_DRIVE_FOLDERS > gdrive_secret.yml"
           bash -c "pipenv sync"
           bash -c "pipenv run python rs_liveries_downloader.py"
       - name: Prep Makensis
