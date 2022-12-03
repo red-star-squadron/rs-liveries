@@ -8,7 +8,6 @@ import os
 import shutil
 import fnmatch
 import io
-from sys import argv
 from concurrent.futures import ThreadPoolExecutor
 import threading
 from locale import getpreferredencoding
