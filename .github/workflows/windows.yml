@@ -28,17 +28,11 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v3
-      - uses: Vampire/setup-wsl@v1
-        with:
-            distribution: Ubuntu-22.04
-            use-cache: false
-            additional-packages:
-              python3.10
-              wget
       - name: Run Downloader in bash
-        shell: wsl-bash {0}
         run: |
+          wsl --install -d Ubuntu-20.04
+          bash -c "apt update"
+          bash -c "apt install python3.10"
           bash -c "wget https://bootstrap.pypa.io/get-pip.py"
           bash -c "python3.10 get-pip.py"
           bash -c "python3.10 -m pip install pipenv"
