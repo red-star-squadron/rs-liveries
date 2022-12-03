@@ -36,13 +36,8 @@ jobs:
           wsl -u root -d Ubuntu-22.04 -- wget https://bootstrap.pypa.io/get-pip.py
           wsl -u root -d Ubuntu-22.04 -- python3.10 get-pip.py
           wsl -u root -d Ubuntu-22.04 -- python3.10 -m pip install pipenv
-          $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
-          [System.IO.File]::WriteAllLines((Get-Location).Path + "\credentials.json",   $Env:GOOGLE_CREDS,         $Utf8NoBomEncoding)
-          [System.IO.File]::WriteAllLines((Get-Location).Path + "\gdrive_secret.json", $Env:GOOGLE_DRIVE_FOLDERS, $Utf8NoBomEncoding)
-          $GOOGLE_CREDS = Get-Content credentials.json -Raw
-          $GOOGLE_DIVE_FOLDERS = Get-Content gdrive_secret.json -Raw
-          Set-Content credentials.json   ([byte[]][char[]] "$GOOGLE_CREDS"        ) -Encoding Byte
-          Set-Content gdrive_secret.json ([byte[]][char[]] "$GOOGLE_DRIVE_FOLDERS") -Encoding Byte
+          bash -c "echo `"$Env:GOOGLE_CREDS`" > google_creds.json"
+          bash -c "echo `"$Env:GOOGLE_DRIVE_FOLDERS`" > gdrive_secret.yml"
           bash -c "pipenv sync"
           bash -c "pipenv run python rs_liveries_downloader.py"
       - name: Prep Makensis
