@@ -37,7 +37,7 @@ jobs:
           bash -c "python3.10 get-pip.py"
           bash -c "python3.10 -m pip install pipenv"
           $GOOGLE_CREDS | Out-File -FilePath credentials.json
-          $GOOGLE_DRIVE_FOLDERS" | Out-File -FilePath gdrive_secret.yml
+          $GOOGLE_DRIVE_FOLDERS | Out-File -FilePath gdrive_secret.yml
           bash -c "pipenv sync"
           bash -c "pipenv run python rs_liveries_downloader.py"
       - name: Prep Makensis
