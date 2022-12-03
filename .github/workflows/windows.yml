@@ -38,6 +38,8 @@ jobs:
           wsl -u root -d Ubuntu-22.04 -- python3.10 -m pip install pipenv
           $Env:GOOGLE_CREDS | Out-File -FilePath credentials.json
           $Env:GOOGLE_DRIVE_FOLDERS | Out-File -FilePath gdrive_secret.yml
+          [System.IO.File]::WriteAllLines(credentials.json,   $Env:GOOGLE_CREDS)
+          [System.IO.File]::WriteAllLines(gdrive_secret.json, $Env:GOOGLE_DRIVE_FOLDERS)
           bash -c "pipenv sync"
           bash -c "pipenv run python rs_liveries_downloader.py"
       - name: Prep Makensis
