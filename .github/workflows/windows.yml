@@ -40,9 +40,9 @@ jobs:
       - name: Install pipenv
         run: wsl -u root -d Ubuntu-22.04 -- python3.10 -m pip install pipenv
       - name: Generate credentials.json
-        run: Set-Content -Path credentials.json -Value $Env:GOOGLE_CREDS         -Encoding UTF8
+        run: Set-Content -Path credentials.json -Value $Env:GOOGLE_CREDS         -Encoding utf8NoBom
       - name: Generate gdrive_secret.yml
-        run: Set-Content -Path gdrive_secret.yml -Value $Env:GOOGLE_DRIVE_FOLDERS -Encoding UTF8
+        run: Set-Content -Path gdrive_secret.yml -Value $Env:GOOGLE_DRIVE_FOLDERS -Encoding utf8NoBom
       - name: pipenv sync
         run: bash -c "pipenv sync"
       - name: Run the liveries downloader
