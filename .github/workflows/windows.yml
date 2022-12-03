@@ -31,7 +31,7 @@ jobs:
       - name: apt update
         run: wsl -u root -d Ubuntu-22.04 -- apt update
       - name: Get python 3 and wget
-        run: wsl -u root -d Ubuntu-22.04 -- apt install python3.10 wget
+        run: wsl -u root -d Ubuntu-22.04 -- apt install python3.10 wget -y
       - name: Get the pip bootstrap script
         run: wsl -u root -d Ubuntu-22.04 -- wget https://bootstrap.pypa.io/get-pip.py
       - name: Install pip
