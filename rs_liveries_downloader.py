@@ -181,7 +181,8 @@ def main():
         current_dir,
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
     print(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-    with open('gdrive_secret.yml', 'r', encoding=getpreferredencoding()) as file:
+    # with open('gdrive_secret.yml', 'r', encoding=getpreferredencoding()) as file:
+    with open('gdrive_secret.yml', 'r', encoding='latin') as file:
         folders = yaml.safe_load(file)
 
     if os.environ['SKIP_DOWNLOADS'].lower() != "true":
