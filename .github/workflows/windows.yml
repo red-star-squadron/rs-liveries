@@ -43,10 +43,11 @@ jobs:
       - run: Copy-Item  Plugins\newadvsplash.dll         "C:\Program Files (x86)\NSIS\Plugins\x86-ansi\"
       - run: Copy-Item  Unicode\plugins/newadvsplash.dll "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\"
       - name: Makensis
+        shell: cmd
         run: |
           cd Staging
-          & "C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DVERSION=%GITHUB_REF% rs-liveries-rendered.nsi
-          Move-Item "RS Liveries.exe" "RS_Liveries_%GITHUB_REF_NAME%.exe"
+          "C:\Program Files (x86)\NSIS\makensis.exe" /V4 /DVERSION=%GITHUB_REF% rs-liveries-rendered.nsi
+      - run: Move-Item "RS Liveries.exe" "RS_Liveries_%GITHUB_REF_NAME%.exe"
       # - name: Release to Github Releases
       #   uses: softprops/action-gh-release@v1
       #   if: startsWith(github.ref, 'refs/tags/')
