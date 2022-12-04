@@ -222,31 +222,16 @@ def main():
     rsc_pilots, rsc_liveries = dir_pilot_and_livery_parser(dcs_airframe_codenames,
                                                            dirs_rsc_liveries)
     pilots.update(rs_pilots, rsc_pilots)
+    pilots_list = list(pilots)
+    pilots_list.sort()
 
     roughmets = dir_roughmet_parser(dirs_roughmets)
+
+    gh_ref = os.environ['GITHUB_REF_NAME']
 
     os.chdir("..")
     file_loader = FileSystemLoader('templates')
     env = Environment(loader=file_loader)
-
-    pilots_list = list(pilots)
-    pilots_list.sort()
-
-    template = env.get_template('rs-liveries.nsi.j2')
-    output = template.render(
-        rs_liveries=rs_liveries,
-        rsc_liveries=rsc_liveries,
-        pilots=pilots_list,
-        roughmets=roughmets)
-    with open('Staging/rs-liveries-rendered.nsi',
-              'w+', encoding=getpreferredencoding()) as file:
-        file.write(output)
-
-    template = env.get_template('rs-liveries-pilot-priorities.ps1.j2')
-    output = template.render(rs_liveries=rs_liveries,rsc_liveries=rsc_liveries)
-    with open('Staging/rs-liveries-pilot-priorities.ps1',
-              'w+', encoding=getpreferredencoding()) as file:
-        file.write(output)
 
     template = env.get_template('compress_list.sh.j2')
     output = template.render(
@@ -255,6 +240,23 @@ def main():
         roughmets=roughmets,
         delete_after_compress=os.environ['DELETE_AFTER_COMPRESS'].lower())
     with open('Staging/compress_list.sh',
+              'w+', encoding=getpreferredencoding()) as file:
+        file.write(output)
+
+    template = env.get_template('rs-liveries.nsi.j2')
+    output = template.render(
+        rs_liveries=rs_liveries,
+        rsc_liveries=rsc_liveries,
+        pilots=pilots_list,
+        roughmets=roughmets,
+        gh_ref=gh_ref)
+    with open('Staging/rs-liveries-rendered.nsi',
+              'w+', encoding=getpreferredencoding()) as file:
+        file.write(output)
+
+    template = env.get_template('rs-liveries-pilot-priorities.ps1.j2')
+    output = template.render(rs_liveries=rs_liveries,rsc_liveries=rsc_liveries)
+    with open('Staging/rs-liveries-pilot-priorities.ps1',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
 
