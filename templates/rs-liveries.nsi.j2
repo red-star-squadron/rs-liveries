@@ -109,6 +109,7 @@ Function .onInit
   InitPluginsDir
   File "/oname=$PluginsDir\mig29flyby.wav" "mig29flyby.wav"
   File "/oname=$PluginsDir\rssplash.bmp" "rssplash.bmp"
+  File "/oname=$PluginsDir\7za.exe"        "7za.exe"
   newadvsplash::play "$PluginsDir\mig29flyby.wav"
   newadvsplash::show 8200 1000 1000 "0x333333" /PASSIVE $PluginsDir\rssplash.bmp
   ; If there is ever a problem with the newadvsplash download, use the old advsplash plugin
@@ -161,13 +162,28 @@ SectionGroup "!Red Star Required Assets"
     File /r "RED STAR BIN"
   SectionEnd
   SectionGroup "Red Star RoughMets"
+  {%- for category_name, _ in roughmets.items() %}
+    Section "{{ category_name }}"
+      SetOutPath "$ProgramFilesDir\Bazar\TempTextures\"
+      NScurl::http GET "https://github.com/red-star-squadron/rs-liveries/releases/download/${VERSION}/{{ category_name }}.7z" "$TEMP\{{ category_name }}.7z" /END
+      Pop $0 ; Status text ("OK" for success)
+      ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" "$PluginsDir\7za.exe" "$ProgramFilesDir\Bazar\TempTextures\" "$TEMP\{{ category_name }}.7z"  '
+      Delete "$TEMP\{{ category_name }}.7z"
+    SectionEnd
+  {%- endfor %}
   SectionGroupEnd
 SectionGroupEnd
 
 SectionGroup "Red Star"
+  {%- for livery in rs_liveries %}
+  {%- include 'rs-liveries.nsi_livery_section.j2' %}
+  {%- endfor %}
 SectionGroupEnd
 
 SectionGroup "Red Star BLACK SQUADRON"
+  {%- for livery in rsc_liveries %}
+  {%- include 'rs-liveries.nsi_livery_section.j2' %}
+  {%- endfor %}
 SectionGroupEnd
 
 Section "Modify Pilot Priority"

@@ -157,6 +157,10 @@ def main():
         os.chdir("Staging")
         staging_dir = os.getcwd()
 
+        if os.environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
+            folders["Folders_RS"] = [folders["Folders_RS"][0]]
+            folders["Folders_RSC"] = []
+
         for dl_list in [
             folders["Folders_RS"],
             folders["Folders_RSC"],
@@ -258,6 +262,7 @@ def main():
     shutil.copy("rs.ico", "Staging/rs.ico")
     shutil.copy("rssplash.bmp", "Staging/rssplash.bmp")
     shutil.copy("mig29flyby.wav", "Staging/mig29flyby.wav")
+    shutil.copy("extract-file.ps1", "Staging/extract-file.ps1")
 
 
 if __name__ == '__main__':

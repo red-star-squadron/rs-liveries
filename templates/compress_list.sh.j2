@@ -3,15 +3,20 @@
 set -e
 DEST="../Compressed"
 mkdir -p "$DEST"
+COMPRESSION="-mx=9"
+if [ "$MINIMAL_SAMPLE_SIZE" = true ]
+then  
+  COMPRESSION="-mx=1"
+fi
 
-7z a -bd -bb0 -mx=9 "$DEST/RED STAR BIN.7z" "RED STAR BIN"
+7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR BIN.7z" "RED STAR BIN"
 {% for category, _ in roughmets.items() %}
-7z a -bd -bb0 -mx=9 "$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "RED STAR ROUGHMETS/{{ category }}"
+7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "RED STAR ROUGHMETS/{{ category }}"
 {%- endfor %}
 {%- for livery_type in [rs_liveries, rsc_liveries] %}
     {% for livery in livery_type %}
 
-7z a -bd -bb0 -mx=9 "$DEST/{{ livery["livery_base_dirname"] }}.7z" \
+7z a -bd -bb0 $COMPRESSION "$DEST/{{ livery["livery_base_dirname"] }}.7z" \
         "{{ livery["dcs_airframe_codename"] }}/{{ livery["livery_base_dirname"] }}" {%-if not livery["livery_pilot_dirs"] | length == 0 %} \{% endif %}
         {%- for pilot_dir in livery["livery_pilot_dirs"] %}
         "{{ livery["dcs_airframe_codename"] }}/{{ pilot_dir }}" {%- if not loop.last %} \{%- endif %}
