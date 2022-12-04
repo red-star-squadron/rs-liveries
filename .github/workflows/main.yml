@@ -99,4 +99,4 @@ jobs:
         with:
           files: |
             Staging/RS_Liveries_${{ github.ref_name }}.exe
-            Compress/*.7z
+            Compressed/*.7z
