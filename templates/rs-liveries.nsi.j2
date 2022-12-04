@@ -170,7 +170,7 @@ SectionGroup "!Red Star Required Assets"
       NScurl::http GET "https://github.com/red-star-squadron/rs-liveries/releases/download/$VERSION/{{ category_name | replace(" ", ".") }}.7z" "$TEMP\{{ category_name }}.7z" /END
       Pop $0 ; Status text ("OK" for success)
       ${If} "$0" != "OK"
-        MessageBox MB_OK "Download of {{ https://github.com/red-star-squadron/rs-liveries/releases/download/$VERSION/{{ category_name | replace(" ", ".") }}.7z }} failed. Aborting install."
+        MessageBox MB_OK "Download of https://github.com/red-star-squadron/rs-liveries/releases/download/$VERSION/{{ category_name | replace(" ", ".") }}.7z failed. Aborting install."
         Abort
       ${EndIf}
       ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" "$PluginsDir\7za.exe" "$ProgramFilesDir\Bazar\TempTextures\" "$TEMP\{{ category_name }}.7z"  '
