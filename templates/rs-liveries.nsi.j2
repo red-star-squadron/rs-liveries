@@ -111,6 +111,7 @@ Function .onInit
   File "/oname=$PluginsDir\rssplash.bmp"                     rssplash.bmp
   File "/oname=$PluginsDir\7za.exe"                          7za.exe
   File "/oname=$PluginsDir\rs-liveries-pilot-priorities.ps1" rs-liveries-pilot-priorities.ps1
+  File "/oname=$PluginsDir\extract-file.ps1"                 extract-file.ps1
   newadvsplash::play "$PluginsDir\mig29flyby.wav"
   newadvsplash::show 8200 1000 1000 "0x333333" /PASSIVE $PluginsDir\rssplash.bmp
   ; If there is ever a problem with the newadvsplash download, use the old advsplash plugin
@@ -168,6 +169,10 @@ SectionGroup "!Red Star Required Assets"
       SetOutPath "$ProgramFilesDir\Bazar\TempTextures\"
       NScurl::http GET "https://github.com/red-star-squadron/rs-liveries/releases/download/${VERSION}/{{ category_name }}.7z" "$TEMP\{{ category_name }}.7z" /END
       Pop $0 ; Status text ("OK" for success)
+      ${If} "$0" != "OK"
+        MessageBox MB_OK "Download of {{ category_name }} failed. Aborting install."
+        Abort
+      ${EndIf}
       ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" "$PluginsDir\7za.exe" "$ProgramFilesDir\Bazar\TempTextures\" "$TEMP\{{ category_name }}.7z"  '
       Delete "$TEMP\{{ category_name }}.7z"
     SectionEnd
