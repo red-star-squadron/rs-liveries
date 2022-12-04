@@ -41,10 +41,8 @@ jobs:
         run: wsl -u root -d Ubuntu-22.04 -- python3.10 -m pip install pipenv
       - name: Generate credentials.json
         run: New-Item -Force credentials.json -Value "$Env:GOOGLE_CREDS"
-        # run: Set-Content -Path credentials.json -Value $Env:GOOGLE_CREDS         -Encoding utf8NoBom
       - name: Generate gdrive_secret.yml
         run: New-Item -Force gdrive_secret.yml -Value "$Env:GOOGLE_DRIVE_FOLDERS"
-        # run: Set-Content -Path gdrive_secret.yml -Value $Env:GOOGLE_DRIVE_FOLDERS -Encoding utf8NoBom
       - name: pipenv sync
         run: bash -c "pipenv sync"
       - name: Run the liveries downloader
