@@ -52,7 +52,7 @@ jobs:
           cd nscurl
           wget https://github.com/negrutiu/nsis-nscurl/releases/download/v1.2022.10.1/NScurl-1.2022.10.1.7z
           7z x NScurl-1.2022.10.1.7z
-          sudo mkdir -p /usr/share/nsis/Contrib/x64-unicode
+          sudo mkdir -p /usr/share/nsis/Contrib/amd64-unicode
           sudo cp -r x86-ansi/NScurl.dll         /usr/share/nsis/Plugins/x86-ansi/
           sudo cp -r x86-unicode/NScurl.dll      /usr/share/nsis/Plugins/x86-unicode/
           sudo cp -r amd64-unicode/NScurl.dll    /usr/share/nsis/Contrib/amd64-unicode/
