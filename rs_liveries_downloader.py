@@ -8,45 +8,54 @@ import os
 import shutil
 import fnmatch
 import io
+from concurrent.futures import ThreadPoolExecutor
+import threading
 from locale import getpreferredencoding
+from pathlib import Path
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import google.auth
 import yaml
 from jinja2 import Environment, FileSystemLoader
-import ray
-
-ray_downloadfiles_futures = []
 
 
-def listfolders(service, filid, des):
+thread_local = threading.local()
+executor_files = ThreadPoolExecutor(max_workers=16)
+current_dir = os.getcwd()
+
+def list_gdrive_folders(filid, des, is_rootfolder):
     '''
     Lists folders within a google drive
     Downloads files
     Recurses itself to go down the directory structure
     '''
+    if is_rootfolder:
+        query="'" + filid + "'" + " in parents"
+    else:
+        query="\'" + filid + "\'" + " in parents"
+    service = get_service()
     results = service.files().list(
-        pageSize=1000, q="\'" + filid + "\'" + " in parents",
+        pageSize=1000,
+        q=query,
         fields="nextPageToken, files(id, name, mimeType)").execute()
-    folder = results.get('files', [])
-    for item in folder:
+    items = results.get('files', [])
+    for item in items:
         fullpath = os.path.join(des, item['name'])
-        if str(item['mimeType']) == str('application/vnd.google-apps.folder'):
-            if not os.path.isdir(fullpath):
-                os.mkdir(path=fullpath)
-            print(f"Creating folder {fullpath}")
-            listfolders(service, item['id'], fullpath)  # LOOP un-till the files are found
+        parentdir = Path(fullpath).resolve().parents[0]
+        if not os.path.exists(parentdir):
+            Path(parentdir).mkdir(parents=True, exist_ok=True)
+            print(f"Created directory {parentdir}")
+        if item['mimeType'] == 'application/vnd.google-apps.folder':
+            list_gdrive_folders(item['id'], fullpath, False)
         else:
-            ray_downloadfiles_futures.append(downloadfiles.remote(service, item['id'], fullpath))
-            print(f"Downloaded {fullpath}")
-    return folder
+            executor_files.submit(downloadfiles, item['id'], fullpath)
 
 
-@ray.remote
-def downloadfiles(service, dowid, dfilespath):
+def downloadfiles(dowid, dfilespath):
     '''
     Downloads a single google drive file
     '''
+    service = get_service()
     request = service.files().get_media(fileId=dowid)
     file_handler = io.BytesIO()
     downloader = MediaIoBaseDownload(file_handler, request)
@@ -58,38 +67,7 @@ def downloadfiles(service, dowid, dfilespath):
     with io.open(dfilespath, 'wb') as file:
         file_handler.seek(0)
         file.write(file_handler.read())
-
-
-def download_root_folder(rootfolder, folderid, service):
-    '''
-    Initiates download of a google drive
-    This functions will use other functions to recursively get
-    all files and folders within a given google drive
-    '''
-    # surrounding ' Needed for the "q" parameter to google drive's "list" API call
-    folderid = "'"+folderid+"'"
-    results = service.files().list(
-        pageSize=1000,
-        q=folderid+" in parents",
-        fields="nextPageToken, files(id, name, mimeType)").execute()
-    items = results.get('files', [])
-    if not items:
-        print('No files found.')
-    else:
-        # print('Files:')
-        for item in items:
-            # If rootfolder is defined, and if the directory does not exist
-            if rootfolder and not os.path.isdir(rootfolder):
-                os.mkdir(rootfolder)
-            fullpath = os.path.join(os.getcwd(), rootfolder, item['name'])
-            if item['mimeType'] == 'application/vnd.google-apps.folder':
-                if not os.path.isdir(fullpath):
-                    os.mkdir(fullpath)
-                listfolders(service, item['id'], fullpath)
-            else:
-                ray_downloadfiles_futures.append(downloadfiles.remote(service, item['id'],
-                                                                      fullpath))
-                print(f"Downloaded {fullpath}")
+    print(f"Downloaded: {dfilespath}")
 
 
 def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
@@ -155,10 +133,22 @@ def dir_roughmet_parser(roughmet_directories):
 
     return roughmet_aircrafts
 
+
+def get_service():
+    '''
+    Ensures we get one google service object per thread
+    '''
+    if not hasattr(thread_local, "service"):
+        creds, _ = google.auth.default()
+        thread_local.service = build('drive', 'v3', credentials=creds)
+    return thread_local.service
+
 def main():
     '''Main loop'''
-    creds, _ = google.auth.default()
-    service = build('drive', 'v3', credentials=creds)
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(
+        current_dir,
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+    print(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
     with open('gdrive_secret.yml', 'r', encoding=getpreferredencoding()) as file:
         folders = yaml.safe_load(file)
 
@@ -169,16 +159,18 @@ def main():
         os.chdir("Staging")
         staging_dir = os.getcwd()
 
-        ray.init(num_cpus=16)
         for dl_list in [
             folders["Folders_RS"],
             folders["Folders_RSC"],
             folders["Folders_Bin"],
             folders["Folders_RoughMets"]]:
             for item in dl_list:
-                download_root_folder(item["dcs-codename"], item["gdrive-path"], service)
+                list_gdrive_folders(
+                    item["gdrive-path"],
+                    os.path.join(os.getcwd(), item["dcs-codename"]),
+                    True)
+        executor_files.shutdown(wait=True)
 
-        ray.get(ray_downloadfiles_futures) # Wait for downloads
     else:
         os.chdir("Staging")
         staging_dir = os.getcwd()
