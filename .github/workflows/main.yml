@@ -70,15 +70,27 @@ jobs:
         run: |
           cd Staging
           bash compress_list.sh
-      # - name: Package to Exe installer
-      #   run: |
-      #     makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
-      #     mv "RS Liveries.exe" "RS_Liveries_$GITHUB_REF_NAME.exe"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Rendered scripts
+          path: |
+            Staging/rs-liveries-rendered.nsi
+            Staging/rs-liveries-pilot-priorities.ps1
+            Staging/compress_list.sh
+      - name: Package to Exe installer
+        run: |
+          makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
+          mv "RS Liveries.exe" "RS_Liveries_$GITHUB_REF_NAME.exe"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Binaries and 7z (REMOVE THIS IF NOT TESTING)
+          path: |
+            Staging/RS_Liveries_${{ github.ref_name }}.exe
+            Compress/*.7z
       # - name: Release to Github Releases
       #   uses: softprops/action-gh-release@v1
       #   if: startsWith(github.ref, 'refs/tags/')
       #   with:
       #     files: |
       #       Staging/RS_Liveries_${{ github.ref_name }}.exe
-      #       Staging/rs-liveries-rendered.nsi
-      #       Staging/rs-liveries-pilot-priorities.ps1
+      #       Compress/*.7z

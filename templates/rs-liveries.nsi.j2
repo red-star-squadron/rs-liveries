@@ -145,12 +145,12 @@ SectionGroup "Clean Up Old Red Star Liveries"
   SectionGroupEnd
   Section "Red Star Camo Liveries"
   {%- for livery in rs_liveries %}
-  {%- include 'removal.j2' %}
+  {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
   SectionEnd
   Section "Red Star Competitive Liveries"
   {%- for livery in rsc_liveries %}
-  {%- include 'removal.j2' %}
+  {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
   SectionEnd
 SectionGroupEnd
@@ -160,28 +160,14 @@ SectionGroup "!Red Star Required Assets"
     SetOutPath $INSTDIR
     File /r "RED STAR BIN"
   SectionEnd
-  SectionGroup "Red Star RoughMats"
-  {%- for category_name, roughmet_filenames in roughmets.items() %}
-    Section "{{ category_name }}"
-      SetOutPath "$ProgramFilesDir\Bazar\TempTextures\"
-    {%- for roughmet_filename in roughmet_filenames %}
-      File "RED STAR ROUGHMETS\{{ category_name }}\{{ roughmet_filename }}"
-    {%- endfor %}
-    SectionEnd
-  {%- endfor %}
+  SectionGroup "Red Star RoughMets"
   SectionGroupEnd
 SectionGroupEnd
 
 SectionGroup "Red Star"
-  {%- for livery in rs_liveries %}
-  {%- include 'livery_section.j2' %}
-  {%- endfor %}
 SectionGroupEnd
 
 SectionGroup "Red Star BLACK SQUADRON"
-  {%- for livery in rsc_liveries %}
-  {%- include 'livery_section.j2' %}
-  {%- endfor %}
 SectionGroupEnd
 
 Section "Modify Pilot Priority"
