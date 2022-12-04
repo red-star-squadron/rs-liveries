@@ -5,8 +5,8 @@ name: Testing Installer Downloader
 # Controls when the workflow will run
 on:
   push:
-    tags: 
-      - download-dev
+    branches: 
+      - beta
   # release:
   #   types: [published]
 
