@@ -6,7 +6,7 @@ name: Testing Installer Downloader
 on:
   push:
     branches: 
-      - beta
+      - download-dev
   # release:
   #   types: [published]
 
