@@ -107,9 +107,10 @@ Function .onInit
   ${EndIf}
 
   InitPluginsDir
-  File "/oname=$PluginsDir\mig29flyby.wav" "mig29flyby.wav"
-  File "/oname=$PluginsDir\rssplash.bmp" "rssplash.bmp"
-  File "/oname=$PluginsDir\7za.exe"        "7za.exe"
+  File "/oname=$PluginsDir\mig29flyby.wav"                   mig29flyby.wav
+  File "/oname=$PluginsDir\rssplash.bmp"                     rssplash.bmp
+  File "/oname=$PluginsDir\7za.exe"                          7za.exe
+  File "/oname=$PluginsDir\rs-liveries-pilot-priorities.ps1" rs-liveries-pilot-priorities.ps1
   newadvsplash::play "$PluginsDir\mig29flyby.wav"
   newadvsplash::show 8200 1000 1000 "0x333333" /PASSIVE $PluginsDir\rssplash.bmp
   ; If there is ever a problem with the newadvsplash download, use the old advsplash plugin
@@ -158,8 +159,8 @@ SectionGroupEnd
 
 SectionGroup "!Red Star Required Assets"
   Section "Red Star Bin (shared) Directory"
-    SetOutPath $INSTDIR
-    File /r "RED STAR BIN"
+    ; SetOutPath $INSTDIR
+    ; File /r "RED STAR BIN"
   SectionEnd
   SectionGroup "Red Star RoughMets"
   {%- for category_name, _ in roughmets.items() %}
@@ -188,7 +189,6 @@ SectionGroupEnd
 
 Section "Modify Pilot Priority"
   SetOutPath "$PLUGINSDIR\NSISTemp"
-  File /oname=$PLUGINSDIR\rs-liveries-pilot-priorities.ps1 rs-liveries-pilot-priorities.ps1
   ${PowerShellExecFileLog} '"$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   ; MessageBox MB_OK "$PilotSelected"
