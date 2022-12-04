@@ -5,7 +5,7 @@ name: Testing Installer Downloader
 # Controls when the workflow will run
 on:
   push:
-    branches: 
+    branches:
       - download-dev
   # release:
   #   types: [published]
@@ -66,10 +66,12 @@ jobs:
         run: echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
       - name: Run the downloader
         run: pipenv run python rs_liveries_downloader.py
-      - name: Package to Exe installer
+      - name: Compress the airframe types
         run: |
           cd Staging
           bash compress_list.sh
+      # - name: Package to Exe installer
+      #   run: |
       #     makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
       #     mv "RS Liveries.exe" "RS_Liveries_$GITHUB_REF_NAME.exe"
       # - name: Release to Github Releases

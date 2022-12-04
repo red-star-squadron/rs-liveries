@@ -8,13 +8,20 @@ mkdir -p "$DEST"
 {% for category, _ in roughmets.items() %}
 7z a -bd -bb0 -mx=9 "$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "RED STAR ROUGHMETS/{{ category }}"
 {%- endfor %}
-{% for livery_type in [rs_liveries, rsc_liveries] %}
-    {%- for livery in livery_type %}
+{%- for livery_type in [rs_liveries, rsc_liveries] %}
+    {% for livery in livery_type %}
+
 7z a -bd -bb0 -mx=9 "$DEST/{{ livery["livery_base_dirname"] }}.7z" \
         "{{ livery["dcs_airframe_codename"] }}/{{ livery["livery_base_dirname"] }}" {%-if not livery["livery_pilot_dirs"] | length == 0 %} \{% endif %}
-{%- for pilot_dir in livery["livery_pilot_dirs"] %}
+        {%- for pilot_dir in livery["livery_pilot_dirs"] %}
         "{{ livery["dcs_airframe_codename"] }}/{{ pilot_dir }}" {%- if not loop.last %} \{%- endif %}
-{%- endfor %}
+        {%- endfor %}
+        {%- if delete_after_compress == "true" %}
+rm -rf "{{ livery["dcs_airframe_codename"] }}/{{ livery["livery_base_dirname"] }}" 
+            {%- for pilot_dir in livery["livery_pilot_dirs"] %}
+rm -rf "{{ livery["dcs_airframe_codename"] }}/{{ pilot_dir }}"
+            {%- endfor %}
+        {% endif %}
     {%- endfor %}
 {%- endfor %}
 

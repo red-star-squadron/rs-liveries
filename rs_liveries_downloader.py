@@ -248,7 +248,8 @@ def main():
     output = template.render(
         rs_liveries=rs_liveries,
         rsc_liveries=rsc_liveries,
-        roughmets=roughmets)
+        roughmets=roughmets,
+        delete_after_compress=os.environ['DELETE_AFTER_COMPRESS'].lower())
     with open('Staging/compress_list.sh',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
