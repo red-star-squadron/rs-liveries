@@ -167,7 +167,7 @@ SectionGroup "!Red Star Required Assets"
   {%- for category_name, _ in roughmets.items() %}
     Section "{{ category_name }}"
       SetOutPath "$ProgramFilesDir\Bazar\TempTextures\"
-      NScurl::http GET "https://github.com/red-star-squadron/rs-liveries/releases/download/${VERSION}/{{ category_name }}.7z" "$TEMP\{{ category_name }}.7z" /END
+      NScurl::http GET "https://github.com/red-star-squadron/rs-liveries/releases/download/${VERSION}/{{ category_name | replace(" ", ".") }}.7z" "$TEMP\{{ category_name }}.7z" /END
       Pop $0 ; Status text ("OK" for success)
       ${If} "$0" != "OK"
         MessageBox MB_OK "Download of {{ category_name }} failed. Aborting install."
