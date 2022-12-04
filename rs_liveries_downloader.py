@@ -11,6 +11,7 @@ import io
 from concurrent.futures import ThreadPoolExecutor
 import threading
 from locale import getpreferredencoding
+from pathlib import Path
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import google.auth
@@ -20,30 +21,32 @@ from jinja2 import Environment, FileSystemLoader
 
 thread_local = threading.local()
 executor_files = ThreadPoolExecutor(max_workers=16)
-executor_subdirs = ThreadPoolExecutor(max_workers=8)
 current_dir = os.getcwd()
 
-def listfolders(filid, des):
+def list_gdrive_folders(filid, des, is_rootfolder):
     '''
     Lists folders within a google drive
     Downloads files
     Recurses itself to go down the directory structure
     '''
+    if is_rootfolder:
+        query="'" + filid + "'" + " in parents"
+    else:
+        query="\'" + filid + "\'" + " in parents"
     service = get_service()
     results = service.files().list(
-        pageSize=1000, q="\'" + filid + "\'" + " in parents",
+        pageSize=1000,
+        q=query,
         fields="nextPageToken, files(id, name, mimeType)").execute()
-    folder = results.get('files', [])
-    for item in folder:
+    items = results.get('files', [])
+    for item in items:
         fullpath = os.path.join(des, item['name'])
-        if str(item['mimeType']) == str('application/vnd.google-apps.folder'):
-            if not os.path.isdir(fullpath):
-                os.mkdir(path=fullpath)
-                print(f"Created folder {fullpath}")
-            executor_subdirs.submit(
-                listfolders,
-                item['id'],
-                fullpath)  # LOOP un-till the files are found
+        parentdir = Path(fullpath).resolve().parents[0]
+        if not os.path.exists(parentdir):
+            Path(parentdir).mkdir(parents=True, exist_ok=True)
+            print(f"Created directory {parentdir}")
+        if item['mimeType'] == 'application/vnd.google-apps.folder':
+            list_gdrive_folders(item['id'], fullpath, False)
         else:
             executor_files.submit(downloadfiles, item['id'], fullpath)
 
@@ -65,41 +68,6 @@ def downloadfiles(dowid, dfilespath):
         file_handler.seek(0)
         file.write(file_handler.read())
     print(f"Downloaded: {dfilespath}")
-
-
-def download_root_folder(rootfolder, folderid):
-    '''
-    Initiates download of a google drive
-    This functions will use other functions to recursively get
-    all files and folders within a given google drive
-    '''
-    # surrounding ' Needed for the "q" parameter to google drive's "list" API call
-    service = get_service()
-    folderid = "'"+folderid+"'"
-    results = service.files().list(
-        pageSize=1000,
-        q=folderid+" in parents",
-        fields="nextPageToken, files(id, name, mimeType)").execute()
-    items = results.get('files', [])
-    if not items:
-        print('No files found.')
-    else:
-        # print('Files:')
-        for item in items:
-            # If rootfolder is defined, and if the directory does not exist
-            if rootfolder and not os.path.isdir(rootfolder):
-                os.mkdir(rootfolder)
-            fullpath = os.path.join(os.getcwd(), rootfolder, item['name'])
-            if item['mimeType'] == 'application/vnd.google-apps.folder':
-                if not os.path.isdir(fullpath):
-                    os.mkdir(fullpath)
-                    print(f"Created folder {fullpath}")
-                executor_subdirs.submit(
-                    listfolders,
-                    item['id'],
-                    fullpath)  # LOOP un-till the files are found
-            else:
-                executor_files.submit(downloadfiles, item['id'], fullpath)
 
 
 def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
@@ -197,10 +165,10 @@ def main():
             folders["Folders_Bin"],
             folders["Folders_RoughMets"]]:
             for item in dl_list:
-                download_root_folder(
-                    item["dcs-codename"],
-                    item["gdrive-path"])
-        executor_subdirs.shutdown(wait=True)
+                list_gdrive_folders(
+                    item["gdrive-path"],
+                    os.path.join(os.getcwd(), item["dcs-codename"]),
+                    True)
         executor_files.shutdown(wait=True)
 
     else:
