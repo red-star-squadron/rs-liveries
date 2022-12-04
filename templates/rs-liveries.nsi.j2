@@ -166,6 +166,7 @@ SectionGroup "!Red Star Required Assets"
   SectionGroup "Red Star RoughMets"
   {%- for category_name, _ in roughmets.items() %}
     Section "{{ category_name }}"
+      ; AddSize - TODO
       SetOutPath "$ProgramFilesDir\Bazar\TempTextures\"
       NScurl::http GET "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.ROUGHMETS_{{ category_name | replace(" ", ".") }}.7z" "$TEMP\{{ category_name }}.7z" /END
       Pop $0 ; Status text ("OK" for success)
@@ -173,7 +174,7 @@ SectionGroup "!Red Star Required Assets"
         MessageBox MB_OK "Download of https://github.com/red-star-squadron/rs-liveries/releases/download/RED.STAR.ROUGHMETS_{{ gh_ref }}/{{ category_name | replace(" ", ".") }}.7z failed. Aborting install."
         Abort
       ${EndIf}
-      ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" "$PluginsDir\7za.exe" "$ProgramFilesDir\Bazar\TempTextures\" "$TEMP\{{ category_name }}.7z"  '
+      ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "$ProgramFilesDir\Bazar\TempTextures\" -archive_path "$TEMP\{{ category_name }}.7z"  '
       Delete "$TEMP\{{ category_name }}.7z"
     SectionEnd
   {%- endfor %}
