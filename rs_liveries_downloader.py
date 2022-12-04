@@ -227,7 +227,11 @@ def main():
 
     roughmets = dir_roughmet_parser(dirs_roughmets)
 
-    gh_ref = os.environ['GITHUB_REF_NAME']
+    if 'GITHUB_REF_NAME' in os.environ:
+        gh_ref = os.environ['GITHUB_REF_NAME']
+    else:
+        gh_ref = "no_gh_ref"
+
 
     os.chdir("..")
     file_loader = FileSystemLoader('templates')
