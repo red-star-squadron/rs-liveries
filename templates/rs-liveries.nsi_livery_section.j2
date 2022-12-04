@@ -1,4 +1,4 @@
-{% comment %}
+{% if False %}
   Section "{{ livery["livery_base_dirname"] }}"
     SetOutPath "$INSTDIR\{{ livery["dcs_airframe_codename"] }}"
     File /r "{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}"
@@ -6,4 +6,4 @@
     File /r "{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}"
     {%- endfor %}
   SectionEnd
-{% endcomment %}
+{% endif %}
