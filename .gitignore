@@ -1,5 +1,6 @@
 token.json
 credentials.json
 Staging*
+Compress*
 .DS_Store
 gdrive_secret.yml

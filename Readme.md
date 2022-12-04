@@ -9,12 +9,6 @@ This repo packages RS liveries for the Digital Combat Simulator (DCS World)
 ## How to download?
 [Releases page](../../releases) contains the Downloads link. Each release offers the `.exe` installer.
 
-## Install options
-
-By far, the easiest method of installation is to download the exe from the [releases page](../../releases) which provides a simple interface of installing/updating/removing RS liveries.
-
-If you are not comfortable running the `.exe`, you can extract it using the popular [7-Zip](https://www.7-zip.org/) archive utility to `Saved Games\DCS\Liveries` or `Saved Games\DCS.openbeta\Liveries`
-
 ## Security concerns
 
 Q: I inspected the code and noticed that you guys don't expose the source of the liveries files. Why?  
@@ -28,3 +22,11 @@ A: This is true. However, we assume that Github and your Antivirus will scan for
 
 Q: What's the biggest threat?  
 A: There is a possibility for DCS to somehow trigger a virus through lua files contained in liveries, but the lua files are available for review by extracting the liveries in a safe location.
+
+## Third party software
+
+### 7-Zip
+7-Zip software which is available on https://www.7-zip.org and licensed under the GNU LGPL license
+
+### NSIS
+NSIS software which is available on https://nsis.sourceforge.io and licensed under the Common Public License version 1.0

@@ -28,7 +28,7 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 20480
+          root-reserve-mb: 2048
           swap-size-mb: 1024
           remove-dotnet: 'true'
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -64,11 +64,12 @@ jobs:
         run: echo "$GOOGLE_CREDS" > credentials.json
       - name: gdrive_secret.yml
         run: echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
-      # - name: Run the downloader
-      #   run: pipenv run python rs_liveries_downloader.py
-      # - name: Package to Exe installer
-      #   run: |
-      #     cd Staging
+      - name: Run the downloader
+        run: pipenv run python rs_liveries_downloader.py
+      - name: Package to Exe installer
+        run: |
+          cd Staging
+          bash compress_list.sh
       #     makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
       #     mv "RS Liveries.exe" "RS_Liveries_$GITHUB_REF_NAME.exe"
       # - name: Release to Github Releases

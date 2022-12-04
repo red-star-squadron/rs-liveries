@@ -18,7 +18,6 @@ import google.auth
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-
 thread_local = threading.local()
 executor_files = ThreadPoolExecutor(max_workers=16)
 current_dir = os.getcwd()
@@ -148,14 +147,13 @@ def main():
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(
         current_dir,
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-    print(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
     with open('gdrive_secret.yml', 'r', encoding=getpreferredencoding()) as file:
         folders = yaml.safe_load(file)
 
     if os.environ['SKIP_DOWNLOADS'].lower() != "true":
         if os.path.isdir("Staging"):
-            shutil.rmtree("Staging")
-        os.mkdir("Staging")
+            shutil.rmtree("Staging", ignore_errors=True)
+        Path("Staging").mkdir(parents=True, exist_ok=True)
         os.chdir("Staging")
         staging_dir = os.getcwd()
 
@@ -243,6 +241,15 @@ def main():
     template = env.get_template('rs-liveries-pilot-priorities.ps1.j2')
     output = template.render(rs_liveries=rs_liveries,rsc_liveries=rsc_liveries)
     with open('Staging/rs-liveries-pilot-priorities.ps1',
+              'w+', encoding=getpreferredencoding()) as file:
+        file.write(output)
+
+    template = env.get_template('compress_list.sh.j2')
+    output = template.render(
+        rs_liveries=rs_liveries,
+        rsc_liveries=rsc_liveries,
+        roughmets=roughmets)
+    with open('Staging/compress_list.sh',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
 
