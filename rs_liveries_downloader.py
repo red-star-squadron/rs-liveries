@@ -22,6 +22,7 @@ from jinja2 import Environment, FileSystemLoader
 THREAD_LOCAL = threading.local()
 EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)
 SCRIPT_DIR = os.getcwd()
+STAGING_DIR = os.path.join(SCRIPT_DIR, "Staging")
 if 'GITHUB_REF_NAME' in os.environ:
     GH_REF = os.environ['GITHUB_REF_NAME']
     GH_RUNNER = True
@@ -174,15 +175,14 @@ def main():
         folders = yaml.safe_load(file)
 
     if os.environ['SKIP_DOWNLOADS'].lower() != "true":
-        if os.path.isdir("Staging"):
-            shutil.rmtree("Staging", ignore_errors=True)
-        Path("Staging").mkdir(parents=True, exist_ok=True)
-        os.chdir("Staging")
-        staging_dir = os.getcwd()
+        if os.path.isdir(STAGING_DIR):
+            shutil.rmtree(STAGING_DIR, ignore_errors=True)
+        Path(STAGING_DIR).mkdir(parents=True, exist_ok=True)
+        os.chdir(STAGING_DIR)
 
         if MINIMAL_SAMPLE_SIZE:
             folders["Folders_RS"] = [folders["Folders_RS"][0]]
-            folders["Folders_RSC"] = []
+            folders["Folders_RSC"] = [folders["Folders_RSC"][0]]
 
         for dl_list in [
             folders["Folders_RS"],
@@ -192,15 +192,13 @@ def main():
             for item in dl_list:
                 list_gdrive_folders(
                     item["gdrive-path"],
-                    os.path.join(os.getcwd(), item["dcs-codename"]),
+                    os.path.join(STAGING_DIR, item["dcs-codename"]),
                     True)
         EXECUTOR_FILES.shutdown(wait=True)
-
     else:
-        os.chdir("Staging")
-        staging_dir = os.getcwd()
+        os.chdir(STAGING_DIR)
 
-    for root, dirs, files in os.walk(os.getcwd()):
+    for root, dirs, files in os.walk(STAGING_DIR):
         for name in files:
             if fnmatch.fnmatch(name.lower(), 'readme*.txt'):  # Remove readmes
                 print(f"Removing {os.path.join(root, name)}")
@@ -211,10 +209,10 @@ def main():
     dcs_airframe_codenames = []
     max_depth = 2
     min_depth = 1
-    for root, dirs, _ in os.walk(staging_dir, topdown=True):
-        if root.count(os.sep) - staging_dir.count(os.sep) < min_depth:
+    for root, dirs, _ in os.walk(STAGING_DIR, topdown=True):
+        if root.count(os.sep) - STAGING_DIR.count(os.sep) < min_depth:
             continue
-        if root.count(os.sep) - staging_dir.count(os.sep) == max_depth - 1:
+        if root.count(os.sep) - STAGING_DIR.count(os.sep) == max_depth - 1:
             del dirs[:]
 
         if "RED STAR BIN" not in root and "RED STAR ROUGHMETS" not in root:
@@ -225,10 +223,10 @@ def main():
     dirs_roughmets = []
     max_depth = 3
     min_depth = 2
-    for root, dirs, _ in os.walk(staging_dir, topdown=True):
-        if root.count(os.sep) - staging_dir.count(os.sep) < min_depth:
+    for root, dirs, _ in os.walk(STAGING_DIR, topdown=True):
+        if root.count(os.sep) - STAGING_DIR.count(os.sep) < min_depth:
             continue
-        if root.count(os.sep) - staging_dir.count(os.sep) == max_depth - 1:
+        if root.count(os.sep) - STAGING_DIR.count(os.sep) == max_depth - 1:
             del dirs[:]
         if "BLACK SQUADRON" in root:
             dirs_rsc_liveries.append(root)
@@ -281,11 +279,11 @@ def main():
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
 
-    shutil.copy("psexec.nsh", "Staging/psexec.nsh")
-    shutil.copy("rs.ico", "Staging/rs.ico")
-    shutil.copy("rssplash.bmp", "Staging/rssplash.bmp")
-    shutil.copy("mig29flyby.wav", "Staging/mig29flyby.wav")
-    shutil.copy("extract-file.ps1", "Staging/extract-file.ps1")
+    shutil.copy("psexec.nsh", os.path.join(STAGING_DIR, "psexec.nsh"))
+    shutil.copy("rs.ico", os.path.join(STAGING_DIR, "rs.ico"))
+    shutil.copy("rssplash.bmp", os.path.join(STAGING_DIR, "rssplash.bmp"))
+    shutil.copy("mig29flyby.wav", os.path.join(STAGING_DIR, "mig29flyby.wav"))
+    shutil.copy("extract-file.ps1", os.path.join(STAGING_DIR, "extract-file.ps1"))
 
 
 if __name__ == '__main__':
