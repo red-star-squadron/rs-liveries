@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-DEST="../Compressed"
+DEST="{{ dest }}"
 mkdir -p "$DEST"
 MINIMAL_SAMPLE_SIZE="{{ minimal_sample_size }}"
 COMPRESSION="-mx=9"
@@ -14,25 +14,27 @@ fi
 {% for category, files in roughmets.items() %}
 pushd "RED STAR ROUGHMETS/{{ category }}"
     {%- for file in files %}
-7z a -bd -bb0 $COMPRESSION "../../$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "{{ file }}"
+7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "{{ file }}"
     {%- endfor %}
 popd
 {%- endfor %}
 
 {%- for livery_type in [rs_liveries, rsc_liveries] %}
     {% for livery in livery_type %}
-
+pushd "{{ livery["dcs_airframe_codename"] }}"
 7z a -bd -bb0 $COMPRESSION "$DEST/{{ livery["livery_base_dirname"] }}.7z" \
-        "{{ livery["dcs_airframe_codename"] }}/{{ livery["livery_base_dirname"] }}" {%-if not livery["livery_pilot_dirs"] | length == 0 %} \{% endif %}
+        "{{ livery["livery_base_dirname"] }}" {%-if not livery["livery_pilot_dirs"] | length == 0 %} \{% endif %}
         {%- for pilot_dir in livery["livery_pilot_dirs"] %}
-        "{{ livery["dcs_airframe_codename"] }}/{{ pilot_dir }}" {%- if not loop.last %} \{%- endif %}
+        "{{ pilot_dir }}" {%- if not loop.last %} \{%- endif %}
         {%- endfor %}
         {%- if delete_after_compress == "true" %}
-rm -rf "{{ livery["dcs_airframe_codename"] }}/{{ livery["livery_base_dirname"] }}" 
+rm -rf "{{ livery["livery_base_dirname"] }}" 
             {%- for pilot_dir in livery["livery_pilot_dirs"] %}
-rm -rf "{{ livery["dcs_airframe_codename"] }}/{{ pilot_dir }}"
+rm -rf "{{ pilot_dir }}"
             {%- endfor %}
-        {% endif %}
+        {%- endif %}
+popd
+
     {%- endfor %}
 {%- endfor %}
 

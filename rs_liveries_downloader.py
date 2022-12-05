@@ -258,7 +258,8 @@ def main():
         rsc_liveries=rsc_liveries,
         roughmets=roughmets,
         delete_after_compress=os.environ['DELETE_AFTER_COMPRESS'].lower(),
-        minimal_sample_size=str(MINIMAL_SAMPLE_SIZE).lower())
+        minimal_sample_size=str(MINIMAL_SAMPLE_SIZE).lower(),
+        dest=os.path.join(STAGING_DIR, "Compressed"))
     with open('Staging/compress_list.sh',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
