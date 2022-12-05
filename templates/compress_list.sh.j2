@@ -3,6 +3,7 @@
 set -e
 DEST="../Compressed"
 mkdir -p "$DEST"
+MINIMAL_SAMPLE_SIZE="{{ minimal_sample_size }}"
 COMPRESSION="-mx=9"
 if [ "$MINIMAL_SAMPLE_SIZE" = true ]
 then  
@@ -10,11 +11,11 @@ then
 fi
 
 7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR BIN.7z" "RED STAR BIN"
-{% for category, _ in roughmets.items() %}
 pushd "RED STAR ROUGHMETS"
+{% for category, _ in roughmets.items() %}
 7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ category }}.7z" {{ category }}"
-popd
 {%- endfor %}
+popd
 
 {%- for livery_type in [rs_liveries, rsc_liveries] %}
     {% for livery in livery_type %}
