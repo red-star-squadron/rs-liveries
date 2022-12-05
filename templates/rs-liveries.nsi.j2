@@ -202,7 +202,8 @@ SectionGroupEnd
 Section "Modify Pilot Priority"
   SetOutPath "$PLUGINSDIR\NSISTemp"
   ${PowerShellExecFileLog} '"$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
-  Pop $R1
+  IfErrors 0 +2
+    Abort "Problem extracting ${ArchivePath} to ${ExtractPath}"
   ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   ; MessageBox MB_OK "$PilotSelected"
 SectionEnd
