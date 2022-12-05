@@ -11,8 +11,11 @@ fi
 
 7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR BIN.7z" "RED STAR BIN"
 {% for category, _ in roughmets.items() %}
-7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "RED STAR ROUGHMETS/{{ category }}"
+pushd ""RED STAR ROUGHMETS"
+7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ category }}.7z" {{ category }}"
+popd
 {%- endfor %}
+
 {%- for livery_type in [rs_liveries, rsc_liveries] %}
     {% for livery in livery_type %}
 
