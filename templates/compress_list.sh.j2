@@ -13,7 +13,7 @@ fi
 7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR BIN.7z" "RED STAR BIN"
 pushd "RED STAR ROUGHMETS"
 {% for category, _ in roughmets.items() %}
-7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "{{ category }}"
+7z a -bd -bb0 $COMPRESSION "../$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "{{ category }}"
 {%- endfor %}
 popd
 
