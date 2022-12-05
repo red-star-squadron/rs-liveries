@@ -259,7 +259,7 @@ def main():
         roughmets=roughmets,
         delete_after_compress=os.environ['DELETE_AFTER_COMPRESS'].lower(),
         minimal_sample_size=str(MINIMAL_SAMPLE_SIZE).lower(),
-        dest=os.path.join(STAGING_DIR, "Compressed"))
+        dest=os.path.join(SCRIPT_DIR, "Compressed"))
     with open('Staging/compress_list.sh',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
