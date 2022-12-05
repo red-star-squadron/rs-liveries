@@ -1,5 +1,3 @@
-{% if False %}
   Section "{{ livery["livery_base_dirname"] }}"
     !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/{{ livery["livery_base_dirname"] | replace(" ", ".") }}.7z" "$TEMP\{{ livery["livery_base_dirname"] }}.7z" "$INSTDIR\{{ livery["dcs_airframe_codename"] }}"
   SectionEnd
-{% endif %}
