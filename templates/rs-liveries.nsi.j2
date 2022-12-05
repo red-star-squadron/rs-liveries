@@ -128,6 +128,20 @@ Page custom nsDialogsPage nsDialogsPageLeave
 
 !insertmacro MUI_LANGUAGE "English"
 
+
+!macro DownloadExtract URL ArchivePath ExtractPath
+  ; AddSize - TODO
+  NScurl::http GET "${URL}" "${ArchivePath}" /END
+  Pop $0 ; Status text ("OK" for success)
+  ${If} "$0" != "OK"
+    MessageBox MB_OK "Download of ${URL} failed. Aborting install."
+    Abort
+  ${EndIf}
+  ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "${ExtractPath}" -archive_path "${ArchivePath}"  '
+  Pop $R1
+  Delete "${ArchivePath}"
+
+!macroend
 ;--------------------------------
 
 ; Old and unused livery folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
@@ -160,30 +174,12 @@ SectionGroupEnd
 
 SectionGroup "!Red Star Required Assets"
   Section "Red Star Bin (shared) Directory"
-      ; AddSize - TODO
-      NScurl::http GET "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.BIN.7z" "$TEMP\RED STAR BIN.7z" /END
-      Pop $0 ; Status text ("OK" for success)
-      ${If} "$0" != "OK"
-        MessageBox MB_OK "Download of https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.BIN.7z failed. Aborting install."
-        Abort
-      ${EndIf}
-      ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "$INSTDIR\\" -archive_path "$TEMP\RED STAR BIN.7z"  '
-      Pop $R1
-      Delete "$TEMP\RED STAR BIN.7z"
+    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.BIN.7z" "$TEMP\RED STAR BIN.7z" "$INSTDIR"
   SectionEnd
   SectionGroup "Red Star RoughMets"
   {%- for category_name, _ in roughmets.items() %}
     Section "{{ category_name }}"
-      ; AddSize - TODO
-      NScurl::http GET "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.ROUGHMETS_{{ category_name | replace(" ", ".") }}.7z" "$TEMP\{{ category_name }}.7z" /END
-      Pop $0 ; Status text ("OK" for success)
-      ${If} "$0" != "OK"
-        MessageBox MB_OK "Download of https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.ROUGHMETS_{{ category_name | replace(" ", ".") }}.7z failed. Aborting install."
-        Abort
-      ${EndIf}
-      ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "$ProgramFilesDir\Bazar\TempTextures\\" -archive_path "$TEMP\{{ category_name }}.7z"  '
-      Pop $R1
-      Delete "$TEMP\{{ category_name }}.7z"
+      !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.ROUGHMETS_{{ category_name | replace(" ", ".") }}.7z" "$TEMP\{{ category_name }}.7z" "$ProgramFilesDir\Bazar\TempTextures"
     SectionEnd
   {%- endfor %}
   SectionGroupEnd
