@@ -11,9 +11,11 @@ then
 fi
 
 7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR BIN.7z" "RED STAR BIN"
-{% for category, _ in roughmets.items() %}
+{% for category, files in roughmets.items() %}
 pushd "RED STAR ROUGHMETS/{{ category }}"
-7z a -bd -bb0 $COMPRESSION "../$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "{{ category }}"
+    {%- for file in files %}
+7z a -bd -bb0 $COMPRESSION "../$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "{{ file }}"
+    {%- endfor %}
 popd
 {%- endfor %}
 
