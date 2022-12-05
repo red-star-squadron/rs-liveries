@@ -132,7 +132,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
 !macro DownloadExtract URL ArchivePath ExtractPath
   ; AddSize - TODO
   DetailPrint "Downloading ${URL} to ${ArchivePath}"
-  NScurl::http GET "${URL}" "${ArchivePath}" /END
+  NScurl::http GET "${URL}" "${ArchivePath}" /INSIST /CANCEL /POPUP /END
   Pop $0 ; Status text ("OK" for success)
   ${If} "$0" != "OK"
     Abort "Download of ${URL} failed. Aborting install."
