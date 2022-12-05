@@ -3,5 +3,8 @@ param($7a_exec_path, $destination_dir, $archive_path)
 # Exit on any error
 $ErrorActionPreference = "Stop"
 
+Write-Host "$7a_exec_path"
+Write-Host "$destination_dir"
+Write-Host "$archive_path"
 Set-Location -Path "$destination_dir"
 & "$7a_exec_path" -bd -bb0 -o x "$archive_path"
