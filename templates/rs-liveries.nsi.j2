@@ -174,7 +174,7 @@ SectionGroup "!Red Star Required Assets"
         MessageBox MB_OK "Download of https://github.com/red-star-squadron/rs-liveries/releases/download/RED.STAR.ROUGHMETS_{{ gh_ref }}/{{ category_name | replace(" ", ".") }}.7z failed. Aborting install."
         Abort
       ${EndIf}
-      ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "$ProgramFilesDir\Bazar\TempTextures\" -archive_path "$TEMP\{{ category_name }}.7z" >&1  '
+      ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "$ProgramFilesDir\Bazar\TempTextures\" -archive_path "$TEMP\{{ category_name }}.7z >&1"  '
       Delete "$TEMP\{{ category_name }}.7z"
     SectionEnd
   {%- endfor %}
@@ -195,7 +195,7 @@ SectionGroupEnd
 
 Section "Modify Pilot Priority"
   SetOutPath "$PLUGINSDIR\NSISTemp"
-  ${PowerShellExecFileLog} '"$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected" >&1  '
+  ${PowerShellExecFileLog} '"$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected >&1"  '
   ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   ; MessageBox MB_OK "$PilotSelected"
 SectionEnd

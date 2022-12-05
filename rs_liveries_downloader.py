@@ -18,9 +18,21 @@ import google.auth
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-thread_local = threading.local()
-executor_files = ThreadPoolExecutor(max_workers=16)
-current_dir = os.getcwd()
+
+THREAD_LOCAL = threading.local()
+EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)
+SCRIPT_DIR = os.getcwd()
+if 'GITHUB_REF_NAME' in os.environ:
+    GH_REF = os.environ['GITHUB_REF_NAME']
+    GH_RUNNER = True
+else:
+    GH_REF = "no_GH_REF"
+    GH_RUNNER = False
+
+if os.environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
+    MINIMAL_SAMPLE_SIZE = True
+else:
+    MINIMAL_SAMPLE_SIZE = False
 
 def list_gdrive_folders(filid, des, is_rootfolder):
     '''
@@ -38,6 +50,7 @@ def list_gdrive_folders(filid, des, is_rootfolder):
         q=query,
         fields="nextPageToken, files(id, name, mimeType)").execute()
     items = results.get('files', [])
+    iter_file_count = 0
     for item in items:
         fullpath = os.path.join(des, item['name'])
         parentdir = Path(fullpath).resolve().parents[0]
@@ -47,7 +60,17 @@ def list_gdrive_folders(filid, des, is_rootfolder):
         if item['mimeType'] == 'application/vnd.google-apps.folder':
             list_gdrive_folders(item['id'], fullpath, False)
         else:
-            executor_files.submit(downloadfiles, item['id'], fullpath)
+            if MINIMAL_SAMPLE_SIZE:
+                if fullpath.lower().endswith("lua") \
+                        or fullpath.lower().endswith("txt"):
+                    EXECUTOR_FILES.submit(downloadfiles, item['id'], fullpath)
+                else:
+                    if iter_file_count > 0:
+                        continue
+                    EXECUTOR_FILES.submit(downloadfiles, item['id'], fullpath)
+                    iter_file_count += 1
+            else:
+                EXECUTOR_FILES.submit(downloadfiles, item['id'], fullpath)
 
 
 def downloadfiles(dowid, dfilespath):
@@ -137,15 +160,15 @@ def get_service():
     '''
     Ensures we get one google service object per thread
     '''
-    if not hasattr(thread_local, "service"):
+    if not hasattr(THREAD_LOCAL, "service"):
         creds, _ = google.auth.default()
-        thread_local.service = build('drive', 'v3', credentials=creds)
-    return thread_local.service
+        THREAD_LOCAL.service = build('drive', 'v3', credentials=creds)
+    return THREAD_LOCAL.service
 
 def main():
     '''Main loop'''
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(
-        current_dir,
+        SCRIPT_DIR,
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
     with open('gdrive_secret.yml', 'r', encoding=getpreferredencoding()) as file:
         folders = yaml.safe_load(file)
@@ -157,7 +180,7 @@ def main():
         os.chdir("Staging")
         staging_dir = os.getcwd()
 
-        if os.environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
+        if MINIMAL_SAMPLE_SIZE:
             folders["Folders_RS"] = [folders["Folders_RS"][0]]
             folders["Folders_RSC"] = []
 
@@ -171,7 +194,7 @@ def main():
                     item["gdrive-path"],
                     os.path.join(os.getcwd(), item["dcs-codename"]),
                     True)
-        executor_files.shutdown(wait=True)
+        EXECUTOR_FILES.shutdown(wait=True)
 
     else:
         os.chdir("Staging")
@@ -227,12 +250,6 @@ def main():
 
     roughmets = dir_roughmet_parser(dirs_roughmets)
 
-    if 'GITHUB_REF_NAME' in os.environ:
-        gh_ref = os.environ['GITHUB_REF_NAME']
-    else:
-        gh_ref = "no_gh_ref"
-
-
     os.chdir("..")
     file_loader = FileSystemLoader('templates')
     env = Environment(loader=file_loader)
@@ -253,7 +270,7 @@ def main():
         rsc_liveries=rsc_liveries,
         pilots=pilots_list,
         roughmets=roughmets,
-        gh_ref=gh_ref)
+        gh_ref=GH_REF)
     with open('Staging/rs-liveries-rendered.nsi',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
