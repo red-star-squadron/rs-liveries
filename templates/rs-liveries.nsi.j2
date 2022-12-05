@@ -137,6 +137,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
     Abort "Download of ${URL} failed. Aborting install."
   ${EndIf}
   ClearErrors
+  DetailPrint "Extracting ${ArchivePath} to ${ExtractPath}"
   ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "${ExtractPath}" -archive_path "${ArchivePath}"  '
   IfErrors 0
     Abort "Problem extracting ${ArchivePath} to ${ExtractPath}"
