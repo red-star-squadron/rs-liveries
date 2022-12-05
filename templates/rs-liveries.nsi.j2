@@ -131,6 +131,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
 
 !macro DownloadExtract URL ArchivePath ExtractPath
   ; AddSize - TODO
+  DetailPrint "Downloading ${URL} to ${ArchivePath}"
   NScurl::http GET "${URL}" "${ArchivePath}" /END
   Pop $0 ; Status text ("OK" for success)
   ${If} "$0" != "OK"
