@@ -134,13 +134,13 @@ Page custom nsDialogsPage nsDialogsPageLeave
   NScurl::http GET "${URL}" "${ArchivePath}" /END
   Pop $0 ; Status text ("OK" for success)
   ${If} "$0" != "OK"
-    MessageBox MB_OK "Download of ${URL} failed. Aborting install."
-    Abort
+    Abort "Download of ${URL} failed. Aborting install."
   ${EndIf}
+  ClearErrors
   ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "${ExtractPath}" -archive_path "${ArchivePath}"  '
-  Pop $R1
+  IfErrors 0
+    Abort "Problem extracting ${ArchivePath} to ${ExtractPath}"
   Delete "${ArchivePath}"
-
 !macroend
 ;--------------------------------
 
