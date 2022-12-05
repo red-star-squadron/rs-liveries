@@ -1,9 +1,5 @@
 {% if False %}
   Section "{{ livery["livery_base_dirname"] }}"
-    SetOutPath "$INSTDIR\{{ livery["dcs_airframe_codename"] }}"
-    File /r "{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}"
-    {%- for pilot_dir in livery["livery_pilot_dirs"] %}
-    File /r "{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}"
-    {%- endfor %}
+    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/{{ livery["livery_base_dirname"] | replace(" ", ".") }}.7z" "$TEMP\{{ livery["livery_base_dirname"] }}.7z" "$INSTDIR\{{ livery["dcs_airframe_codename"] }}"
   SectionEnd
 {% endif %}
