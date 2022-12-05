@@ -96,9 +96,9 @@ FunctionEnd
 Function .onInit
   # Detect which Save/liveries directory to use. If multiple exist, use the most bottom one from this list.
   ${If} ${FileExists} "$PROFILE\Saved Games\DCS.openbeta"
-    StrCpy $InstDir "$PROFILE\Saved Games\DCS\Liveries"
-  ${ElseIf} ${FileExists} "$PROFILE\Saved Games\DCS"
     StrCpy $InstDir "$PROFILE\Saved Games\DCS.openbeta\Liveries"
+  ${ElseIf} ${FileExists} "$PROFILE\Saved Games\DCS"
+    StrCpy $InstDir "$PROFILE\Saved Games\DCS\Liveries"
   ${EndIf}
   
   ReadRegStr $ProgramFilesDir "HKCU" "SOFTWARE\Eagle Dynamics\DCS World OpenBeta" "Path"
