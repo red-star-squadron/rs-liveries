@@ -96,9 +96,9 @@ FunctionEnd
 Function .onInit
   # Detect which Save/liveries directory to use. If multiple exist, use the most bottom one from this list.
   ${If} ${FileExists} "$PROFILE\Saved Games\DCS.openbeta"
-    StrCpy $InstDir "$PROFILE\Saved Games\DCS\Liveries"
-  ${ElseIf} ${FileExists} "$PROFILE\Saved Games\DCS"
     StrCpy $InstDir "$PROFILE\Saved Games\DCS.openbeta\Liveries"
+  ${ElseIf} ${FileExists} "$PROFILE\Saved Games\DCS"
+    StrCpy $InstDir "$PROFILE\Saved Games\DCS\Liveries"
   ${EndIf}
   
   ReadRegStr $ProgramFilesDir "HKCU" "SOFTWARE\Eagle Dynamics\DCS World OpenBeta" "Path"
@@ -107,8 +107,11 @@ Function .onInit
   ${EndIf}
 
   InitPluginsDir
-  File "/oname=$PluginsDir\mig29flyby.wav" "mig29flyby.wav"
-  File "/oname=$PluginsDir\rssplash.bmp" "rssplash.bmp"
+  File "/oname=$PluginsDir\mig29flyby.wav"                   mig29flyby.wav
+  File "/oname=$PluginsDir\rssplash.bmp"                     rssplash.bmp
+  File "/oname=$PluginsDir\7za.exe"                          7za.exe
+  File "/oname=$PluginsDir\rs-liveries-pilot-priorities.ps1" rs-liveries-pilot-priorities.ps1
+  File "/oname=$PluginsDir\extract-file.ps1"                 extract-file.ps1
   newadvsplash::play "$PluginsDir\mig29flyby.wav"
   newadvsplash::show 8200 1000 1000 "0x333333" /PASSIVE $PluginsDir\rssplash.bmp
   ; If there is ever a problem with the newadvsplash download, use the old advsplash plugin
@@ -125,6 +128,22 @@ Page custom nsDialogsPage nsDialogsPageLeave
 
 !insertmacro MUI_LANGUAGE "English"
 
+
+!macro DownloadExtract URL ArchivePath ExtractPath
+  ; AddSize - TODO
+  DetailPrint "Downloading ${URL} to ${ArchivePath}"
+  NScurl::http GET "${URL}" "${ArchivePath}" /INSIST /POPUP /END
+  Pop $0 ; Status text ("OK" for success)
+  ${If} "$0" != "OK"
+    Abort "Download of ${URL} failed. Aborting install."
+  ${EndIf}
+  ClearErrors
+  DetailPrint "Extracting ${ArchivePath} to ${ExtractPath}"
+  ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "${ExtractPath}" -archive_path "${ArchivePath}"  '
+  IfErrors 0 +2
+    Abort "Problem extracting ${ArchivePath} to ${ExtractPath}"
+  Delete "${ArchivePath}"
+!macroend
 ;--------------------------------
 
 ; Old and unused livery folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
@@ -145,28 +164,24 @@ SectionGroup "Clean Up Old Red Star Liveries"
   SectionGroupEnd
   Section "Red Star Camo Liveries"
   {%- for livery in rs_liveries %}
-  {%- include 'removal.j2' %}
+  {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
   SectionEnd
   Section "Red Star Competitive Liveries"
   {%- for livery in rsc_liveries %}
-  {%- include 'removal.j2' %}
+  {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
   SectionEnd
 SectionGroupEnd
 
 SectionGroup "!Red Star Required Assets"
   Section "Red Star Bin (shared) Directory"
-    SetOutPath $INSTDIR
-    File /r "RED STAR BIN"
+    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.BIN.7z" "$TEMP\RED STAR BIN.7z" "$INSTDIR"
   SectionEnd
-  SectionGroup "Red Star RoughMats"
-  {%- for category_name, roughmet_filenames in roughmets.items() %}
+  SectionGroup "Red Star RoughMets"
+  {%- for category_name, _ in roughmets.items() %}
     Section "{{ category_name }}"
-      SetOutPath "$ProgramFilesDir\Bazar\TempTextures\"
-    {%- for roughmet_filename in roughmet_filenames %}
-      File "RED STAR ROUGHMETS\{{ category_name }}\{{ roughmet_filename }}"
-    {%- endfor %}
+      !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.ROUGHMETS_{{ category_name | replace(" ", ".") }}.7z" "$TEMP\{{ category_name }}.7z" "$ProgramFilesDir\Bazar\TempTextures"
     SectionEnd
   {%- endfor %}
   SectionGroupEnd
@@ -174,20 +189,21 @@ SectionGroupEnd
 
 SectionGroup "Red Star"
   {%- for livery in rs_liveries %}
-  {%- include 'livery_section.j2' %}
+  {%- include 'rs-liveries.nsi_livery_section.j2' %}
   {%- endfor %}
 SectionGroupEnd
 
 SectionGroup "Red Star BLACK SQUADRON"
   {%- for livery in rsc_liveries %}
-  {%- include 'livery_section.j2' %}
+  {%- include 'rs-liveries.nsi_livery_section.j2' %}
   {%- endfor %}
 SectionGroupEnd
 
 Section "Modify Pilot Priority"
   SetOutPath "$PLUGINSDIR\NSISTemp"
-  File /oname=$PLUGINSDIR\rs-liveries-pilot-priorities.ps1 rs-liveries-pilot-priorities.ps1
   ${PowerShellExecFileLog} '"$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
+  IfErrors 0 +2
+    Abort "Problem extracting ${ArchivePath} to ${ExtractPath}"
   ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   ; MessageBox MB_OK "$PilotSelected"
 SectionEnd

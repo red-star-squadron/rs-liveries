@@ -1,13 +1,12 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Package and Release
+name: Download, parse, compress and create the installer
 
 # Controls when the workflow will run
 on:
   # push:
-  #   tags: 
-  #     - v*
-  #     - beta*
+  #   branches:
+  #     - download-dev
   release:
     types: [published]
 
@@ -29,7 +28,7 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
-          root-reserve-mb: 20480
+          root-reserve-mb: 2048
           swap-size-mb: 1024
           remove-dotnet: 'true'
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -39,14 +38,24 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install nsis, wget and unzip
-        run: sudo apt install -y nsis wget unzip
-      - name: Copy the newadvsplash plugin
+        run: sudo apt install -y nsis wget unzip p7zip-full
+      - name: Install the newadvsplash plugin
         run: |
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
           unzip NewAdvSplash.zip
           sudo cp -r Contrib/NewAdvSplash             /usr/share/nsis/Contrib/
           sudo cp -r Plugins/newadvsplash.dll         /usr/share/nsis/Plugins/x86-ansi/
           sudo cp -r Unicode/plugins/newadvsplash.dll /usr/share/nsis/Plugins/x86-unicode/
+      - name: Install the nsis-nscurl plugin
+        run: |
+          mkdir nscurl
+          cd nscurl
+          wget https://github.com/negrutiu/nsis-nscurl/releases/download/v1.2022.10.1/NScurl-1.2022.10.1.7z
+          7z x NScurl-1.2022.10.1.7z
+          sudo mkdir -p /usr/share/nsis/Contrib/amd64-unicode
+          sudo cp -r x86-ansi/NScurl.dll         /usr/share/nsis/Plugins/x86-ansi/
+          sudo cp -r x86-unicode/NScurl.dll      /usr/share/nsis/Plugins/x86-unicode/
+          sudo cp -r amd64-unicode/NScurl.dll    /usr/share/nsis/Contrib/amd64-unicode/
       - name: Install pipenv
         run: python -m pip install pipenv
       - name: sync pipenv
@@ -57,6 +66,22 @@ jobs:
         run: echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
       - name: Run the downloader
         run: pipenv run python rs_liveries_downloader.py
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Rendered scripts
+          path: |
+            Staging/rs-liveries-rendered.nsi
+            Staging/rs-liveries-pilot-priorities.ps1
+            Staging/compress_list.sh
+      - name: Compress the airframe types
+        run: |
+          cd Staging
+          bash compress_list.sh
+      - name: Download 7-zip
+        run: |
+          wget https://www.7-zip.org/a/7z2201-extra.7z
+          cd Staging
+          7z x ../7z2201-extra.7z
       - name: Package to Exe installer
         run: |
           cd Staging
@@ -68,5 +93,4 @@ jobs:
         with:
           files: |
             Staging/RS_Liveries_${{ github.ref_name }}.exe
-            Staging/rs-liveries-rendered.nsi
-            Staging/rs-liveries-pilot-priorities.ps1
+            Compressed/*.7z
