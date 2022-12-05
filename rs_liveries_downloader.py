@@ -19,9 +19,21 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 
 
-thread_local = threading.local()
-executor_files = ThreadPoolExecutor(max_workers=16)
-current_dir = os.getcwd()
+THREAD_LOCAL = threading.local()
+EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)
+SCRIPT_DIR = os.getcwd()
+STAGING_DIR = os.path.join(SCRIPT_DIR, "Staging")
+if 'GITHUB_REF_NAME' in os.environ:
+    GH_REF = os.environ['GITHUB_REF_NAME']
+    GH_RUNNER = True
+else:
+    GH_REF = "no_GH_REF"
+    GH_RUNNER = False
+
+if os.environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
+    MINIMAL_SAMPLE_SIZE = True
+else:
+    MINIMAL_SAMPLE_SIZE = False
 
 def list_gdrive_folders(filid, des, is_rootfolder):
     '''
@@ -39,6 +51,7 @@ def list_gdrive_folders(filid, des, is_rootfolder):
         q=query,
         fields="nextPageToken, files(id, name, mimeType)").execute()
     items = results.get('files', [])
+    iter_file_count = 0
     for item in items:
         fullpath = os.path.join(des, item['name'])
         parentdir = Path(fullpath).resolve().parents[0]
@@ -48,7 +61,17 @@ def list_gdrive_folders(filid, des, is_rootfolder):
         if item['mimeType'] == 'application/vnd.google-apps.folder':
             list_gdrive_folders(item['id'], fullpath, False)
         else:
-            executor_files.submit(downloadfiles, item['id'], fullpath)
+            if MINIMAL_SAMPLE_SIZE:
+                if fullpath.lower().endswith("lua") \
+                        or fullpath.lower().endswith("txt"):
+                    EXECUTOR_FILES.submit(downloadfiles, item['id'], fullpath)
+                else:
+                    if iter_file_count > 0:
+                        continue
+                    EXECUTOR_FILES.submit(downloadfiles, item['id'], fullpath)
+                    iter_file_count += 1
+            else:
+                EXECUTOR_FILES.submit(downloadfiles, item['id'], fullpath)
 
 
 def downloadfiles(dowid, dfilespath):
@@ -138,26 +161,28 @@ def get_service():
     '''
     Ensures we get one google service object per thread
     '''
-    if not hasattr(thread_local, "service"):
+    if not hasattr(THREAD_LOCAL, "service"):
         creds, _ = google.auth.default()
-        thread_local.service = build('drive', 'v3', credentials=creds)
-    return thread_local.service
+        THREAD_LOCAL.service = build('drive', 'v3', credentials=creds)
+    return THREAD_LOCAL.service
 
 def main():
     '''Main loop'''
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(
-        current_dir,
+        SCRIPT_DIR,
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-    print(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
     with open('gdrive_secret.yml', 'r', encoding=getpreferredencoding()) as file:
         folders = yaml.safe_load(file)
 
     if os.environ['SKIP_DOWNLOADS'].lower() != "true":
-        if os.path.isdir("Staging"):
-            shutil.rmtree("Staging")
-        os.mkdir("Staging")
-        os.chdir("Staging")
-        staging_dir = os.getcwd()
+        if os.path.isdir(STAGING_DIR):
+            shutil.rmtree(STAGING_DIR, ignore_errors=True)
+        Path(STAGING_DIR).mkdir(parents=True, exist_ok=True)
+        os.chdir(STAGING_DIR)
+
+        if MINIMAL_SAMPLE_SIZE:
+            folders["Folders_RS"] = [folders["Folders_RS"][0]]
+            folders["Folders_RSC"] = [folders["Folders_RSC"][0]]
 
         for dl_list in [
             folders["Folders_RS"],
@@ -167,15 +192,13 @@ def main():
             for item in dl_list:
                 list_gdrive_folders(
                     item["gdrive-path"],
-                    os.path.join(os.getcwd(), item["dcs-codename"]),
+                    os.path.join(STAGING_DIR, item["dcs-codename"]),
                     True)
-        executor_files.shutdown(wait=True)
-
+        EXECUTOR_FILES.shutdown(wait=True)
     else:
-        os.chdir("Staging")
-        staging_dir = os.getcwd()
+        os.chdir(STAGING_DIR)
 
-    for root, dirs, files in os.walk(os.getcwd()):
+    for root, dirs, files in os.walk(STAGING_DIR):
         for name in files:
             if fnmatch.fnmatch(name.lower(), 'readme*.txt'):  # Remove readmes
                 print(f"Removing {os.path.join(root, name)}")
@@ -186,10 +209,10 @@ def main():
     dcs_airframe_codenames = []
     max_depth = 2
     min_depth = 1
-    for root, dirs, _ in os.walk(staging_dir, topdown=True):
-        if root.count(os.sep) - staging_dir.count(os.sep) < min_depth:
+    for root, dirs, _ in os.walk(STAGING_DIR, topdown=True):
+        if root.count(os.sep) - STAGING_DIR.count(os.sep) < min_depth:
             continue
-        if root.count(os.sep) - staging_dir.count(os.sep) == max_depth - 1:
+        if root.count(os.sep) - STAGING_DIR.count(os.sep) == max_depth - 1:
             del dirs[:]
 
         if "RED STAR BIN" not in root and "RED STAR ROUGHMETS" not in root:
@@ -200,10 +223,10 @@ def main():
     dirs_roughmets = []
     max_depth = 3
     min_depth = 2
-    for root, dirs, _ in os.walk(staging_dir, topdown=True):
-        if root.count(os.sep) - staging_dir.count(os.sep) < min_depth:
+    for root, dirs, _ in os.walk(STAGING_DIR, topdown=True):
+        if root.count(os.sep) - STAGING_DIR.count(os.sep) < min_depth:
             continue
-        if root.count(os.sep) - staging_dir.count(os.sep) == max_depth - 1:
+        if root.count(os.sep) - STAGING_DIR.count(os.sep) == max_depth - 1:
             del dirs[:]
         if "BLACK SQUADRON" in root:
             dirs_rsc_liveries.append(root)
@@ -220,6 +243,8 @@ def main():
     rsc_pilots, rsc_liveries = dir_pilot_and_livery_parser(dcs_airframe_codenames,
                                                            dirs_rsc_liveries)
     pilots.update(rs_pilots, rsc_pilots)
+    pilots_list = list(pilots)
+    pilots_list.sort()
 
     roughmets = dir_roughmet_parser(dirs_roughmets)
 
@@ -227,15 +252,25 @@ def main():
     file_loader = FileSystemLoader('templates')
     env = Environment(loader=file_loader)
 
-    pilots_list = list(pilots)
-    pilots_list.sort()
+    template = env.get_template('compress_list.sh.j2')
+    output = template.render(
+        rs_liveries=rs_liveries,
+        rsc_liveries=rsc_liveries,
+        roughmets=roughmets,
+        delete_after_compress=os.environ['DELETE_AFTER_COMPRESS'].lower(),
+        minimal_sample_size=str(MINIMAL_SAMPLE_SIZE).lower(),
+        dest=os.path.join(SCRIPT_DIR, "Compressed"))
+    with open('Staging/compress_list.sh',
+              'w+', encoding=getpreferredencoding()) as file:
+        file.write(output)
 
     template = env.get_template('rs-liveries.nsi.j2')
     output = template.render(
         rs_liveries=rs_liveries,
         rsc_liveries=rsc_liveries,
         pilots=pilots_list,
-        roughmets=roughmets)
+        roughmets=roughmets,
+        gh_ref=GH_REF)
     with open('Staging/rs-liveries-rendered.nsi',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
@@ -246,10 +281,11 @@ def main():
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
 
-    shutil.copy("psexec.nsh", "Staging/psexec.nsh")
-    shutil.copy("rs.ico", "Staging/rs.ico")
-    shutil.copy("rssplash.bmp", "Staging/rssplash.bmp")
-    shutil.copy("mig29flyby.wav", "Staging/mig29flyby.wav")
+    shutil.copy("psexec.nsh", os.path.join(STAGING_DIR, "psexec.nsh"))
+    shutil.copy("rs.ico", os.path.join(STAGING_DIR, "rs.ico"))
+    shutil.copy("rssplash.bmp", os.path.join(STAGING_DIR, "rssplash.bmp"))
+    shutil.copy("mig29flyby.wav", os.path.join(STAGING_DIR, "mig29flyby.wav"))
+    shutil.copy("extract-file.ps1", os.path.join(STAGING_DIR, "extract-file.ps1"))
 
 
 if __name__ == '__main__':
