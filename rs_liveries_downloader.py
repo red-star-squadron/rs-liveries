@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 from locale import getpreferredencoding
 from pathlib import Path
+from inspect import getsourcefile
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import google.auth
@@ -21,7 +22,7 @@ from jinja2 import Environment, FileSystemLoader
 
 THREAD_LOCAL = threading.local()
 EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)
-SCRIPT_DIR = os.getcwd()
+SCRIPT_DIR = os.path.dirname(getsourcefile(lambda:0))
 STAGING_DIR = os.path.join(SCRIPT_DIR, "Staging")
 if 'GITHUB_REF_NAME' in os.environ:
     GH_REF = os.environ['GITHUB_REF_NAME']
@@ -30,10 +31,11 @@ else:
     GH_REF = "no_GH_REF"
     GH_RUNNER = False
 
-if os.environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
+if bool(os.environ['MINIMAL_SAMPLE_SIZE']):
     MINIMAL_SAMPLE_SIZE = True
 else:
     MINIMAL_SAMPLE_SIZE = False
+
 
 def list_gdrive_folders(filid, des, is_rootfolder):
     '''
@@ -51,6 +53,8 @@ def list_gdrive_folders(filid, des, is_rootfolder):
         q=query,
         fields="nextPageToken, files(id, name, mimeType)").execute()
     items = results.get('files', [])
+    if len(items) == 0:
+        raise ValueError("Google Drive folder empty or doesn't exist")
     iter_file_count = 0
     for item in items:
         fullpath = os.path.join(des, item['name'])
@@ -135,6 +139,7 @@ def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
                 pilots.add(liv.removeprefix(smallest_dirname).strip())
     return pilots, liveries
 
+
 def dir_roughmet_parser(roughmet_directories):
     '''
     Inputs:
@@ -142,19 +147,55 @@ def dir_roughmet_parser(roughmet_directories):
         is a directory path
     Outputs:
     * roughmet_aircrafts
-        Is a dict of lists. Dict is an identifier like "F-15C RoughMet"
-        Each nested list is a list of strings with elements like "f15_wing_r_RoughMet_RS.dds"
+        Is a list of dicts. Each dict:
+        roughmet_directory - Staging dir of roughmets for a single aircraft
+        roughmet_directory_basename - basename of the above, example F-15C Roughmet
+        files - List of files contained in roughmet_directory
+        size - size in kilobytes of roughmet_directory
     '''
-    roughmet_aircrafts = dict()
+    roughmet_aircrafts = []
     for roughmet_directory in roughmet_directories:
         roughmet_directory_basename = os.path.basename(roughmet_directory)
-
-        if roughmet_directory_basename not in roughmet_aircrafts:
-            roughmet_aircrafts[roughmet_directory_basename] = []
-
-        roughmet_aircrafts[roughmet_directory_basename].extend(os.listdir(roughmet_directory))
+        roughmet_aircrafts.append({
+            'roughmet_directory' : roughmet_directory,
+            'roughmet_directory_basename' : roughmet_directory_basename,
+            'files' : os.listdir(roughmet_directory),
+            'size' : int(single_dir_size(roughmet_directory) / 1024) # kilobytes
+        })
 
     return roughmet_aircrafts
+
+
+def livery_sizes(liveries_list):
+    '''
+    Input should be a "liveries" list as returned by dir_pilot_and_livery_parser()
+    Appends each dict elemet in the input list with
+    a ['total_size'] key and value in kilobytes
+    '''
+    for livery in liveries_list:
+        basedir = os.path.join(STAGING_DIR, livery['dcs_airframe_codename'])
+        total_size = 0
+        dir_basename = os.path.join(basedir, livery['livery_base_dirname'])
+        total_size += single_dir_size(dir_basename)
+        for pilot_livery in livery['livery_pilot_dirs']:
+            dir_pilot = os.path.join(basedir, pilot_livery)
+            total_size += single_dir_size(dir_pilot)
+        livery['total_size'] = int(total_size / 1024) # kilobytes
+
+
+def single_dir_size(start_path):
+    '''
+    Returns size of a single dir in bytes
+    Stolen from: https://stackoverflow.com/a/1392549
+    '''
+    total_size = 0
+    for dirpath, _, filenames in os.walk(start_path):
+        for fileee in filenames:
+            filepath = os.path.join(dirpath, fileee)
+            # skip if it is symbolic link
+            if not os.path.islink(filepath):
+                total_size += os.path.getsize(filepath)
+    return total_size
 
 
 def get_service():
@@ -165,6 +206,7 @@ def get_service():
         creds, _ = google.auth.default()
         THREAD_LOCAL.service = build('drive', 'v3', credentials=creds)
     return THREAD_LOCAL.service
+
 
 def main():
     '''Main loop'''
@@ -242,6 +284,10 @@ def main():
                                                          dirs_rs_liveries)
     rsc_pilots, rsc_liveries = dir_pilot_and_livery_parser(dcs_airframe_codenames,
                                                            dirs_rsc_liveries)
+
+    livery_sizes(rs_liveries)
+    livery_sizes(rsc_liveries)
+    size_bin_kb = int(single_dir_size(os.path.join(STAGING_DIR, "RED STAR BIN")) / 1024 )
     pilots.update(rs_pilots, rsc_pilots)
     pilots_list = list(pilots)
     pilots_list.sort()
@@ -270,7 +316,8 @@ def main():
         rsc_liveries=rsc_liveries,
         pilots=pilots_list,
         roughmets=roughmets,
-        gh_ref=GH_REF)
+        gh_ref=GH_REF,
+        size_bin_kb=size_bin_kb)
     with open('Staging/rs-liveries-rendered.nsi',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)

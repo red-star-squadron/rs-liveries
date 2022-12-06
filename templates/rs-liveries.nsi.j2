@@ -130,7 +130,6 @@ Page custom nsDialogsPage nsDialogsPageLeave
 
 
 !macro DownloadExtract URL ArchivePath ExtractPath
-  ; AddSize - TODO
   DetailPrint "Downloading ${URL} to ${ArchivePath}"
   NScurl::http GET "${URL}" "${ArchivePath}" /INSIST /POPUP /END
   Pop $0 ; Status text ("OK" for success)
@@ -154,9 +153,9 @@ SectionGroup "Clean Up Old Red Star Liveries"
     RMDir /r "$INSTDIR\RED STAR BIN"
   SectionEnd
   SectionGroup "RoughMets"
-  {%- for category, roughmet_filenames in roughmets.items() %}
-    Section "{{ category }}"
-    {%- for roughmet_filename in roughmet_filenames %}
+  {%- for roughmet in roughmets %}
+    Section "{{ roughmet['roughmet_directory_basename'] }}"
+    {%- for roughmet_filename in roughmet['files'] %}
       Delete "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_filename }}"
     {%- endfor %}
     SectionEnd
@@ -164,24 +163,26 @@ SectionGroup "Clean Up Old Red Star Liveries"
   SectionGroupEnd
   Section "Red Star Camo Liveries"
   {%- for livery in rs_liveries %}
-  {%- include 'rs-liveries.nsi_removal.j2' %}
+    {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
   SectionEnd
   Section "Red Star Competitive Liveries"
   {%- for livery in rsc_liveries %}
-  {%- include 'rs-liveries.nsi_removal.j2' %}
+    {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
   SectionEnd
 SectionGroupEnd
 
 SectionGroup "!Red Star Required Assets"
   Section "Red Star Bin (shared) Directory"
+    AddSize {{ size_bin_kb }}
     !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.BIN.7z" "$TEMP\RED STAR BIN.7z" "$INSTDIR"
   SectionEnd
   SectionGroup "Red Star RoughMets"
-  {%- for category_name, _ in roughmets.items() %}
-    Section "{{ category_name }}"
-      !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.ROUGHMETS_{{ category_name | replace(" ", ".") }}.7z" "$TEMP\{{ category_name }}.7z" "$ProgramFilesDir\Bazar\TempTextures"
+  {%- for roughmet in roughmets %}
+    Section "{{ roughmet['roughmet_directory_basename'] }}"
+      AddSize {{ roughmet['size'] }}
+      !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.ROUGHMETS_{{ roughmet['roughmet_directory_basename'] | replace(" ", ".") }}.7z" "$TEMP\{{ roughmet['roughmet_directory_basename'] }}.7z" "$ProgramFilesDir\Bazar\TempTextures"
     SectionEnd
   {%- endfor %}
   SectionGroupEnd
@@ -189,7 +190,7 @@ SectionGroupEnd
 
 SectionGroup "Red Star"
   {%- for livery in rs_liveries %}
-  {%- include 'rs-liveries.nsi_livery_section.j2' %}
+    {%- include 'rs-liveries.nsi_livery_section.j2' %}
   {%- endfor %}
 SectionGroupEnd
 
