@@ -13,7 +13,7 @@ fi
 {% for roughmet in roughmets %}
 pushd "{{ roughmet['roughmet_directory'] }}"
     {%- for file in roughmet['files'] %}
-7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ category }}.7z" "{{ file }}"
+7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ roughmet['roughmet_directory_basename'] }}.7z" "{{ file }}"
     {%- endfor %}
 popd
 {%- endfor %}
