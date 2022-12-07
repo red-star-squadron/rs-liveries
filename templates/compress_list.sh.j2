@@ -2,26 +2,35 @@
 
 set -e
 DEST="{{ dest }}"
-mkdir -p "$DEST"
+STAGING_DIR="{{ staging_dir }}"
 COMPRESSION="-mx=9"
 if [ "{{ minimal_sample_size }}" = "true" ]
 then  
   COMPRESSION="-mx=1"
 fi
 
-7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR BIN.7z" "RED STAR BIN"
+cd "${STAGING_DIR}"
+
+7z a -bd -bb0 $COMPRESSION "${DEST}/RED STAR BIN.7z" "RED STAR BIN"
+{%- if delete_after_compress == "true" %}
+rm -rf "RED STAR BIN"
+{%- endif %}
+mkdir -p "RED STAR BIN"
+sha256sum "${DEST}/RED STAR BIN.7z" > "${STAGING_DIR}/RED STAR BIN/RED STAR BIN.sha256sum"
+
 {% for roughmet in roughmets %}
 pushd "{{ roughmet['roughmet_directory'] }}"
-    {%- for file in roughmet['files'] %}
-7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ roughmet['roughmet_directory_basename'] }}.7z" "{{ file }}"
-    {%- endfor %}
+7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ roughmet['roughmet_directory_basename'] }}.7z"  {%- for file in roughmet['files'] %} "{{ file }}" {%- endfor %}
+{%- if delete_after_compress == "true" %}
+rm -rf "{{ roughmet['roughmet_directory'] }}"
+{%- endif %}
+sha256sum "${DEST}/RED STAR ROUGHMETS_{{ roughmet['roughmet_directory_basename'] }}.7z" > "${STAGING_DIR}/RED STAR BIN/{{ roughmet['roughmet_directory_basename'] }}.sha256sum"
 popd
 {%- endfor %}
-
-{%- for livery_type in [rs_liveries, rsc_liveries] %}
+{% for livery_type in [rs_liveries, rsc_liveries] %}
     {% for livery in livery_type %}
 pushd "{{ livery["dcs_airframe_codename"] }}"
-7z a -bd -bb0 $COMPRESSION "$DEST/{{ livery["livery_base_dirname"] }}.7z" \
+7z a -bd -bb0 ${COMPRESSION} "${DEST}/{{ livery["livery_base_dirname"] }}.7z" \
         "{{ livery["livery_base_dirname"] }}" {%-if not livery["livery_pilot_dirs"] | length == 0 %} \{% endif %}
         {%- for pilot_dir in livery["livery_pilot_dirs"] %}
         "{{ pilot_dir }}" {%- if not loop.last %} \{%- endif %}
@@ -32,6 +41,7 @@ rm -rf "{{ livery["livery_base_dirname"] }}"
 rm -rf "{{ pilot_dir }}"
             {%- endfor %}
         {%- endif %}
+sha256sum "${DEST}/{{ livery["livery_base_dirname"] }}.7z" > "${STAGING_DIR}/RED STAR BIN/{{ livery["livery_base_dirname"] }}.sha256sum"
 popd
 
     {%- endfor %}

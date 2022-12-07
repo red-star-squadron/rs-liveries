@@ -93,4 +93,5 @@ jobs:
         with:
           files: |
             Staging/RS_Liveries_${{ github.ref_name }}.exe
+            Staging/*.sha256sum
             Compressed/*.7z
