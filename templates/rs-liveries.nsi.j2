@@ -168,25 +168,25 @@ Page custom nsDialogsPage nsDialogsPageLeave
 ; Old and unused livery folder names are OK to remain in the cleanup list. We want to reduce clutter for the user
 
 
-SectionGroup /o "Clean Up Old Red Star Liveries"
-  Section "Red Star Bin"
+SectionGroup "Clean Up Old Red Star Liveries"
+  Section /o "Red Star Bin"
     RMDir /r "$INSTDIR\RED STAR BIN"
   SectionEnd
   SectionGroup "RoughMets"
   {%- for roughmet in roughmets %}
-    Section "{{ roughmet['roughmet_directory_basename'] }}"
+    Section /o "{{ roughmet['roughmet_directory_basename'] }}"
     {%- for roughmet_filename in roughmet['files'] %}
       Delete "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_filename }}"
     {%- endfor %}
     SectionEnd
   {%- endfor %}
   SectionGroupEnd
-  Section "Red Star Camo Liveries"
+  Section /o "Red Star Camo Liveries"
   {%- for livery in rs_liveries %}
     {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
   SectionEnd
-  Section "Red Star Competitive Liveries"
+  Section /o "Red Star Competitive Liveries"
   {%- for livery in rsc_liveries %}
     {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
