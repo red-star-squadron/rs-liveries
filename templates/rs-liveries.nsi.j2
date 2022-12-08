@@ -201,7 +201,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
 Push "${Dirname}"
 Call isEmptyDir
 Pop $0
-${If} $0 == "1"
+${If} $0 == 1
   DetailPrint "$0"
   RMDir /r "${Dirname}"
 ${EndIf}
