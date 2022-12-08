@@ -60,7 +60,8 @@ def main():
             extract_7z(file_7z, tmpdirname)
             chksum = checksum_list_of_files(get_files_in_dir(tmpdirname))
         dest_chksumfile = os.path.join(checksums_dir,
-            PurePath(file_7z).name.rstrip(".7z") + ".sha256sum")
+            PurePath(file_7z).stem + ".sha256sum")
+        print(f"Writing {dest_chksumfile}")
         Path(Path(dest_chksumfile).resolve().parents[0]).mkdir(parents=True, exist_ok=True)
         with open(dest_chksumfile, "w", encoding=getpreferredencoding()) as file_final:
             file_final.write(chksum)
