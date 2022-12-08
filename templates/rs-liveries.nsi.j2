@@ -132,7 +132,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
 !macro DownloadExtract URL ArchivePath ExtractPath BaseName
   ; Basename is the filename without extension
   ${If} ${FileExists} "$InstDir\RED STAR BIN\${BaseName}.sha256sum"
-    DetailPrint "Checking whether to reinstall $BaseName ..."
+    DetailPrint "Checking whether to reinstall ${BaseName} ..."
     SetOutPath "$PluginsDir"
     File "RED STAR BIN\${BaseName}.sha256sum"
     FileOpen $9 "$PluginsDir\${BaseName}.sha256sum" r
@@ -144,10 +144,10 @@ Page custom nsDialogsPage nsDialogsPageLeave
     DetailPrint $R8
     DetailPrint $8
     ${If} "$8" == "$R8"
-      DetailPrint "$BaseName already installed. Skipping. Use Cleanup to reinstall."
+      DetailPrint "${BaseName} already installed. Skipping. Use Cleanup to reinstall."
       Goto SkipToEnd
     ${Else}
-      DetailPrint "$BaseName differs from the current version. Installing"
+      DetailPrint "${BaseName} differs from the current version. Installing"
     ${Endif}
   ${EndIf}
   DetailPrint "Downloading ${URL}.7z to ${ArchivePath}"
@@ -162,6 +162,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
   IfErrors 0 +2
     Abort "Problem extracting ${ArchivePath} to ${ExtractPath}"
   Delete "${ArchivePath}"
+  Delete "$InstDir\RED STAR BIN\${BaseName}.sha256sum"
   Rename "$PluginsDir\${BaseName}.sha256sum" "$InstDir\RED STAR BIN\${BaseName}.sha256sum"
   SkipToEnd:
 !macroend
