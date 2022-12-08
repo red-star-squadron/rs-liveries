@@ -159,6 +159,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
 
 !macro DownloadExtract URL ArchivePath ExtractPath BaseName
   ; Basename is the filename without extension
+  !define ID ${__LINE__}
   ${If} ${FileExists} "$InstDir\RED STAR CHECKSUMS\${BaseName}.sha256sum"
     DetailPrint "Checking whether to reinstall ${BaseName} ..."
     FileOpen $9 "$PluginsDir\${BaseName}.sha256sum" r
@@ -170,7 +171,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
     ; DetailPrint $R8
     ; DetailPrint $8
     ${If} "$8" == "$R8"
-      DetailPrint "${BaseName} already installed. Skipping. Use Cleanup to reinstall."
+      DetailPrint "${BaseName} already installed. Skipping. Use Cleanup to reinstall if there are issues."
       Goto SkipToEnd
     ${Else}
       DetailPrint "${BaseName} differs from the current version. Installing"
@@ -191,7 +192,8 @@ Page custom nsDialogsPage nsDialogsPageLeave
   Delete "$InstDir\RED STAR CHECKSUMS\${BaseName}.sha256sum"
   CreateDirectory "$InstDir\RED STAR CHECKSUMS"
   Rename "$PluginsDir\${BaseName}.sha256sum" "$InstDir\RED STAR CHECKSUMS\${BaseName}.sha256sum"
-  SkipToEnd:
+  SkipToEnd_${ID}:
+  !undef ID
 !macroend
 
 ; Usage inside the macro stolen from: https://nsis.sourceforge.io/Check_if_dir_is_empty
@@ -200,7 +202,7 @@ Push "${Dirname}"
 Call isEmptyDir
 Pop $0
 StrCmp $0 1 0 +2
-  DetailPrint "Removing empty directory: ${Dirname}"
+  DetailPrint "$0"
   RMDir /r "${Dirname}"
 !macroend
 
@@ -264,7 +266,6 @@ SectionGroup "Red Star BLACK SQUADRON"
 SectionGroupEnd
 
 Section "Modify Pilot Priority"
-  SetOutPath "$PLUGINSDIR\NSISTemp"
   ${PowerShellExecFileLog} '"$PLUGINSDIR\rs-liveries-pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   IfErrors 0 +2
     Abort "There was a problem with the pilot priorities script. Aborting. You can probably use the liveries as normal."
