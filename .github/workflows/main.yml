@@ -77,6 +77,11 @@ jobs:
         run: |
           cd Staging
           bash compress_list.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Checksums
+          path: |
+            Staging/RED STAR BIN/*sha256sum
       - name: Download 7-zip
         run: |
           wget https://www.7-zip.org/a/7z2201-extra.7z
