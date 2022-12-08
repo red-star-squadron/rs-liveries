@@ -1,5 +1,9 @@
 
-    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}"
-    {%- for pilot_dir in livery["livery_pilot_dirs"] %}
-    RMDir /r "$INSTDIR\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}"
-    {%- endfor %}
+    Section /o "Remove {{ livery["livery_base_dirname"] }}"
+        RMDir /r "$InstDir\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}"
+        {%- for pilot_dir in livery["livery_pilot_dirs"] %}
+        RMDir /r "$InstDir\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}"
+        {%- endfor %}
+        !insertmacro DeleteChecksum "$InstDir\RED STAR CHECKSUMS\{{ livery["livery_base_dirname"] }}.sha256sum"
+        !insertmacro RemoveEmptyDir "$InstDir\{{ livery["dcs_airframe_codename"] }}"
+    SectionEnd
