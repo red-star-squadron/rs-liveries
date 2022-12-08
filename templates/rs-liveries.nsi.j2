@@ -211,12 +211,12 @@ ${EndIf}
   !insertmacro RemoveEmptyDir "$InstDir\RED STAR CHECKSUMS"
 !macroend
 
-SectionGroup "Clean Up Old Red Star Liveries"
-  Section /o "Red Star Bin"
+SectionGroup "Remove Red Star Liveries"
+  Section /o "Remove Red Star Bin"
     RMDir /r "$INSTDIR\RED STAR BIN"
     !insertmacro DeleteChecksum "$InstDir\RED STAR CHECKSUMS\RED STAR BIN.sha256sum"
   SectionEnd
-  SectionGroup "RoughMets"
+  SectionGroup "Remove RoughMets"
   {%- for roughmet in roughmets %}
     Section /o "{{ roughmet['roughmet_directory_basename'] }}"
     {%- for roughmet_filename in roughmet['files'] %}
@@ -226,12 +226,12 @@ SectionGroup "Clean Up Old Red Star Liveries"
     SectionEnd
   {%- endfor %}
   SectionGroupEnd
-  SectionGroup "Red Star Camo Liveries"
+  SectionGroup "Remove Red Star Camo Liveries"
   {%- for livery in rs_liveries %}
     {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
   SectionGroupEnd
-  SectionGroup "Red Star Competitive Liveries"
+  SectionGroup "Remove Red Star Competitive Liveries"
   {%- for livery in rsc_liveries %}
     {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
