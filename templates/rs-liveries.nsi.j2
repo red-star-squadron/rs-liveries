@@ -201,9 +201,10 @@ Page custom nsDialogsPage nsDialogsPageLeave
 Push "${Dirname}"
 Call isEmptyDir
 Pop $0
-StrCmp $0 1 0 +2
+${If} $0 == "1"
   DetailPrint "$0"
   RMDir /r "${Dirname}"
+${EndIf}
 !macroend
 
 !macro DeleteChecksum ChecksumFile
