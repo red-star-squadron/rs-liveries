@@ -200,12 +200,12 @@ Push "${Dirname}"
 Call isEmptyDir
 Pop $0
 StrCmp $0 1 0 +2
-  DetailPrint "Removing empty directory: $Dirname"
-  RMDir /r Dirname
+  DetailPrint "Removing empty directory: ${Dirname}"
+  RMDir /r "${Dirname}"
 !macroend
 
 !macro DeleteChecksum ChecksumFile
-  Delete "$ChecksumFile"
+  Delete "${ChecksumFile}"
   !insertmacro RemoveEmptyDir "$InstDir\RED STAR CHECKSUMS"
 !macroend
 
@@ -228,12 +228,12 @@ SectionGroup "Clean Up Old Red Star Liveries"
   {%- for livery in rs_liveries %}
     {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
-  SectionEnd
+  SectionGroupEnd
   SectionGroup "Red Star Competitive Liveries"
   {%- for livery in rsc_liveries %}
     {%- include 'rs-liveries.nsi_removal.j2' %}
   {%- endfor %}
-  SectionEnd
+  SectionGroupEnd
 SectionGroupEnd
 
 SectionGroup "!Red Star Required Assets"
