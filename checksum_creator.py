@@ -52,16 +52,18 @@ def main():
     script_dir = os.path.dirname(getsourcefile(lambda:0))
     staging_dir = os.path.join(script_dir, "Staging")
     compressed_dir = os.path.join(script_dir, "Compressed")
+    checksums_dir = os.path.join(staging_dir, "Checksums")
     list_of_7z_files = [arch_file for arch_file in get_files_in_dir(compressed_dir) \
         if arch_file.endswith(".7z")]
     for file_7z in list_of_7z_files:
         with TemporaryDirectory() as tmpdirname:
             extract_7z(file_7z, tmpdirname)
             chksum = checksum_list_of_files(get_files_in_dir(tmpdirname))
-        dest_chksumfile = os.path.join(staging_dir, "RED STAR BIN",
+        dest_chksumfile = os.path.join(checksums_dir,
             PurePath(file_7z).name.rstrip(".7z") + ".sha256sum")
-        with open(dest_chksumfile, "w", encoding=getpreferredencoding()) as file1:
-            file1.write(chksum)
+        Path(Path(dest_chksumfile).resolve().parents[0]).mkdir(parents=True, exist_ok=True)
+        with open(dest_chksumfile, "w", encoding=getpreferredencoding()) as file_final:
+            file_final.write(chksum)
 
 
 
