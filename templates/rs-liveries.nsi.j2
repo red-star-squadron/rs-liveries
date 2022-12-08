@@ -141,6 +141,8 @@ Page custom nsDialogsPage nsDialogsPageLeave
     FileRead $R9 $R8
     FileClose $9
     FileClose $R9
+    DetailPrint $R8
+    DetailPrint $8
     ${If} "$8" == "$R8"
       DetailPrint "$BaseName already installed. Skipping. Use Cleanup to reinstall."
       Goto SkipToEnd
