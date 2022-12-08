@@ -137,7 +137,7 @@ Function .onInit
   File "mig29flyby.wav"
   File "rssplash.bmp"
   File "7za.exe"
-  File "pilot-priorities.ps1"
+  File "livery-priorities.ps1"
   File "extract-file.ps1"
   File "Checksums\*.sha256sum"
   newadvsplash::play "$PluginsDir\mig29flyby.wav"
@@ -266,9 +266,9 @@ SectionGroup "Red Star BLACK SQUADRON"
 SectionGroupEnd
 
 Section "Modify Pilot Priority"
-  ${PowerShellExecFileLog} '"$PLUGINSDIR\pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
+  ${PowerShellExecFileLog} '"$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   IfErrors 0 +2
     Abort "There was a problem with the pilot priorities script. Aborting. You can probably use the liveries as normal."
-  ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\pilot-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
+  ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   ; MessageBox MB_OK "$PilotSelected"
 SectionEnd
