@@ -172,7 +172,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
     ; DetailPrint $8
     ${If} "$8" == "$R8"
       DetailPrint "${BaseName} already installed. Skipping. Use Cleanup to reinstall if there are issues."
-      Goto SkipToEnd
+      Goto SkipToEnd_${ID}
     ${Else}
       DetailPrint "${BaseName} differs from the current version. Installing"
     ${Endif}
