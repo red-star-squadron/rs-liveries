@@ -31,7 +31,7 @@ else:
     GH_REF = "no_GH_REF"
     GH_RUNNER = False
 
-if bool(os.environ['MINIMAL_SAMPLE_SIZE']):
+if os.environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
     MINIMAL_SAMPLE_SIZE = True
 else:
     MINIMAL_SAMPLE_SIZE = False
@@ -53,8 +53,8 @@ def list_gdrive_folders(filid, des, is_rootfolder):
         q=query,
         fields="nextPageToken, files(id, name, mimeType)").execute()
     items = results.get('files', [])
-    if len(items) == 0:
-        raise ValueError("Google Drive folder empty or doesn't exist")
+    if len(items) == 0 and is_rootfolder:
+        raise ValueError(f"Google Drive folder empty or other issue: {filid}")
     iter_file_count = 0
     for item in items:
         fullpath = os.path.join(des, item['name'])
@@ -131,6 +131,8 @@ def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
         liveries.append({
                 "dcs_airframe_codename": os.path.basename(dcs_airframe_codename),
                 "livery_base_dirname": os.path.basename(smallest_dirname),
+                "livery_base_fulldir": os.path.join(STAGING_DIR, dcs_airframe_codename,
+                                                     os.path.basename(smallest_dirname)),
                 "livery_pilot_dirs": [os.path.basename(pilot_dir) for pilot_dir in pilot_dirs]
             })
         if len(livery_dirs) > 1:
@@ -305,7 +307,8 @@ def main():
         roughmets=roughmets,
         delete_after_compress=os.environ['DELETE_AFTER_COMPRESS'].lower(),
         minimal_sample_size=str(MINIMAL_SAMPLE_SIZE).lower(),
-        dest=os.path.join(SCRIPT_DIR, "Compressed"))
+        dest=os.path.join(SCRIPT_DIR, "Compressed"),
+        staging_dir=STAGING_DIR)
     with open('Staging/compress_list.sh',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
