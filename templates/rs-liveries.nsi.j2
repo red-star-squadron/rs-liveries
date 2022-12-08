@@ -131,10 +131,10 @@ Page custom nsDialogsPage nsDialogsPageLeave
 
 !macro DownloadExtract URL ArchivePath ExtractPath BaseName
   ; Basename is the filename without extension
+  SetOutPath "$PluginsDir"
+  File "RED STAR BIN\${BaseName}.sha256sum"
   ${If} ${FileExists} "$InstDir\RED STAR BIN\${BaseName}.sha256sum"
     DetailPrint "Checking whether to reinstall ${BaseName} ..."
-    SetOutPath "$PluginsDir"
-    File "RED STAR BIN\${BaseName}.sha256sum"
     FileOpen $9 "$PluginsDir\${BaseName}.sha256sum" r
     FileOpen $R9 "$InstDir\RED STAR BIN\${BaseName}.sha256sum" r
     FileRead $9 $8
