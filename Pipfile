@@ -9,6 +9,7 @@ google-auth-httplib2 = "*"
 google-auth-oauthlib = "*"
 PyYAML = "*"
 jinja2 = "*"
+py7zr = "*"
 
 [dev-packages]
 flake8 = "*"
