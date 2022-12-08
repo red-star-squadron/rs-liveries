@@ -18,7 +18,7 @@ rm -rf "RED STAR BIN"
 
 {% for roughmet in roughmets %}
 pushd "{{ roughmet['roughmet_directory'] }}"
-7z a -bd -bb0 $COMPRESSION "$DEST/RED STAR ROUGHMETS_{{ roughmet['roughmet_directory_basename'] }}.7z"  {%- for file in roughmet['files'] %} "{{ file }}" {%- endfor %}
+7z a -bd -bb0 $COMPRESSION "$DEST/{{ roughmet['roughmet_directory_basename'] }}.7z"  {%- for file in roughmet['files'] %} "{{ file }}" {%- endfor %}
 {%- if delete_after_compress == "true" %}
 rm -rf "{{ roughmet['roughmet_directory'] }}"
 {%- endif %}
