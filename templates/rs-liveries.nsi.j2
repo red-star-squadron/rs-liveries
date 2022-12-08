@@ -163,6 +163,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
     Abort "Problem extracting ${ArchivePath} to ${ExtractPath}"
   Delete "${ArchivePath}"
   Delete "$InstDir\RED STAR BIN\${BaseName}.sha256sum"
+  CreateDirectory "$InstDir\RED STAR BIN"
   Rename "$PluginsDir\${BaseName}.sha256sum" "$InstDir\RED STAR BIN\${BaseName}.sha256sum"
   SkipToEnd:
 !macroend
