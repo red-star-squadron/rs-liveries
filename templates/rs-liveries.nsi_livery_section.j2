@@ -2,7 +2,5 @@
   Section "{{ livery["livery_base_dirname"] }}"
     AddSize {{ livery['total_size'] }}
     CreateDirectory "$INSTDIR\{{ livery["dcs_airframe_codename"] }}"
-    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/{{ livery["livery_base_dirname"] | replace(" ", ".") }}" "$TEMP\{{ livery["livery_base_dirname"] }}.7z" "$INSTDIR\{{ livery["dcs_airframe_codename"] }}"
-    SetOutPath "$InstDir\RED STAR BIN"
-    File "RED STAR BIN/{{ livery["livery_base_dirname"] }}.sha256sum"
+    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/{{ livery["livery_base_dirname"] | replace(" ", ".") }}" "$TEMP\{{ livery["livery_base_dirname"] }}.7z" "$INSTDIR\{{ livery["dcs_airframe_codename"] }}" "{{ livery["livery_base_dirname"] }}"
   SectionEnd
