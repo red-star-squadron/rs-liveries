@@ -15,30 +15,43 @@ $ErrorActionPreference = "Stop"
 function DescriptionLuaReplace {
     param (
         $luafile,
-        $pilot
+        $pilot,
+        $is_basename
     )
     if ("$pilot" -eq "-- STREAMER / YOUTUBER --" ){        
-        Write-Host "Modifying livery file with priority 9999: $luafile"
+        Write-Host "Setting livery file with priority 9999: $luafile"
         (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile"
     } elseif ("$pilot" -eq "-- RS SQUAD BUT NOT IN LIST --" ) {
-        # Do nothing if member is RS squad but not in list because Striker's layout already matches this
-    } elseif ((Get-Item "$luafile").Directory | Split-Path -Leaf | Select-String -CaseSensitive -SimpleMatch "$pilot") {
-        Write-Host "Modifying pilot file with priority -1000: $luafile"
-        (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = -1000' | Set-Content -Path "$luafile"
+        if (-not ($is_basename)) {
+            Write-Host "Setting inferior pilot livery file with priority 9999: $luafile"
+            (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile" 
+        } elseif ($is_basename) {
+            Write-Host "Setting base livery file with priority -2: $luafile"
+            (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = -2' | Set-Content -Path "$luafile"
+        }
     } else {
-        # Do nothing
+        if (((Get-Item "$luafile").Directory | Split-Path -Leaf | Select-String -CaseSensitive -SimpleMatch "$pilot") -and (-not ($is_basename))) {
+            Write-Host "Setting pilot file with priority -3000: $luafile"
+            (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = -3000' | Set-Content -Path "$luafile"
+        } elseif ($is_basename) {
+            Write-Host "Setting base livery file with priority -2: $luafile"
+            (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = -2' | Set-Content -Path "$luafile"
+        } else {
+            Write-Host "Setting inferior pilot livery file with priority 9999: $luafile"
+            (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile"            
+        }
     }
 }
 
 {% for livery in rs_liveries %}
-DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}\description.lua"
+DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}\description.lua" -is_basename $true
     {%- for pilot_dir in livery["livery_pilot_dirs"] %}
-DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}\description.lua"
+DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}\description.lua" -is_basename $false
     {%- endfor %}
 {%- endfor %}
 {%- for livery in rsc_liveries %}
-DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}\description.lua"
+DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}\description.lua" -is_basename $true
     {%- for pilot_dir in livery["livery_pilot_dirs"] %}
-DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}\description.lua"
+DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}\description.lua" -is_basename false
     {%- endfor %}
 {%- endfor %}
