@@ -325,9 +325,9 @@ def main():
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
 
-    template = env.get_template('pilot-priorities.ps1.j2')
+    template = env.get_template('livery-priorities.ps1.j2')
     output = template.render(rs_liveries=rs_liveries,rsc_liveries=rsc_liveries)
-    with open('Staging/pilot-priorities.ps1',
+    with open('Staging/livery-priorities.ps1',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
 
