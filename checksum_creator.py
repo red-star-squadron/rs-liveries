@@ -14,7 +14,7 @@ from locale import getpreferredencoding
 import py7zr
 
 
-def checksum_list_of_files(filenames: list[str]) -> bytes:
+def checksum_list_of_files(filenames: list[str]) -> str:
     '''
     Calculate the sha256 sum of multiple files
     Stolen from:
@@ -49,7 +49,7 @@ def get_files_in_dir(directory: str) -> list[str]:
 
 def main():
     '''main loop'''
-    script_dir = os.path.dirname(getsourcefile(lambda:0))
+    script_dir = os.path.dirname(getsourcefile(lambda:0)) # type: ignore
     staging_dir = os.path.join(script_dir, "Staging")
     compressed_dir = os.path.join(script_dir, "Compressed")
     checksums_dir = os.path.join(staging_dir, "Checksums")

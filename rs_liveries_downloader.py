@@ -22,7 +22,7 @@ from jinja2 import Environment, FileSystemLoader
 
 THREAD_LOCAL = threading.local()
 EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)
-SCRIPT_DIR = os.path.dirname(getsourcefile(lambda:0))
+SCRIPT_DIR = os.path.dirname(getsourcefile(lambda:0)) # type: ignore
 STAGING_DIR = os.path.join(SCRIPT_DIR, "Staging")
 if 'GITHUB_REF_NAME' in os.environ:
     GH_REF = os.environ['GITHUB_REF_NAME']
