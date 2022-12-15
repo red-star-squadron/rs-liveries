@@ -174,14 +174,14 @@ Page custom nsDialogsPage nsDialogsPageLeave
       DetailPrint "${BaseName} already installed. Skipping. Use Cleanup to reinstall if there are issues."
       Goto SkipToEnd_${ID}
     ${Else}
-      DetailPrint "${BaseName} differs from the current version. Installing"
+      DetailPrint "${BaseName} cheksum differs from the current version. Installing"
     ${Endif}
   ${EndIf}
   DetailPrint "Downloading ${URL}.7z to ${ArchivePath}"
   NScurl::http GET "${URL}.7z" "${ArchivePath}" /INSIST /POPUP /END
   Pop $0 ; Status text ("OK" for success)
   ${If} "$0" != "OK"
-    Abort "Download of ${URL}.7z failed. Aborting install. Please ensure you're running the latest release."
+    Abort "Download of ${URL}.7z failed. Aborting install. Download the latest release from: https://github.com/red-star-squadron/rs-liveries/releases/latest"
   ${EndIf}
   ClearErrors
   DetailPrint "Extracting ${ArchivePath} to ${ExtractPath}"
