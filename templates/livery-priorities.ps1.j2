@@ -18,26 +18,30 @@ function DescriptionLuaReplace {
         $pilot,
         $is_basename
     )
+    if (-not (Test-Path $luafile)) {
+        Write-Host "Pilot luafile not present. Exiting gracefully: $luafile"
+        Exit
+    }
     if ("$pilot" -eq "-- STREAMER / YOUTUBER --" ){        
-        Write-Host "Setting livery file with priority 9999: $luafile"
+        Write-Host "Setting livery priority to low: $luafile"
         (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile"
     } elseif ("$pilot" -eq "-- RS SQUAD BUT NOT IN LIST --" ) {
         if (-not ($is_basename)) {
-            Write-Host "Setting inferior pilot livery file with priority 9999: $luafile"
+            Write-Host "Setting pilot livery priority to low: $luafile"
             (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile" 
         } elseif ($is_basename) {
-            Write-Host "Setting base livery file with priority -2: $luafile"
+            Write-Host "Setting base livery priority to high: $luafile"
             (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = -2' | Set-Content -Path "$luafile"
         }
     } else {
         if (((Get-Item "$luafile").Directory | Split-Path -Leaf | Select-String -CaseSensitive -SimpleMatch "$pilot") -and (-not ($is_basename))) {
-            Write-Host "Setting pilot file with priority -3000: $luafile"
+            Write-Host "Setting your livery to priority highest: $luafile"
             (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = -3000' | Set-Content -Path "$luafile"
         } elseif ($is_basename) {
-            Write-Host "Setting base livery file with priority -2: $luafile"
+            Write-Host "Setting base livery priority to high: $luafile"
             (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = -2' | Set-Content -Path "$luafile"
         } else {
-            Write-Host "Setting inferior pilot livery file with priority 9999: $luafile"
+            Write-Host "Setting teammate pilot livery to lowest: $luafile"
             (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile"            
         }
     }
