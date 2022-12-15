@@ -19,8 +19,8 @@ function DescriptionLuaReplace {
         $is_basename
     )
     if (-not (Test-Path $luafile)) {
-        Write-Host "Pilot luafile not present. Exiting gracefully: $luafile"
-        Exit
+        Write-Host "Pilot luafile not present. Proceeding: $luafile"
+        Return
     }
     if ("$pilot" -eq "-- STREAMER / YOUTUBER --" ){        
         Write-Host "Setting livery priority to low: $luafile"
