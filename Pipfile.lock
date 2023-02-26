@@ -470,16 +470,16 @@
                 "sha256:efeae04f9516907be44904cc7ce08defb6b665128992a56957abc9b61dca94b7",
                 "sha256:fd8522436a6ada7b4aad6638662966de0d61d241cb821239b2ae7013d41a43d4"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "markers": "sys_platform != 'cygwin'",
             "version": "==5.9.4"
         },
         "py7zr": {
             "hashes": [
-                "sha256:791ef912a295b61b91c5fe0c23adeddb80bf13500308062c082b8fec6c8c9653",
-                "sha256:f6615a5bb07a9252034f23e518affcf4f62725c3632f23b7cfee86aef8bae779"
+                "sha256:1d01f98ea1e1f5c49940358691b2076f9a5848056426541e783de33834f59e21",
+                "sha256:94d0c24217f6582741813ee94490a4ca82bd5f9bf35e4f8610cb588cf7445764"
             ],
             "index": "pypi",
-            "version": "==0.20.2"
+            "version": "==0.20.4"
         },
         "pyasn1": {
             "hashes": [
