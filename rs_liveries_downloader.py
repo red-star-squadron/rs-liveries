@@ -280,6 +280,8 @@ def main():
             dirs_rs_liveries.append(root)
         else:
             pass # Red Star Bin
+    dirs_rs_liveries.sort()
+    dirs_rsc_liveries.sort()
 
     pilots = set()
     rs_pilots, rs_liveries = dir_pilot_and_livery_parser(dcs_airframe_codenames,
@@ -293,8 +295,6 @@ def main():
     pilots.update(rs_pilots, rsc_pilots)
     pilots_list = list(pilots)
     pilots_list.sort()
-    rs_liveries.sort()
-    rsc_liveries.sort()
 
     roughmets = dir_roughmet_parser(dirs_roughmets)
 
