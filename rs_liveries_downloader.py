@@ -293,6 +293,8 @@ def main():
     pilots.update(rs_pilots, rsc_pilots)
     pilots_list = list(pilots)
     pilots_list.sort()
+    rs_liveries.sort()
+    rsc_liveries.sort()
 
     roughmets = dir_roughmet_parser(dirs_roughmets)
 
