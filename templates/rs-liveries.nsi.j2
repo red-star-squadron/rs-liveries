@@ -19,9 +19,9 @@ Icon "rs.ico"
 ; This might help with large installs
 FileBufSize 256
 
-; Let's compress as much as possible. /GLOBAL breaks the installer. Too many big files!
-SetCompressor /FINAL zlib
-; SetCompressor /FINAL lzma
+; Let's compress as much as possible. /GLOBAL breaks the installer in case of too many big files!
+; SetCompressor /FINAL zlib
+SetCompressor /GLOBAL /FINAL lzma
 
 ; LZMA compression only
 ; SetCompressorDictSize 128
