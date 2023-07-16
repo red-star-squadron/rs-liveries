@@ -21,7 +21,7 @@ FileBufSize 256
 
 ; Let's compress as much as possible. /SOLID breaks the installer in case of too many big files (2gb +)!
 ; SetCompressor /FINAL zlib
-SetCompressor /SOLID /FINAL lzma
+; SetCompressor /SOLID /FINAL lzma ; This gave us a trojan false positive... trying without
 
 ; LZMA compression only
 ; SetCompressorDictSize 128
