@@ -1,8 +1,8 @@
 '''
 This script:
-1. Iterates multiple .7z files in series
-2. Extracts each file into a directory
-3. iterates all files in the directory to checksum the total
+1. Goes through each packaged livery .7z file
+2. Runs the 7z utility to extract the archive to stdout
+3. Gets the checksum of the stdout
 4. Writes the checksum as <basename_of_7z>.sha256sum
 '''
 import subprocess
