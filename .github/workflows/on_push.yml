@@ -3,8 +3,10 @@ name: Download, parse, compress and create the installer
 
 on:
 
-  release:
-    types: [published]
+  push:
+    branches:
+      - 'feature/*'
+      - 'test*'
   
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -17,4 +19,4 @@ jobs:
   call_reusable_workflow:
     uses: ./.github/workflows/reusable_workflow.yml
     with:
-      runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
+      runner: self-hosted
