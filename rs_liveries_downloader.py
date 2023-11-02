@@ -232,7 +232,8 @@ def main():
             folders["Folders_RS"],
             folders["Folders_RSC"],
             folders["Folders_Bin"],
-            folders["Folders_RoughMets"]]:
+            folders["Folders_RoughMets"]
+        ]:
             for item in dl_list:
                 list_gdrive_folders(
                     item["gdrive-path"],
