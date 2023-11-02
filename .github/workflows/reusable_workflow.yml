@@ -114,7 +114,12 @@ jobs:
           # Default: 'latest'
           ref: testing
 
-    # only create a release if we're pushing from a feature branch
+      - name: Delete testing release
+        if: startsWith( github.ref_name, 'feature')
+        uses: cb80/delrel@latest
+        with:
+          tag: testing
+
       - name: Create Release if testing
         if: startsWith( github.ref_name, 'feature')
         uses: ncipollo/release-action@v1
