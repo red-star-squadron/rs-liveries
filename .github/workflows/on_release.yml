@@ -13,4 +13,4 @@ jobs:
     call_reusable_workflow:
         uses: ./.github/workflows/reusable_workflow.yml
         with:
-            runner: ${{ github.ref == 'test' && 'self-hosted' || 'ubuntu-22.04' }}
+            runner: ${{ startsWith( github.ref, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
