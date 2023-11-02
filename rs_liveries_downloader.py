@@ -31,6 +31,9 @@ else:
     GH_REF = "no_GH_REF"
     GH_RUNNER = False
 
+if GH_REF.startswith("feature"):
+    GH_REF = "testing"
+
 if os.environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
     MINIMAL_SAMPLE_SIZE = True
 else:
