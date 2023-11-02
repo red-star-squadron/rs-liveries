@@ -22,7 +22,7 @@ from jinja2 import Environment, FileSystemLoader
 
 THREAD_LOCAL = threading.local()
 EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)
-SCRIPT_DIR = os.path.dirname(getsourcefile(lambda:0)) # type: ignore
+SCRIPT_DIR = os.path.dirname(getsourcefile(lambda: 0))  # type: ignore
 STAGING_DIR = os.path.join(SCRIPT_DIR, "Staging")
 if 'GITHUB_REF_NAME' in os.environ:
     GH_REF = os.environ['GITHUB_REF_NAME']
@@ -44,9 +44,9 @@ def list_gdrive_folders(filid, des, is_rootfolder):
     Recurses itself to go down the directory structure
     '''
     if is_rootfolder:
-        query="'" + filid + "'" + " in parents"
+        query = "'" + filid + "'" + " in parents"
     else:
-        query="\'" + filid + "\'" + " in parents"
+        query = "\'" + filid + "\'" + " in parents"
     service = get_service()
     results = service.files().list(
         pageSize=1000,
@@ -132,7 +132,7 @@ def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
                 "dcs_airframe_codename": os.path.basename(dcs_airframe_codename),
                 "livery_base_dirname": os.path.basename(smallest_dirname),
                 "livery_base_fulldir": os.path.join(STAGING_DIR, dcs_airframe_codename,
-                                                     os.path.basename(smallest_dirname)),
+                                                    os.path.basename(smallest_dirname)),
                 "livery_pilot_dirs": [os.path.basename(pilot_dir) for pilot_dir in pilot_dirs]
             })
         if len(livery_dirs) > 1:
@@ -159,10 +159,10 @@ def dir_roughmet_parser(roughmet_directories):
     for roughmet_directory in roughmet_directories:
         roughmet_directory_basename = os.path.basename(roughmet_directory)
         roughmet_aircrafts.append({
-            'roughmet_directory' : roughmet_directory,
-            'roughmet_directory_basename' : roughmet_directory_basename,
-            'files' : os.listdir(roughmet_directory),
-            'size' : int(single_dir_size(roughmet_directory) / 1024) # kilobytes
+            'roughmet_directory': roughmet_directory,
+            'roughmet_directory_basename': roughmet_directory_basename,
+            'files': os.listdir(roughmet_directory),
+            'size': int(single_dir_size(roughmet_directory) / 1024)  # kilobytes
         })
 
     return roughmet_aircrafts
@@ -182,7 +182,7 @@ def livery_sizes(liveries_list):
         for pilot_livery in livery['livery_pilot_dirs']:
             dir_pilot = os.path.join(basedir, pilot_livery)
             total_size += single_dir_size(dir_pilot)
-        livery['total_size'] = int(total_size / 1024) # kilobytes
+        livery['total_size'] = int(total_size / 1024)  # kilobytes
 
 
 def single_dir_size(start_path):
@@ -279,7 +279,7 @@ def main():
         elif "RED STAR BIN" not in root:
             dirs_rs_liveries.append(root)
         else:
-            pass # Red Star Bin
+            pass  # Red Star Bin
     dirs_rs_liveries.sort()
     dirs_rsc_liveries.sort()
 
@@ -291,7 +291,7 @@ def main():
 
     livery_sizes(rs_liveries)
     livery_sizes(rsc_liveries)
-    size_bin_kb = int(single_dir_size(os.path.join(STAGING_DIR, "RED STAR BIN")) / 1024 )
+    size_bin_kb = int(single_dir_size(os.path.join(STAGING_DIR, "RED STAR BIN")) / 1024)
     pilots.update(rs_pilots, rsc_pilots)
     pilots_list = list(pilots)
     pilots_list.sort()
@@ -328,7 +328,7 @@ def main():
         file.write(output)
 
     template = env.get_template('livery-priorities.ps1.j2')
-    output = template.render(rs_liveries=rs_liveries,rsc_liveries=rsc_liveries)
+    output = template.render(rs_liveries=rs_liveries, rsc_liveries=rsc_liveries)
     with open('Staging/livery-priorities.ps1',
               'w+', encoding=getpreferredencoding()) as file:
         file.write(output)
