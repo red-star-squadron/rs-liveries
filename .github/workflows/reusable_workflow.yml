@@ -9,6 +9,11 @@ on:
         required: true
         type: string
         # For example "ubuntu-22.04" or "self-hosted"
+    secrets:
+      GOOGLE_CREDS:
+        required: true
+      GOOGLE_DRIVE_FOLDERS:
+        required: true
 
 env:
   GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}

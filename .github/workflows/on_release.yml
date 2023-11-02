@@ -14,3 +14,6 @@ jobs:
     uses: ./.github/workflows/reusable_workflow.yml
     with:
       runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
+    secrets:
+      GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
+      GOOGLE_DRIVE_FOLDERS: ${{ secrets.GOOGLE_DRIVE_FOLDERS }}
