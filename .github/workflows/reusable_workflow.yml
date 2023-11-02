@@ -41,7 +41,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install nsis, wget and unzip
-        run: sudo apt install -y nsis wget unzip p7zip-full git
+        run: sudo apt install -y nsis wget unzip p7zip-full
       - name: Install the newadvsplash plugin
         run: |
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
@@ -108,18 +108,19 @@ jobs:
 
       - name: Bump version and push tag
         if: startsWith( github.ref_name, 'feature')
-        id: tag_release_on_feature
-        uses: laputansoft/github-tag-action@v4.6
+        uses: EndBug/latest-tag@latest
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # You can change the name of the tag or branch with this input.
+          # Default: 'latest'
+          ref: testing
 
     # only create a release if we're pushing from a feature branch
       - name: Create Release if testing
         if: startsWith( github.ref_name, 'feature')
-        uses: EndBug/latest-tag@latest
+        uses: ncipollo/release-action@v1
         with:
-          ref: testing
- 
+          tag: testing
+
       - name: Upload Assets to Github Releases
         uses: softprops/action-gh-release@v1
         # if: startsWith(github.ref, 'refs/tags/')
