@@ -11,7 +11,7 @@ on:
   
 jobs:
     debug:
-        runs-on: default
+        runs-on: ubuntu-22.04
         steps:
             - name: test
               run: echo $GITHUB_REF
