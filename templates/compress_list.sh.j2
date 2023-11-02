@@ -11,7 +11,7 @@ STAGING_DIR="{{ staging_dir }}"
 COMPRESSION="-m=7z -myx=9 -mx=9 -mmt=256"
 if [ "{{ minimal_sample_size }}" = "true" ]
 then  
-  COMPRESSION="-mx=1"
+  COMPRESSION="-m=7z -mx=1 -mmt=256"
 fi
 
 cd "${STAGING_DIR}"
