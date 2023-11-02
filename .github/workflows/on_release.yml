@@ -1,11 +1,8 @@
 ---
 name: Download, parse, compress and create the installer
 
-# Controls when the workflow will run
 on:
-    # push:
-    #   branches:
-    #     - download-dev
+
     release:
       types: [published]
   
