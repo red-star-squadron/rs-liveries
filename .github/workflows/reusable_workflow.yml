@@ -116,10 +116,9 @@ jobs:
     # only create a release if we're pushing from a feature branch
       - name: Create Release if testing
         if: startsWith( github.ref_name, 'feature')
-        uses: ncipollo/release-action@v1
+        uses: EndBug/latest-tag@latest
         with:
-          tag: ${{ steps.tag_release_on_feature.outputs.new_tag }}
-          commit: ${{ github.ref_name }}
+          ref: testing
  
       - name: Upload Assets to Github Releases
         uses: softprops/action-gh-release@v1
