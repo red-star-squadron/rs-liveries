@@ -123,7 +123,16 @@ jobs:
 
       - name: Upload Assets to Github Releases
         uses: softprops/action-gh-release@v1
-        # if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith( github.ref_name, 'feature')
+        with:
+          tag_name: testing
+          files: |
+            Staging/RS_Liveries_${{ github.ref_name }}.exe
+            Compressed/*.7z
+
+      - name: Upload Assets to Github Releases
+        uses: softprops/action-gh-release@v1
+        if: ! startsWith( github.ref_name, 'feature')
         with:
           files: |
             Staging/RS_Liveries_${{ github.ref_name }}.exe
