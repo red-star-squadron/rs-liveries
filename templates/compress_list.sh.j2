@@ -4,14 +4,13 @@ set -e
 DEST="{{ dest }}"
 STAGING_DIR="{{ staging_dir }}"
 # Compression explained
-# -m=7z - type of compression
 # -myx=9 - maximum file analysis (5 is default)
 # -mx=9 - highest level of LZMA2 compression
-# -mmt=32 Try for 32 threads or use available
-COMPRESSION="-m=7z -myx=9 -mx=9 -mmt=256"
+# -mmt=256 Try for 256 threads or use available
+COMPRESSION="-myx=9 -mx=9 -mmt=256"
 if [ "{{ minimal_sample_size }}" = "true" ]
 then  
-  COMPRESSION="-m=7z -mx=1 -mmt=256"
+  COMPRESSION="-mx=1 -mmt=256"
 fi
 
 cd "${STAGING_DIR}"
