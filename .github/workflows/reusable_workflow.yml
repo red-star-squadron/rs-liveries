@@ -105,14 +105,20 @@ jobs:
           cd Staging
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_testing.exe"
-          
-      # only create a release if we're pushing from a feature branch
+
+      - name: Bump version and push tag
+        if: startsWith( github.ref_name, 'feature')
+        id: tag_release_on_feature
+        uses: laputansoft/github-tag-action@v4.6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    # only create a release if we're pushing from a feature branch
       - name: Create Release if testing
-        id: create_release
         if: startsWith( github.ref_name, 'feature')
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ github.ref_name }}
+          tag: ${{ steps.tag_release_on_feature.outputs.new_tag }}
           commit: ${{ github.ref_name }}
  
       - name: Upload Assets to Github Releases
