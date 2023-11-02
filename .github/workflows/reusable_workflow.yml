@@ -1,17 +1,14 @@
-# This is a basic workflow to help you get started with Actions
+---
+name: Reusable workflow
 
-name: Download, parse, compress and create the installer
 
-# Controls when the workflow will run
 on:
-  # push:
-  #   branches:
-  #     - download-dev
-  release:
-    types: [published]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      runner:
+        required: true
+        type: string
+        # For example "ubuntu-22.04" or "self-hosted"
 
 env:
   GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
@@ -21,7 +18,7 @@ env:
 jobs:
   package-and-release:
     # The type of runner that the job will run on
-    runs-on: ubuntu-22.04
+    runs-on: ${{ inputs.runner }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
