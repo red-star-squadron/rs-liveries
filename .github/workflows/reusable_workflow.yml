@@ -107,17 +107,13 @@ jobs:
           mv "RS Liveries.exe" "RS_Liveries_testing.exe"
           
       # only create a release if we're pushing from a feature branch
-      - name: Create Release
+      - name: Create Release if testing
         if: startsWith( github.ref_name, 'feature')
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: true          
+          tag: ${{ github.ref_name }}
+          commit: ${{ github.ref_name }}
+ 
 
       - name: Release to Github Releases
         uses: softprops/action-gh-release@v1
