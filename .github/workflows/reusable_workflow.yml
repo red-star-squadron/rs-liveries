@@ -92,12 +92,20 @@ jobs:
           wget https://www.7-zip.org/a/7z2201-extra.7z
           cd Staging
           7z x ../7z2201-extra.7z
-      - name: Package to Exe installer
+      - name: Package to Exe installer (release)
+        if: ${{ inputs.runner != 'self-hosted' }}
         run: |
           cd Staging
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_$GITHUB_REF_NAME.exe"
-      
+
+      - name: Package to Exe installer (testing)
+        if: ${{ inputs.runner == 'self-hosted' }}
+        run: |
+          cd Staging
+          makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
+          mv "RS Liveries.exe" "RS_Liveries_testing.exe"
+          
       # only create a release if we're pushing from a feature branch
       - name: Create Release
         if: startsWith( github.ref_name, 'feature')
