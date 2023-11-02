@@ -127,7 +127,7 @@ jobs:
         with:
           tag_name: testing
           files: |
-            Staging/RS_Liveries_${{ github.ref_name }}.exe
+            Staging/RS_Liveries_testing.exe
             Compressed/*.7z
 
       - name: Upload Assets to Github Releases
