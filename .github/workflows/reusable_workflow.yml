@@ -132,7 +132,7 @@ jobs:
 
       - name: Upload Assets to Github Releases
         uses: softprops/action-gh-release@v1
-        if: ! startsWith( github.ref_name, 'feature')
+        if: ${{ ! startsWith( github.ref_name, 'feature') }}
         with:
           files: |
             Staging/RS_Liveries_${{ github.ref_name }}.exe
