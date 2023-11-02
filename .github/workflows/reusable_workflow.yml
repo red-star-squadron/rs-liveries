@@ -19,6 +19,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Maximize build space
+        if: ${{ inputs.runner != 'self-hosted' }}
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 2048
