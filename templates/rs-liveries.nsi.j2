@@ -211,6 +211,20 @@ ${EndIf}
   !insertmacro RemoveEmptyDir "$InstDir\RED STAR CHECKSUMS"
 !macroend
 
+; This is a secret section that's not visible to the user
+Section "-Clean up our mistakes"
+  ;
+  ; Clean up our mistakes
+  ;
+
+  ; This was a case of mixed 14-a/14-b blackliveries
+  RMDir /r "$InstDir\f-14a-135-gr\RED STAR F-14B BLACK SQUADRON"
+  RMDir /r "$InstDir\f-14b\RED STAR F-14A-135-GR BLACK SQUADRON"
+
+  ; next mistake cleanup below
+
+SectionEnd
+
 SectionGroup "Remove Red Star Liveries"
   Section /o "Remove Red Star Bin"
     RMDir /r "$INSTDIR\RED STAR BIN"
