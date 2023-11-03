@@ -79,7 +79,6 @@ def sevenz_archive(entrypoint, files_and_or_dirs, destination_file):
         sevenz_exec = ["7z", "a", "-bd", "-bb0", "-mx=9", "-mmt=2"]
     appended_files_and_or_dirs = []
     for file in files_and_or_dirs:
-        print(file)
         appended_files_and_or_dirs.append(os_join(entrypoint, file))
     print(f"Compressing: {destination_file}")
     subprocess.run(sevenz_exec + [destination_file] + appended_files_and_or_dirs,
