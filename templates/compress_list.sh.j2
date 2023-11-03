@@ -7,7 +7,7 @@ STAGING_DIR="{{ staging_dir }}"
 # -myx=9 - maximum file analysis (5 is default)
 # -mx=9 - highest level of LZMA2 compression
 # -mmt=256 Try for 256 threads or use available
-COMPRESSION="-myx=9 -mx=9 -mmt=256"
+COMPRESSION="-mx=9 -mmt=256"
 if [ "{{ minimal_sample_size }}" = "true" ]
 then  
   COMPRESSION="-mx=1 -mmt=256"
