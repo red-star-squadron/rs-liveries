@@ -196,7 +196,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
   ; In case of normal liveries nothing will happen because the previous extract already created the dir
   ; In case of roughmets, we will get a new directory with the roughmet['roughmet_directory_basename'] inside the Programfiles bazaar folder
   CreateDirectory "${ExtractPath}\${BaseName}"
-  Rename "$PluginsDir\${BaseName}\${BaseName}.sha256sum" "${ExtractPath}\${BaseName}\${BaseName}.sha256sum"
+  Rename "$PluginsDir\${BaseName}.sha256sum" "${ExtractPath}\${BaseName}\${BaseName}.sha256sum"
   SkipToEnd_${ID}:
   !undef ID
 !macroend
