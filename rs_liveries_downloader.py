@@ -315,7 +315,7 @@ def main():
     rs_var_dump.roughmets = roughmets
 
     with open("rs_var_dump.pickle", "wb") as f:
-        f.write(pickle.dumps(rs_var_dump))
+        f.write(pickle.dumps("rs_var_dump.pickle"))
 
     template = env.get_template('rs-liveries.nsi.j2')
     output = template.render(
