@@ -5,3 +5,4 @@ Compress*
 .DS_Store
 gdrive_secret.yml
 7za.exe
+rs_var_dump.pickle
