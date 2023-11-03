@@ -2,11 +2,11 @@
 
 cd /home/docker/actions-runner || exit 1
 
-./config.sh --url "https://github.com/${ORGANIZATION}" --token "${REG_TOKEN}"
+./config.sh --url "https://github.com/${ORGANIZATION}/${REPO}" --token "${REG_TOKEN}"
 
 cleanup() {
     echo "Removing runner..."
-    ./config.sh remove --unattended --token "${REG_TOKEN}"
+    ./config.sh remove --token "${REG_TOKEN}"
 }
 
 trap 'cleanup; exit 130' INT

@@ -34,17 +34,14 @@ jobs:
           root-reserve-mb: 2048
           swap-size-mb: 1024
           remove-dotnet: 'true'
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          sparse-checkout-cone-mode: false
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
       - name: Install nsis, wget and unzip
         run: sudo apt install -y nsis wget unzip p7zip-full git
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Install the newadvsplash plugin
         run: |
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
@@ -106,7 +103,7 @@ jobs:
           mv "RS Liveries.exe" "RS_Liveries_testing.exe"
 
       - name: Create 'testing' tag (feature branches)
-        if: startsWith( github.ref_name, 'feature')
+        if: ${{ inputs.runner == 'self-hosted' }}
         uses: EndBug/latest-tag@latest
         with:
           # You can change the name of the tag or branch with this input.
@@ -114,13 +111,13 @@ jobs:
           ref: testing
 
       - name: Delete testing release (feature branches)
-        if: startsWith( github.ref_name, 'feature')
+        if: ${{ inputs.runner == 'self-hosted' }}
         uses: cb80/delrel@latest
         with:
           tag: testing
 
       - name: Create a "testing" release (feature branches)
-        if: startsWith( github.ref_name, 'feature')
+        if: ${{ inputs.runner == 'self-hosted' }}
         uses: ncipollo/release-action@v1
         with:
           prerelease: true
@@ -128,7 +125,7 @@ jobs:
 
       - name: Upload Assets to Github Releases (feature branches)
         uses: softprops/action-gh-release@v1
-        if: startsWith( github.ref_name, 'feature')
+        if: ${{ inputs.runner == 'self-hosted' }}
         with:
           tag_name: testing
           files: |
@@ -137,7 +134,7 @@ jobs:
 
       - name: Upload Assets to Github Releases (main release)
         uses: softprops/action-gh-release@v1
-        if: ${{ ! startsWith( github.ref_name, 'feature') }}
+        if: ${{ ! inputs.runner == 'self-hosted' }}
         with:
           files: |
             Staging/RS_Liveries_${{ github.ref_name }}.exe
