@@ -306,16 +306,13 @@ def main():
     file_loader = FileSystemLoader('templates')
     env = Environment(loader=file_loader)
 
-    class Rs_var_dump:
-        pass
-
-    rs_var_dump = Rs_var_dump()
-    rs_var_dump.rs_liveries = rs_liveries
-    rs_var_dump.rsc_liveries = rsc_liveries
-    rs_var_dump.roughmets = roughmets
+    rs_var_dump = dict()
+    rs_var_dump['rs_liveries'] = rs_liveries
+    rs_var_dump['rsc_liveries'] = rsc_liveries
+    rs_var_dump['roughmets'] = roughmets
 
     with open("rs_var_dump.pickle", "wb") as f:
-        f.write(pickle.dumps("rs_var_dump.pickle"))
+        f.write(pickle.dumps(rs_var_dump))
 
     template = env.get_template('rs-liveries.nsi.j2')
     output = template.render(
