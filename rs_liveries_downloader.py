@@ -18,7 +18,7 @@ from googleapiclient.http import MediaIoBaseDownload
 import google.auth
 import yaml
 from jinja2 import Environment, FileSystemLoader
-
+import pickle
 
 THREAD_LOCAL = threading.local()
 EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)
@@ -306,18 +306,16 @@ def main():
     file_loader = FileSystemLoader('templates')
     env = Environment(loader=file_loader)
 
-    template = env.get_template('compress_list.sh.j2')
-    output = template.render(
-        rs_liveries=rs_liveries,
-        rsc_liveries=rsc_liveries,
-        roughmets=roughmets,
-        delete_after_compress=os.environ['DELETE_AFTER_COMPRESS'].lower(),
-        minimal_sample_size=str(MINIMAL_SAMPLE_SIZE).lower(),
-        dest=os.path.join(SCRIPT_DIR, "Compressed"),
-        staging_dir=STAGING_DIR)
-    with open('Staging/compress_list.sh',
-              'w+', encoding=getpreferredencoding()) as file:
-        file.write(output)
+    class Rs_var_dump:
+        pass
+
+    rs_var_dump = Rs_var_dump()
+    rs_var_dump.rs_liveries = rs_liveries
+    rs_var_dump.rsc_liveries = rsc_liveries
+    rs_var_dump.roughmets = roughmets
+
+    with open("rs_var_dump.pickle", "wb") as f:
+        f.write(pickle.dumps(rs_var_dump))
 
     template = env.get_template('rs-liveries.nsi.j2')
     output = template.render(
