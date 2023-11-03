@@ -1,12 +1,28 @@
 '''
-TODO compression part
+This script aims to compress the individual liveries and then
+create checksums of individual livery archives.
 
-This script:
-1. Goes through each packaged livery .7z file
-2. Runs the 7z utility to extract the archive to stdout
-3. Gets the checksum of the stdout
-4. Writes the checksum as <basename_of_7z>.sha256sum
+We use ThreadPoolExecutor from the concurrent.features module.
+This is so we can utilize maximum resources of any given system this runs on.
+
+Concurrency is particulary useful on systems with many threads available as we
+do a tally of how many threads are available to python, and then use them all.
+
+In short, here are the steps. Note that they are jumbled due to concurrency.
+
+* Grab the pickle file from rs_liveries_downloader
+  It contains info about the liveries and their locations
+* Concurrently invoke the sevenz_archive function which:
+  * Compresses the given livery (or roughmet or bin)
+  * Removes the processed source files
+  * Creates a checksum
+
+Checksum feature in a bit more detail
+* Runs the 7z utility (as-in system binary) to extract the archive to stdout
+* Gets the checksum of the stdout
+* Writes the checksum as <basename_of_7z>.sha256sum
 '''
+
 # pickle to import our liveries data from disk
 import pickle
 # subprocess to run 7z outside of python
@@ -44,8 +60,7 @@ STAGING_DIR = os_join(SCRIPT_DIR, "Staging")
 CHECKSUMS_DIR = os_join(STAGING_DIR, "Checksums")
 COMPRESSED_DIR = os_join(SCRIPT_DIR, "Compressed")
 
-# Set up our threadpool executor so it has NUM_CPUS/2 threads
-# because we use 7z with 2 threads
+# Set up our threadpool executor so it has NUM_CPUS threads
 available_cpus = len(sched_getaffinity(0))
 EXECUTOR = ThreadPoolExecutor(max_workers=available_cpus)
 
