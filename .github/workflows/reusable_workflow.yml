@@ -98,14 +98,14 @@ jobs:
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_$GITHUB_REF_NAME.exe"
 
-      - name: Package to Exe installer (testing)
+      - name: Package to Exe installer (feature branches)
         if: ${{ inputs.runner == 'self-hosted' }}
         run: |
           cd Staging
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_testing.exe"
 
-      - name: Create 'testing' tag
+      - name: Create 'testing' tag (feature branches)
         if: startsWith( github.ref_name, 'feature')
         uses: EndBug/latest-tag@latest
         with:
@@ -113,20 +113,20 @@ jobs:
           # Default: 'latest'
           ref: testing
 
-      - name: Delete testing release
+      - name: Delete testing release (feature branches)
         if: startsWith( github.ref_name, 'feature')
         uses: cb80/delrel@latest
         with:
           tag: testing
 
-      - name: Create Release if testing
+      - name: Create a "testing" release (feature branches)
         if: startsWith( github.ref_name, 'feature')
         uses: ncipollo/release-action@v1
         with:
           prerelease: true
           tag: testing
 
-      - name: Upload Assets to Github Releases
+      - name: Upload Assets to Github Releases (feature branches)
         uses: softprops/action-gh-release@v1
         if: startsWith( github.ref_name, 'feature')
         with:
@@ -135,7 +135,7 @@ jobs:
             Staging/RS_Liveries_testing.exe
             Compressed/*.7z
 
-      - name: Upload Assets to Github Releases
+      - name: Upload Assets to Github Releases (main release)
         uses: softprops/action-gh-release@v1
         if: ${{ ! startsWith( github.ref_name, 'feature') }}
         with:

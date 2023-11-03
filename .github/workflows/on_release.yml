@@ -1,5 +1,5 @@
 ---
-name: Download, parse, compress and create the installer
+name: Bake the installer - On release
 
 on:
 
