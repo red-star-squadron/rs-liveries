@@ -25,7 +25,6 @@ from shutil import rmtree
 # concurrency stuff
 from concurrent.futures import ThreadPoolExecutor
 from os import sched_getaffinity
-from math import ceil
 
 
 if environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
@@ -48,7 +47,7 @@ COMPRESSED_DIR = os_join(SCRIPT_DIR, "Compressed")
 # Set up our threadpool executor so it has NUM_CPUS/2 threads
 # because we use 7z with 2 threads
 available_cpus = len(sched_getaffinity(0))
-EXECUTOR = ThreadPoolExecutor(max_workers=ceil(available_cpus/2))
+EXECUTOR = ThreadPoolExecutor(max_workers=available_cpus)
 
 
 def load_rs_var_dump():
@@ -58,7 +57,7 @@ def load_rs_var_dump():
 
 
 def calculate_and_write_checksum(input_7z):
-    z_subprocess = subprocess.run(["7z", "e", "-so", input_7z],
+    z_subprocess = subprocess.run(["7z", "e", "-so", "-mmt=1", input_7z],
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                   check=True,
                                   text=False)
@@ -74,9 +73,9 @@ def calculate_and_write_checksum(input_7z):
 
 def sevenz_archive(entrypoint, files_and_or_dirs, destination_file):
     if MINIMAL_SAMPLE_SIZE:
-        sevenz_exec = ["7z", "a", "-bd", "-bb0", "-mx=1", "-mmt=2"]
+        sevenz_exec = ["7z", "a", "-bd", "-bb0", "-mx=1", "-mmt=1"]
     else:
-        sevenz_exec = ["7z", "a", "-bd", "-bb0", "-mx=9", "-mmt=2"]
+        sevenz_exec = ["7z", "a", "-bd", "-bb0", "-mx=9", "-mmt=1"]
     appended_files_and_or_dirs = []
     for file in files_and_or_dirs:
         appended_files_and_or_dirs.append(os_join(entrypoint, file))
