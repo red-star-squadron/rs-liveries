@@ -106,7 +106,7 @@ jobs:
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_testing.exe"
 
-      - name: Bump version and push tag
+      - name: Create 'testing' tag
         if: startsWith( github.ref_name, 'feature')
         uses: EndBug/latest-tag@latest
         with:
