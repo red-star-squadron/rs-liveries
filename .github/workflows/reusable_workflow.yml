@@ -80,7 +80,7 @@ jobs:
             Staging/rs-liveries-pilot-priorities.ps1
 
       - name: Compress and checksum bin, roughmets and liveries
-        run: pipenv run python compress_and_checksum.py
+        run: pipenv run python rs_liveries_compress_and_checksum.py
       - uses: actions/upload-artifact@v3
         with:
           name: Checksums

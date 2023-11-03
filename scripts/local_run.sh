@@ -4,7 +4,7 @@ set -e
 
 pipenv run python rs_liveries_downloader.py
 
-pipenv run python compress_and_checksum.py
+pipenv run python rs_liveries_compress_and_checksum.py
 
 cp 7za.exe Staging/
 
