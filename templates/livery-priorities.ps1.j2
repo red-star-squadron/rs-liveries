@@ -22,13 +22,13 @@ function DescriptionLuaReplace {
         Write-Host "Pilot luafile not present. Proceeding: $luafile"
         Return
     }
-    if ("$pilot" -eq "-- STREAMER / YOUTUBER --" ){        
+    if ("$pilot" -eq "-- STREAMER / YOUTUBER --" ){
         Write-Host "Setting livery priority to low: $luafile"
         (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile"
     } elseif ("$pilot" -eq "-- RS SQUAD BUT NOT IN LIST --" ) {
         if (-not ($is_basename)) {
             Write-Host "Setting pilot livery priority to low: $luafile"
-            (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile" 
+            (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile"
         } elseif ($is_basename) {
             Write-Host "Setting base livery priority to high: $luafile"
             (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = -2' | Set-Content -Path "$luafile"
@@ -42,18 +42,12 @@ function DescriptionLuaReplace {
             (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = -2' | Set-Content -Path "$luafile"
         } else {
             Write-Host "Setting teammate pilot livery to lowest: $luafile"
-            (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile"            
+            (Get-Content -path "$luafile") -replace '^order += +-?\d+','order = 9999' | Set-Content -Path "$luafile"
         }
     }
 }
 
-{% for livery in rs_liveries %}
-DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}\description.lua" -is_basename $true
-    {%- for pilot_dir in livery["livery_pilot_dirs"] %}
-DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}\description.lua" -is_basename $false
-    {%- endfor %}
-{%- endfor %}
-{%- for livery in rsc_liveries %}
+{%- for livery in liveries %}
 DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}\description.lua" -is_basename $true
     {%- for pilot_dir in livery["livery_pilot_dirs"] %}
 DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}\description.lua" -is_basename $false
