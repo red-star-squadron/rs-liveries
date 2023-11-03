@@ -120,6 +120,7 @@ jobs:
         if: startsWith( github.ref_name, 'feature')
         uses: ncipollo/release-action@v1
         with:
+          prerelease: true
           tag: testing
 
       - name: Upload Assets to Github Releases
