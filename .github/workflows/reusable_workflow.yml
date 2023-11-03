@@ -41,7 +41,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install nsis, wget and unzip
-        run: sudo apt install -y nsis wget unzip p7zip-full
+        run: sudo apt install -y nsis wget unzip p7zip-full git
       - name: Install the newadvsplash plugin
         run: |
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
