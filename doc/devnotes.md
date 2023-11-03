@@ -37,8 +37,12 @@ Folders_RSC:
 Folders_BIN:
   - dcs-codename: '' # Keep as empty string
     gdrive-path: <gdrive-shared-folder-ID>
+Folders_RoughMets:
+  - dcs-codename: '' # Keep as empty string
+    gdrive-path: <gdrive-shared-folder-ID>
 
 ```
 
-BIN folder is unique. It contains various assets shared across multiple aircraft
+* BIN folder: It contains various assets shared across multiple aircraft
+* RoughMets folder: Reason why we need admin privileges - those files end up in the DCS installation instead of the "Saved Games" location. They are also flat files in a already used dir, so handling install/uninstall of Roughmets needed some more doing.
 
