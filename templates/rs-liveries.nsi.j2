@@ -71,7 +71,7 @@ Function nsDialogsPage
 	
   ${NSD_CreateLabel} 0 60 100% 12u "Please select the install directory of DCS"
 	Pop $LabelBrowse
-  
+
   ${NSD_CreateBrowseButton} 0 80 100% 12u "$ProgramFilesDir"
   Pop $BrowseButton
   ${NSD_OnClick} $BrowseButton OnDirBrowse
@@ -81,7 +81,7 @@ FunctionEnd
 
 Function OnDirBrowse
     ${NSD_GetText} $BrowseButton $0
-    nsDialogs::SelectFolderDialog "Please select the install directory of DCS" "$0" 
+    nsDialogs::SelectFolderDialog "Please select the install directory of DCS" "$0"
     Pop $0
     ${If} $0 != error
         ${NSD_SetText} $BrowseButton "$0"
@@ -126,7 +126,7 @@ Function .onInit
   ${ElseIf} ${FileExists} "$PROFILE\Saved Games\DCS"
     StrCpy $InstDir "$PROFILE\Saved Games\DCS\Liveries"
   ${EndIf}
-  
+
   ReadRegStr $ProgramFilesDir "HKCU" "SOFTWARE\Eagle Dynamics\DCS World OpenBeta" "Path"
   ${If} "$ProgramFilesDir" == ""
     ReadRegStr $ProgramFilesDir "HKCU" "SOFTWARE\Eagle Dynamics\DCS World" "Path"
@@ -223,7 +223,7 @@ Section "-Clean up our mistakes"
 
   ; Deprecating RED STAR CHECKSUMS directory. We're putting checksum files together with liveries
   RMDir /r "$InstDir\RED STAR CHECKSUMS"
-  
+
   ; next mistake cleanup below
 
 SectionEnd
@@ -238,7 +238,7 @@ SectionGroup "Remove Red Star Liveries"
     {%- for roughmet_filename in roughmet['files'] %}
       Delete "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_filename }}"
     {%- endfor %}
-    RMDir /r "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet['roughmet_directory_basename'] }}" 
+    RMDir /r "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet['roughmet_directory_basename'] }}"
     SectionEnd
   {%- endfor %}
   SectionGroupEnd
