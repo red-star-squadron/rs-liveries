@@ -24,13 +24,14 @@ Checksum feature in a bit more detail
 """
 
 # pickle to import our liveries data from disk
-import pickle
+from pickle import load as pickle_load
 
 # subprocess to run 7z outside of python
-import subprocess
+from subprocess import run as sp_run
+from subprocess import PIPE as sp_pipe
 
 # Checksum stuff
-import hashlib
+from hashlib import sha256
 from locale import getpreferredencoding
 
 # Path stuff
@@ -57,19 +58,19 @@ EXECUTOR = ThreadPoolExecutor(max_workers=available_cpus)
 
 def load_rs_var_dump():
     with open("rs_var_dump.pickle", "rb") as f:
-        rs_var_dump = pickle.load(f)
+        rs_var_dump = pickle_load(f)
     return rs_var_dump
 
 
 def calculate_and_write_checksum(input_7z):
-    z_subprocess = subprocess.run(
+    z_subprocess = sp_run(
         ["7z", "e", "-so", "-mmt=4", input_7z],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=sp_pipe,
+        stderr=sp_pipe,
         check=True,
         text=False,
     )
-    chksum = hashlib.sha256(z_subprocess.stdout).hexdigest()
+    chksum = sha256(z_subprocess.stdout).hexdigest()
     dest_chksumfile = os_join(CHECKSUMS_DIR, PurePath(input_7z).stem + ".sha256sum")
     print(f"Checksum: '{chksum}' -> '{dest_chksumfile}'")
     Path(Path(dest_chksumfile).resolve().parents[0]).mkdir(parents=True, exist_ok=True)
@@ -87,7 +88,7 @@ def sevenz_archive(entrypoint, files_and_or_dirs, destination_file):
     for file in files_and_or_dirs:
         appended_files_and_or_dirs.append(os_join(entrypoint, file))
     print(f"Compressing: {destination_file}")
-    subprocess.run(
+    sp_run(
         sevenz_exec + [destination_file] + appended_files_and_or_dirs,
         capture_output=False,
         check=True,
