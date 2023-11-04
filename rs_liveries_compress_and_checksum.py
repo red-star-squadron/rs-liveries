@@ -1,4 +1,4 @@
-'''
+"""
 This script aims to compress the individual liveries and then
 create checksums of individual livery archives.
 
@@ -21,15 +21,18 @@ Checksum feature in a bit more detail
 * Runs the 7z utility (as-in system binary) to extract the archive to stdout
 * Gets the checksum of the stdout
 * Writes the checksum as <basename_of_7z>.sha256sum
-'''
+"""
 
 # pickle to import our liveries data from disk
 import pickle
+
 # subprocess to run 7z outside of python
 import subprocess
+
 # Checksum stuff
 import hashlib
 from locale import getpreferredencoding
+
 # Path stuff
 from os.path import join as os_join
 from os.path import dirname as os_dirname
@@ -38,18 +41,19 @@ from os import environ
 from pathlib import Path, PurePath
 from inspect import getsourcefile
 from shutil import rmtree
+
 # concurrency stuff
 from concurrent.futures import ThreadPoolExecutor
 from os import sched_getaffinity
 
 
-if environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
+if environ["MINIMAL_SAMPLE_SIZE"].lower() == "true":
     MINIMAL_SAMPLE_SIZE = True
 else:
     MINIMAL_SAMPLE_SIZE = False
 
 
-if environ['DELETE_AFTER_COMPRESS'].lower() == "true":
+if environ["DELETE_AFTER_COMPRESS"].lower() == "true":
     DELETE_AFTER_COMPRESS = True
 else:
     DELETE_AFTER_COMPRESS = False
@@ -72,13 +76,15 @@ def load_rs_var_dump():
 
 
 def calculate_and_write_checksum(input_7z):
-    z_subprocess = subprocess.run(["7z", "e", "-so", "-mmt=4", input_7z],
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                  check=True,
-                                  text=False)
+    z_subprocess = subprocess.run(
+        ["7z", "e", "-so", "-mmt=4", input_7z],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        text=False,
+    )
     chksum = hashlib.sha256(z_subprocess.stdout).hexdigest()
-    dest_chksumfile = os_join(CHECKSUMS_DIR,
-                              PurePath(input_7z).stem + ".sha256sum")
+    dest_chksumfile = os_join(CHECKSUMS_DIR, PurePath(input_7z).stem + ".sha256sum")
     print(f"Checksum: '{chksum}' -> '{dest_chksumfile}'")
     Path(Path(dest_chksumfile).resolve().parents[0]).mkdir(parents=True, exist_ok=True)
     with open(dest_chksumfile, "w", encoding=getpreferredencoding()) as file_final:
@@ -95,9 +101,11 @@ def sevenz_archive(entrypoint, files_and_or_dirs, destination_file):
     for file in files_and_or_dirs:
         appended_files_and_or_dirs.append(os_join(entrypoint, file))
     print(f"Compressing: {destination_file}")
-    subprocess.run(sevenz_exec + [destination_file] + appended_files_and_or_dirs,
-                   capture_output=False,
-                   check=True)
+    subprocess.run(
+        sevenz_exec + [destination_file] + appended_files_and_or_dirs,
+        capture_output=False,
+        check=True,
+    )
 
     if DELETE_AFTER_COMPRESS:
         for target in appended_files_and_or_dirs:
@@ -114,32 +122,38 @@ def sevenz_archive(entrypoint, files_and_or_dirs, destination_file):
 
 def main():
     rs_var_dump = load_rs_var_dump()
-    rs_liveries = rs_var_dump['rs_liveries']
-    rsc_liveries = rs_var_dump['rsc_liveries']
-    roughmets = rs_var_dump['roughmets']
+    rs_liveries = rs_var_dump["rs_liveries"]
+    rsc_liveries = rs_var_dump["rsc_liveries"]
+    roughmets = rs_var_dump["roughmets"]
 
     # Red Star BIN
-    EXECUTOR.submit(sevenz_archive,
-                    STAGING_DIR,
-                    ["RED STAR BIN"],
-                    os_join(COMPRESSED_DIR, "RED STAR BIN.7z"))
+    EXECUTOR.submit(
+        sevenz_archive,
+        STAGING_DIR,
+        ["RED STAR BIN"],
+        os_join(COMPRESSED_DIR, "RED STAR BIN.7z"),
+    )
 
     # Red Star ROUGHMETS
     for roughmet in roughmets:
-        EXECUTOR.submit(sevenz_archive,
-                        roughmet['roughmet_directory'],
-                        roughmet['files'],
-                        os_join(COMPRESSED_DIR, f'{roughmet["roughmet_directory_basename"]}.7z'))
+        EXECUTOR.submit(
+            sevenz_archive,
+            roughmet["roughmet_directory"],
+            roughmet["files"],
+            os_join(COMPRESSED_DIR, f'{roughmet["roughmet_directory_basename"]}.7z'),
+        )
 
     # Red Star Liveries (camo and black)
     for livery in rs_liveries + rsc_liveries:
-        EXECUTOR.submit(sevenz_archive,
-                        os_join(STAGING_DIR, livery["dcs_airframe_codename"]),
-                        [livery["livery_base_dirname"]] + livery["livery_pilot_dirs"],
-                        os_join(COMPRESSED_DIR, f'{livery["livery_base_dirname"]}.7z'))
+        EXECUTOR.submit(
+            sevenz_archive,
+            os_join(STAGING_DIR, livery["dcs_airframe_codename"]),
+            [livery["livery_base_dirname"]] + livery["livery_pilot_dirs"],
+            os_join(COMPRESSED_DIR, f'{livery["livery_base_dirname"]}.7z'),
+        )
 
     EXECUTOR.shutdown(wait=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

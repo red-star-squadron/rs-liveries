@@ -1,6 +1,6 @@
-'''
+"""
 RS Liveries Downloader
-'''
+"""
 
 
 from __future__ import print_function
@@ -24,8 +24,8 @@ THREAD_LOCAL = threading.local()
 EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)
 SCRIPT_DIR = os.path.dirname(getsourcefile(lambda: 0))  # type: ignore
 STAGING_DIR = os.path.join(SCRIPT_DIR, "Staging")
-if 'GITHUB_REF_NAME' in os.environ:
-    GITHUB_REF_NAME = os.environ['GITHUB_REF_NAME']
+if "GITHUB_REF_NAME" in os.environ:
+    GITHUB_REF_NAME = os.environ["GITHUB_REF_NAME"]
     GH_RUNNER = True
 else:
     GITHUB_REF_NAME = "no_GITHUB_REF_NAME"
@@ -34,57 +34,57 @@ else:
 if not GITHUB_REF_NAME.startswith("v"):
     GITHUB_REF_NAME = "testing"
 
-if os.environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
+if os.environ["MINIMAL_SAMPLE_SIZE"].lower() == "true":
     MINIMAL_SAMPLE_SIZE = True
 else:
     MINIMAL_SAMPLE_SIZE = False
 
 
 def list_gdrive_folders(filid, des, is_rootfolder):
-    '''
+    """
     Lists folders within a google drive
     Downloads files
     Recurses itself to go down the directory structure
-    '''
+    """
     if is_rootfolder:
         query = "'" + filid + "'" + " in parents"
     else:
-        query = "\'" + filid + "\'" + " in parents"
+        query = "'" + filid + "'" + " in parents"
     service = get_service()
-    results = service.files().list(
-        pageSize=1000,
-        q=query,
-        fields="nextPageToken, files(id, name, mimeType)").execute()
-    items = results.get('files', [])
+    results = (
+        service.files()
+        .list(pageSize=1000, q=query, fields="nextPageToken, files(id, name, mimeType)")
+        .execute()
+    )
+    items = results.get("files", [])
     if len(items) == 0 and is_rootfolder:
         raise ValueError(f"Google Drive folder empty or other issue: {filid}")
     iter_file_count = 0
     for item in items:
-        fullpath = os.path.join(des, item['name'])
+        fullpath = os.path.join(des, item["name"])
         parentdir = Path(fullpath).resolve().parents[0]
         if not os.path.exists(parentdir):
             Path(parentdir).mkdir(parents=True, exist_ok=True)
             print(f"Created directory {parentdir}")
-        if item['mimeType'] == 'application/vnd.google-apps.folder':
-            list_gdrive_folders(item['id'], fullpath, False)
+        if item["mimeType"] == "application/vnd.google-apps.folder":
+            list_gdrive_folders(item["id"], fullpath, False)
         else:
             if MINIMAL_SAMPLE_SIZE:
-                if fullpath.lower().endswith("lua") \
-                        or fullpath.lower().endswith("txt"):
-                    EXECUTOR_FILES.submit(downloadfiles, item['id'], fullpath)
+                if fullpath.lower().endswith("lua") or fullpath.lower().endswith("txt"):
+                    EXECUTOR_FILES.submit(downloadfiles, item["id"], fullpath)
                 else:
                     if iter_file_count > 0:
                         continue
-                    EXECUTOR_FILES.submit(downloadfiles, item['id'], fullpath)
+                    EXECUTOR_FILES.submit(downloadfiles, item["id"], fullpath)
                     iter_file_count += 1
             else:
-                EXECUTOR_FILES.submit(downloadfiles, item['id'], fullpath)
+                EXECUTOR_FILES.submit(downloadfiles, item["id"], fullpath)
 
 
 def downloadfiles(dowid, dfilespath):
-    '''
+    """
     Downloads a single google drive file
-    '''
+    """
     service = get_service()
     request = service.files().get_media(fileId=dowid)
     file_handler = io.BytesIO()
@@ -94,14 +94,14 @@ def downloadfiles(dowid, dfilespath):
         _, done = downloader.next_chunk()
         # NOTE: replace above _ with status
         # print("Download %d%%." % int(status.progress() * 100))
-    with io.open(dfilespath, 'wb') as file:
+    with io.open(dfilespath, "wb") as file:
         file_handler.seek(0)
         file.write(file_handler.read())
     print(f"Downloaded: {dfilespath}")
 
 
 def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
-    '''
+    """
     Inputs:
     * dcs_airframe_codenames - list of strings where each is
         like "mig-29s" (what DCS recognizes)
@@ -116,7 +116,7 @@ def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
             * dcs_airframe_codename - string like mig-29s
             * livery_base_dirname - string like "RED STAR FA-18C BLACK SQUADRON"
             * livery_pilot_dirs - list of strings like "RED STAR FA-18C BLACK SQUADRON SQuID"
-    '''
+    """
     pilots = set()
     liveries = []
     for dcs_airframe_codename in dcs_airframe_codenames:
@@ -131,13 +131,20 @@ def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
         smallest_dirname = min(livery_dirs, key=len)
         pilot_dirs = livery_dirs.copy()
         pilot_dirs.remove(smallest_dirname)
-        liveries.append({
+        liveries.append(
+            {
                 "dcs_airframe_codename": os.path.basename(dcs_airframe_codename),
                 "livery_base_dirname": os.path.basename(smallest_dirname),
-                "livery_base_fulldir": os.path.join(STAGING_DIR, dcs_airframe_codename,
-                                                    os.path.basename(smallest_dirname)),
-                "livery_pilot_dirs": [os.path.basename(pilot_dir) for pilot_dir in pilot_dirs]
-            })
+                "livery_base_fulldir": os.path.join(
+                    STAGING_DIR,
+                    dcs_airframe_codename,
+                    os.path.basename(smallest_dirname),
+                ),
+                "livery_pilot_dirs": [
+                    os.path.basename(pilot_dir) for pilot_dir in pilot_dirs
+                ],
+            }
+        )
         if len(livery_dirs) > 1:
             livery_dirs.remove(smallest_dirname)
             for liv in livery_dirs:
@@ -146,7 +153,7 @@ def dir_pilot_and_livery_parser(dcs_airframe_codenames, livery_directories):
 
 
 def dir_roughmet_parser(roughmet_directories):
-    '''
+    """
     Inputs:
     * livery_directories - list of strings where each string
         is a directory path
@@ -157,42 +164,44 @@ def dir_roughmet_parser(roughmet_directories):
         roughmet_directory_basename - basename of the above, example F-15C Roughmet
         files - List of files contained in roughmet_directory
         size - size in kilobytes of roughmet_directory
-    '''
+    """
     roughmet_aircrafts = []
     for roughmet_directory in roughmet_directories:
         roughmet_directory_basename = os.path.basename(roughmet_directory)
-        roughmet_aircrafts.append({
-            'roughmet_directory': roughmet_directory,
-            'roughmet_directory_basename': roughmet_directory_basename,
-            'files': os.listdir(roughmet_directory),
-            'size': int(single_dir_size(roughmet_directory) / 1024)  # kilobytes
-        })
+        roughmet_aircrafts.append(
+            {
+                "roughmet_directory": roughmet_directory,
+                "roughmet_directory_basename": roughmet_directory_basename,
+                "files": os.listdir(roughmet_directory),
+                "size": int(single_dir_size(roughmet_directory) / 1024),  # kilobytes
+            }
+        )
 
     return roughmet_aircrafts
 
 
 def livery_sizes(liveries_list):
-    '''
+    """
     Input should be a "liveries" list as returned by dir_pilot_and_livery_parser()
     Appends each dict elemet in the input list with
     a ['total_size'] key and value in kilobytes
-    '''
+    """
     for livery in liveries_list:
-        basedir = os.path.join(STAGING_DIR, livery['dcs_airframe_codename'])
+        basedir = os.path.join(STAGING_DIR, livery["dcs_airframe_codename"])
         total_size = 0
-        dir_basename = os.path.join(basedir, livery['livery_base_dirname'])
+        dir_basename = os.path.join(basedir, livery["livery_base_dirname"])
         total_size += single_dir_size(dir_basename)
-        for pilot_livery in livery['livery_pilot_dirs']:
+        for pilot_livery in livery["livery_pilot_dirs"]:
             dir_pilot = os.path.join(basedir, pilot_livery)
             total_size += single_dir_size(dir_pilot)
-        livery['total_size'] = int(total_size / 1024)  # kilobytes
+        livery["total_size"] = int(total_size / 1024)  # kilobytes
 
 
 def single_dir_size(start_path):
-    '''
+    """
     Returns size of a single dir in bytes
     Stolen from: https://stackoverflow.com/a/1392549
-    '''
+    """
     total_size = 0
     for dirpath, _, filenames in os.walk(start_path):
         for fileee in filenames:
@@ -204,24 +213,24 @@ def single_dir_size(start_path):
 
 
 def get_service():
-    '''
+    """
     Ensures we get one google service object per thread
-    '''
+    """
     if not hasattr(THREAD_LOCAL, "service"):
         creds, _ = google.auth.default()
-        THREAD_LOCAL.service = build('drive', 'v3', credentials=creds)
+        THREAD_LOCAL.service = build("drive", "v3", credentials=creds)
     return THREAD_LOCAL.service
 
 
 def main():
-    '''Main loop'''
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(
-        SCRIPT_DIR,
-        os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-    with open('gdrive_secret.yml', 'r', encoding=getpreferredencoding()) as file:
+    """Main loop"""
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(
+        SCRIPT_DIR, os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+    )
+    with open("gdrive_secret.yml", "r", encoding=getpreferredencoding()) as file:
         folders = yaml.safe_load(file)
 
-    if os.environ['SKIP_DOWNLOADS'].lower() != "true":
+    if os.environ["SKIP_DOWNLOADS"].lower() != "true":
         if os.path.isdir(STAGING_DIR):
             shutil.rmtree(STAGING_DIR, ignore_errors=True)
         Path(STAGING_DIR).mkdir(parents=True, exist_ok=True)
@@ -231,20 +240,21 @@ def main():
             folders["Folders_RS"],
             folders["Folders_RSC"],
             folders["Folders_Bin"],
-            folders["Folders_RoughMets"]
+            folders["Folders_RoughMets"],
         ]:
             for item in dl_list:
                 list_gdrive_folders(
                     item["gdrive-path"],
                     os.path.join(STAGING_DIR, item["dcs-codename"]),
-                    True)
+                    True,
+                )
         EXECUTOR_FILES.shutdown(wait=True)
     else:
         os.chdir(STAGING_DIR)
 
     for root, dirs, files in os.walk(STAGING_DIR):
         for name in files:
-            if fnmatch.fnmatch(name.lower(), 'readme*.txt'):  # Remove readmes
+            if fnmatch.fnmatch(name.lower(), "readme*.txt"):  # Remove readmes
                 print(f"Removing {os.path.join(root, name)}")
                 os.remove(os.path.join(root, name))
             else:
@@ -284,10 +294,12 @@ def main():
     dirs_rsc_liveries.sort()
 
     pilots = set()
-    rs_pilots, rs_liveries = dir_pilot_and_livery_parser(dcs_airframe_codenames,
-                                                         dirs_rs_liveries)
-    rsc_pilots, rsc_liveries = dir_pilot_and_livery_parser(dcs_airframe_codenames,
-                                                           dirs_rsc_liveries)
+    rs_pilots, rs_liveries = dir_pilot_and_livery_parser(
+        dcs_airframe_codenames, dirs_rs_liveries
+    )
+    rsc_pilots, rsc_liveries = dir_pilot_and_livery_parser(
+        dcs_airframe_codenames, dirs_rsc_liveries
+    )
 
     livery_sizes(rs_liveries)
     livery_sizes(rsc_liveries)
@@ -299,33 +311,36 @@ def main():
     roughmets = dir_roughmet_parser(dirs_roughmets)
 
     os.chdir("..")
-    file_loader = FileSystemLoader('templates')
+    file_loader = FileSystemLoader("templates")
     env = Environment(loader=file_loader)
 
     rs_var_dump = dict()
-    rs_var_dump['rs_liveries'] = rs_liveries
-    rs_var_dump['rsc_liveries'] = rsc_liveries
-    rs_var_dump['roughmets'] = roughmets
+    rs_var_dump["rs_liveries"] = rs_liveries
+    rs_var_dump["rsc_liveries"] = rsc_liveries
+    rs_var_dump["roughmets"] = roughmets
 
     with open("rs_var_dump.pickle", "wb") as f:
         f.write(pickle.dumps(rs_var_dump))
 
-    template = env.get_template('rs-liveries.nsi.j2')
+    template = env.get_template("rs-liveries.nsi.j2")
     output = template.render(
         rs_liveries=rs_liveries,
         rsc_liveries=rsc_liveries,
         pilots=pilots_list,
         roughmets=roughmets,
         github_ref_name=GITHUB_REF_NAME,
-        size_bin_kb=size_bin_kb)
-    with open('Staging/rs-liveries-rendered.nsi',
-              'w+', encoding=getpreferredencoding()) as file:
+        size_bin_kb=size_bin_kb,
+    )
+    with open(
+        "Staging/rs-liveries-rendered.nsi", "w+", encoding=getpreferredencoding()
+    ) as file:
         file.write(output)
 
-    template = env.get_template('livery-priorities.ps1.j2')
+    template = env.get_template("livery-priorities.ps1.j2")
     output = template.render(liveries=rs_liveries + rsc_liveries)
-    with open('Staging/livery-priorities.ps1',
-              'w+', encoding=getpreferredencoding()) as file:
+    with open(
+        "Staging/livery-priorities.ps1", "w+", encoding=getpreferredencoding()
+    ) as file:
         file.write(output)
 
     shutil.copy("psexec.nsh", os.path.join(STAGING_DIR, "psexec.nsh"))
@@ -335,5 +350,5 @@ def main():
     shutil.copy("extract-file.ps1", os.path.join(STAGING_DIR, "extract-file.ps1"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
