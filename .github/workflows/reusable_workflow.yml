@@ -95,14 +95,14 @@ jobs:
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_$GITHUB_REF_NAME.exe"
 
-      - name: Package to Exe installer (feature branches)
+      - name: Package to Exe installer (non-main release)
         if: ${{ inputs.runner == 'self-hosted' }}
         run: |
           cd Staging
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_testing.exe"
 
-      - name: Create 'testing' tag (feature branches)
+      - name: Create 'testing' tag (non-main release)
         if: ${{ inputs.runner == 'self-hosted' }}
         uses: EndBug/latest-tag@latest
         with:
@@ -110,20 +110,20 @@ jobs:
           # Default: 'latest'
           ref: testing
 
-      - name: Delete testing release (feature branches)
+      - name: Delete testing release (non-main release)
         if: ${{ inputs.runner == 'self-hosted' }}
         uses: cb80/delrel@latest
         with:
           tag: testing
 
-      - name: Create a "testing" release (feature branches)
+      - name: Create a "testing" release (non-main release)
         if: ${{ inputs.runner == 'self-hosted' }}
         uses: ncipollo/release-action@v1
         with:
           prerelease: true
           tag: testing
 
-      - name: Upload Assets to Github Releases (feature branches)
+      - name: Upload Assets to Github Releases (non-main release)
         uses: softprops/action-gh-release@v1
         if: ${{ inputs.runner == 'self-hosted' }}
         with:

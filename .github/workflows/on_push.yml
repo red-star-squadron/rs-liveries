@@ -1,5 +1,5 @@
 ---
-name: Bake the installer (feature branches - on push)
+name: Bake the installer (non-main release - on push)
 
 on:
 
@@ -7,6 +7,10 @@ on:
     branches:
       - 'feature/*'
       - 'test*'
+      - 'hotfix*'
+      - 'bug*'
+      - 'wip*'
+      - 'dev*'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
