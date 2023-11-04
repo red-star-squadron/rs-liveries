@@ -6,7 +6,7 @@ from os import listdir as os_listdir
 from os import walk as os_walk
 
 # Our includes
-from rs_shared import STAGING_DIR
+from rs_util_shared import STAGING_DIR
 
 
 def livery_sizes(liveries_list):

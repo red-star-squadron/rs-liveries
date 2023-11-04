@@ -44,11 +44,11 @@ from concurrent.futures import ThreadPoolExecutor
 from os import sched_getaffinity
 
 # Our includes
-from rs_shared import MINIMAL_SAMPLE_SIZE
-from rs_shared import STAGING_DIR
-from rs_shared import CHECKSUMS_DIR
-from rs_shared import COMPRESSED_DIR
-from rs_shared import DELETE_AFTER_COMPRESS
+from rs_util_shared import MINIMAL_SAMPLE_SIZE
+from rs_util_shared import STAGING_DIR
+from rs_util_shared import CHECKSUMS_DIR
+from rs_util_shared import COMPRESSED_DIR
+from rs_util_shared import DELETE_AFTER_COMPRESS
 
 # Set up our threadpool executor so it has NUM_CPUS threads
 available_cpus = len(sched_getaffinity(0))

@@ -15,8 +15,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 # Our includes
-from rs_shared import MINIMAL_SAMPLE_SIZE
-from rs_shared import SCRIPT_DIR
+from rs_util_shared import MINIMAL_SAMPLE_SIZE
+from rs_util_shared import SCRIPT_DIR
 
 THREAD_LOCAL = threading_local()
 EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)

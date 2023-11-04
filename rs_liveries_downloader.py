@@ -18,8 +18,8 @@ from jinja2 import Environment, FileSystemLoader
 import pickle
 
 # Our includes
-from rs_shared import STAGING_DIR
-from rs_shared import GITHUB_REF_NAME
+from rs_util_shared import STAGING_DIR
+from rs_util_shared import GITHUB_REF_NAME
 from rs_util_google import EXECUTOR_FILES
 from rs_util_google import download_gdrive_folder
 from rs_util_parsers import single_dir_size
