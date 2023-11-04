@@ -2,6 +2,7 @@ from os.path import join as os_join
 from os.path import basename as os_basename
 from os.path import islink as os_islink
 from os.path import getsize as os_getsize
+from os import sep as os_sep
 from os import listdir as os_listdir
 from os import walk as os_walk
 
@@ -119,6 +120,43 @@ def dir_roughmet_parser(roughmet_directories):
         )
 
     return roughmet_aircrafts
+
+
+def get_dcs_airframe_codenames():
+    dcs_airframe_codenames = []
+    max_depth = 2
+    min_depth = 1
+    for root, dirs, _ in os_walk(STAGING_DIR, topdown=True):
+        if root.count(os_sep) - STAGING_DIR.count(os_sep) < min_depth:
+            continue
+        if root.count(os_sep) - STAGING_DIR.count(os_sep) == max_depth - 1:
+            del dirs[:]
+
+        if "RED STAR BIN" not in root and "RED STAR ROUGHMETS" not in root:
+            dcs_airframe_codenames.append(root)
+    return dcs_airframe_codenames
+
+
+def rs_enum_dirs():
+    dirs_rs_liveries = []
+    dirs_rsc_liveries = []
+    dirs_roughmets = []
+    max_depth = 3
+    min_depth = 2
+    for root, dirs, _ in os_walk(STAGING_DIR, topdown=True):
+        if root.count(os_sep) - STAGING_DIR.count(os_sep) < min_depth:
+            continue
+        if root.count(os_sep) - STAGING_DIR.count(os_sep) == max_depth - 1:
+            del dirs[:]
+        if "BLACK SQUADRON" in root:
+            dirs_rsc_liveries.append(root)
+        elif "RED STAR ROUGHMETS" in root:
+            dirs_roughmets.append(root)
+        elif "RED STAR BIN" not in root:
+            dirs_rs_liveries.append(root)
+        else:
+            pass  # Red Star Bin
+    return dirs_rs_liveries, dirs_rsc_liveries, dirs_roughmets
 
 
 def main():

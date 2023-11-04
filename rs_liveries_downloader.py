@@ -5,9 +5,7 @@ RS Liveries Downloader
 from os.path import join as os_join
 from os.path import isdir as os_isdir
 from os import walk as os_walk
-from os import chdir as os_chdir
 from os import remove as os_remove
-from os import sep as os_sep
 from os import environ
 import shutil
 import fnmatch
@@ -17,15 +15,21 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 import pickle
 
-# Our includes
+# Shared env vars
 from rs_util_shared import STAGING_DIR
 from rs_util_shared import GITHUB_REF_NAME
+
+# Google includes
 from rs_util_google import EXECUTOR_FILES
 from rs_util_google import download_gdrive_folder
+
+# Parsers includes
 from rs_util_parsers import single_dir_size
 from rs_util_parsers import dir_pilot_and_livery_parser
 from rs_util_parsers import dir_roughmet_parser
 from rs_util_parsers import livery_sizes
+from rs_util_parsers import get_dcs_airframe_codenames
+from rs_util_parsers import rs_enum_dirs
 
 
 def main():
@@ -36,7 +40,6 @@ def main():
         if os_isdir(STAGING_DIR):
             shutil.rmtree(STAGING_DIR, ignore_errors=True)
         Path(STAGING_DIR).mkdir(parents=True, exist_ok=True)
-        os_chdir(STAGING_DIR)
 
         for item in (
             folders["Folders_RS"]
@@ -51,7 +54,7 @@ def main():
             )
         EXECUTOR_FILES.shutdown(wait=True)
     else:
-        os_chdir(STAGING_DIR)
+        pass
 
     for root, dirs, files in os_walk(STAGING_DIR):
         for name in files:
@@ -61,36 +64,9 @@ def main():
             else:
                 pass
 
-    dcs_airframe_codenames = []
-    max_depth = 2
-    min_depth = 1
-    for root, dirs, _ in os_walk(STAGING_DIR, topdown=True):
-        if root.count(os_sep) - STAGING_DIR.count(os_sep) < min_depth:
-            continue
-        if root.count(os_sep) - STAGING_DIR.count(os_sep) == max_depth - 1:
-            del dirs[:]
+    dcs_airframe_codenames = get_dcs_airframe_codenames()
+    dirs_rs_liveries, dirs_rsc_liveries, dirs_roughmets = rs_enum_dirs()
 
-        if "RED STAR BIN" not in root and "RED STAR ROUGHMETS" not in root:
-            dcs_airframe_codenames.append(root)
-
-    dirs_rs_liveries = []
-    dirs_rsc_liveries = []
-    dirs_roughmets = []
-    max_depth = 3
-    min_depth = 2
-    for root, dirs, _ in os_walk(STAGING_DIR, topdown=True):
-        if root.count(os_sep) - STAGING_DIR.count(os_sep) < min_depth:
-            continue
-        if root.count(os_sep) - STAGING_DIR.count(os_sep) == max_depth - 1:
-            del dirs[:]
-        if "BLACK SQUADRON" in root:
-            dirs_rsc_liveries.append(root)
-        elif "RED STAR ROUGHMETS" in root:
-            dirs_roughmets.append(root)
-        elif "RED STAR BIN" not in root:
-            dirs_rs_liveries.append(root)
-        else:
-            pass  # Red Star Bin
     dirs_rs_liveries.sort()
     dirs_rsc_liveries.sort()
 
@@ -111,7 +87,6 @@ def main():
 
     roughmets = dir_roughmet_parser(dirs_roughmets)
 
-    os_chdir("..")
     file_loader = FileSystemLoader("templates")
     env = Environment(loader=file_loader)
 
