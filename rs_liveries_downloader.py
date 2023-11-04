@@ -227,10 +227,6 @@ def main():
         Path(STAGING_DIR).mkdir(parents=True, exist_ok=True)
         os.chdir(STAGING_DIR)
 
-        if MINIMAL_SAMPLE_SIZE:
-            folders["Folders_RS"] = [folders["Folders_RS"][0]]
-            folders["Folders_RSC"] = [folders["Folders_RSC"][0]]
-
         for dl_list in [
             folders["Folders_RS"],
             folders["Folders_RSC"],
