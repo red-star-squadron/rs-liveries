@@ -25,14 +25,14 @@ EXECUTOR_FILES = ThreadPoolExecutor(max_workers=16)
 SCRIPT_DIR = os.path.dirname(getsourcefile(lambda: 0))  # type: ignore
 STAGING_DIR = os.path.join(SCRIPT_DIR, "Staging")
 if 'GITHUB_REF_NAME' in os.environ:
-    GH_REF = os.environ['GITHUB_REF_NAME']
+    GITHUB_REF_NAME = os.environ['GITHUB_REF_NAME']
     GH_RUNNER = True
 else:
-    GH_REF = "no_GH_REF"
+    GITHUB_REF_NAME = "no_GITHUB_REF_NAME"
     GH_RUNNER = False
 
-if not GH_REF.startswith("v"):
-    GH_REF = "testing"
+if not GITHUB_REF_NAME.startswith("v"):
+    GITHUB_REF_NAME = "testing"
 
 if os.environ['MINIMAL_SAMPLE_SIZE'].lower() == "true":
     MINIMAL_SAMPLE_SIZE = True
@@ -316,7 +316,7 @@ def main():
         rsc_liveries=rsc_liveries,
         pilots=pilots_list,
         roughmets=roughmets,
-        gh_ref=GH_REF,
+        github_ref_name=GITHUB_REF_NAME,
         size_bin_kb=size_bin_kb)
     with open('Staging/rs-liveries-rendered.nsi',
               'w+', encoding=getpreferredencoding()) as file:

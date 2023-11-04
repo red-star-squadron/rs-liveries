@@ -257,13 +257,13 @@ SectionGroupEnd
 SectionGroup "!Red Star Required Assets"
   Section "Red Star Bin (shared) Directory"
     AddSize {{ size_bin_kb }}
-    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/RED.STAR.BIN" "$TEMP\RED STAR BIN.7z" "$INSTDIR" "RED STAR BIN"
+    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/RED.STAR.BIN" "$TEMP\RED STAR BIN.7z" "$INSTDIR" "RED STAR BIN"
   SectionEnd
   SectionGroup "Red Star RoughMets"
   {%- for roughmet in roughmets %}
     Section "{{ roughmet['roughmet_directory_basename'] }}"
       AddSize {{ roughmet['size'] }}
-      !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ gh_ref }}/{{ roughmet['roughmet_directory_basename'] | replace(" ", ".") }}" "$TEMP\{{ roughmet['roughmet_directory_basename'] }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ roughmet['roughmet_directory_basename'] }}"
+      !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ roughmet['roughmet_directory_basename'] | replace(" ", ".") }}" "$TEMP\{{ roughmet['roughmet_directory_basename'] }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ roughmet['roughmet_directory_basename'] }}"
     SectionEnd
   {%- endfor %}
   SectionGroupEnd
