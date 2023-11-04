@@ -35,34 +35,20 @@ from locale import getpreferredencoding
 
 # Path stuff
 from os.path import join as os_join
-from os.path import dirname as os_dirname
 from os import remove as os_remove
-from os import environ
 from pathlib import Path, PurePath
-from inspect import getsourcefile
 from shutil import rmtree
 
 # concurrency stuff
 from concurrent.futures import ThreadPoolExecutor
 from os import sched_getaffinity
 
-
-if environ["MINIMAL_SAMPLE_SIZE"].lower() == "true":
-    MINIMAL_SAMPLE_SIZE = True
-else:
-    MINIMAL_SAMPLE_SIZE = False
-
-
-if environ["DELETE_AFTER_COMPRESS"].lower() == "true":
-    DELETE_AFTER_COMPRESS = True
-else:
-    DELETE_AFTER_COMPRESS = False
-
-
-SCRIPT_DIR = os_dirname(getsourcefile(lambda: 0))  # type: ignore
-STAGING_DIR = os_join(SCRIPT_DIR, "Staging")
-CHECKSUMS_DIR = os_join(STAGING_DIR, "Checksums")
-COMPRESSED_DIR = os_join(SCRIPT_DIR, "Compressed")
+# Our includes
+from rs_shared import MINIMAL_SAMPLE_SIZE
+from rs_shared import STAGING_DIR
+from rs_shared import CHECKSUMS_DIR
+from rs_shared import COMPRESSED_DIR
+from rs_shared import DELETE_AFTER_COMPRESS
 
 # Set up our threadpool executor so it has NUM_CPUS threads
 available_cpus = len(sched_getaffinity(0))
