@@ -137,7 +137,7 @@ def get_dcs_airframe_codenames():
     return dcs_airframe_codenames
 
 
-def rs_enum_dirs():
+def rs_enumerate_dirs():
     dirs_rs_liveries = []
     dirs_rsc_liveries = []
     dirs_roughmets = []

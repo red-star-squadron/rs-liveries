@@ -7,13 +7,13 @@ from os.path import isdir as os_isdir
 from os import walk as os_walk
 from os import remove as os_remove
 from os import environ
-import shutil
-import fnmatch
+from shutil import rmtree, copy
+from fnmatch import fnmatch
 from locale import getpreferredencoding
 from pathlib import Path
-import yaml
+from yaml import safe_load
 from jinja2 import Environment, FileSystemLoader
-import pickle
+from pickle import dumps
 
 # Shared env vars
 from rs_util_shared import STAGING_DIR
@@ -29,16 +29,16 @@ from rs_util_parsers import dir_pilot_and_livery_parser
 from rs_util_parsers import dir_roughmet_parser
 from rs_util_parsers import livery_sizes
 from rs_util_parsers import get_dcs_airframe_codenames
-from rs_util_parsers import rs_enum_dirs
+from rs_util_parsers import rs_enumerate_dirs
 
 
 def main():
     """Main loop"""
     with open("gdrive_secret.yml", "r", encoding=getpreferredencoding()) as file:
-        folders = yaml.safe_load(file)
+        folders = safe_load(file)
     if environ["SKIP_DOWNLOADS"].lower() != "true":
         if os_isdir(STAGING_DIR):
-            shutil.rmtree(STAGING_DIR, ignore_errors=True)
+            rmtree(STAGING_DIR, ignore_errors=True)
         Path(STAGING_DIR).mkdir(parents=True, exist_ok=True)
 
         for item in (
@@ -58,14 +58,14 @@ def main():
 
     for root, dirs, files in os_walk(STAGING_DIR):
         for name in files:
-            if fnmatch.fnmatch(name.lower(), "readme*.txt"):  # Remove readmes
+            if fnmatch(name.lower(), "readme*.txt"):  # Remove readmes
                 print(f"Removing {os_join(root, name)}")
                 os_remove(os_join(root, name))
             else:
                 pass
 
     dcs_airframe_codenames = get_dcs_airframe_codenames()
-    dirs_rs_liveries, dirs_rsc_liveries, dirs_roughmets = rs_enum_dirs()
+    dirs_rs_liveries, dirs_rsc_liveries, dirs_roughmets = rs_enumerate_dirs()
 
     dirs_rs_liveries.sort()
     dirs_rsc_liveries.sort()
@@ -96,7 +96,7 @@ def main():
     rs_var_dump["roughmets"] = roughmets
 
     with open("rs_var_dump.pickle", "wb") as f:
-        f.write(pickle.dumps(rs_var_dump))
+        f.write(dumps(rs_var_dump))
 
     template = env.get_template("rs-liveries.nsi.j2")
     output = template.render(
@@ -119,11 +119,11 @@ def main():
     ) as file:
         file.write(output)
 
-    shutil.copy("psexec.nsh", os_join(STAGING_DIR, "psexec.nsh"))
-    shutil.copy("rs.ico", os_join(STAGING_DIR, "rs.ico"))
-    shutil.copy("rssplash.bmp", os_join(STAGING_DIR, "rssplash.bmp"))
-    shutil.copy("mig29flyby.wav", os_join(STAGING_DIR, "mig29flyby.wav"))
-    shutil.copy("extract-file.ps1", os_join(STAGING_DIR, "extract-file.ps1"))
+    copy("psexec.nsh", os_join(STAGING_DIR, "psexec.nsh"))
+    copy("rs.ico", os_join(STAGING_DIR, "rs.ico"))
+    copy("rssplash.bmp", os_join(STAGING_DIR, "rssplash.bmp"))
+    copy("mig29flyby.wav", os_join(STAGING_DIR, "mig29flyby.wav"))
+    copy("extract-file.ps1", os_join(STAGING_DIR, "extract-file.ps1"))
 
 
 if __name__ == "__main__":
