@@ -38,18 +38,17 @@ def main():
         Path(STAGING_DIR).mkdir(parents=True, exist_ok=True)
         os_chdir(STAGING_DIR)
 
-        for dl_list in [
-            folders["Folders_RS"],
-            folders["Folders_RSC"],
-            folders["Folders_Bin"],
-            folders["Folders_RoughMets"],
-        ]:
-            for item in dl_list:
-                download_gdrive_folder(
-                    item["gdrive-path"],
-                    os_join(STAGING_DIR, item["dcs-codename"]),
-                    True,
-                )
+        for item in (
+            folders["Folders_RS"]
+            + folders["Folders_RSC"]
+            + folders["Folders_Bin"]
+            + folders["Folders_RoughMets"]
+        ):
+            download_gdrive_folder(
+                item["gdrive-path"],
+                os_join(STAGING_DIR, item["dcs-codename"]),
+                True,
+            )
         EXECUTOR_FILES.shutdown(wait=True)
     else:
         os_chdir(STAGING_DIR)
