@@ -107,14 +107,14 @@
 {%- set livery_size_kb = (asset._size_in_bytes / 1024) | int  %}
 {{ spaces }}    AddSize {{ livery_size_kb }}
 {{ spaces }}    CreateDirectory "$INSTDIR\{{ asset.dcs_codename }}"
-{{ spaces }}    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR\{{ asset.dcs_codename }}" "{{ asset.basename }}"
+{{ spaces }}    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}.7z" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR\{{ asset.dcs_codename }}" "{{ asset.basename }}"
 {%- endmacro -%}
 
 
 {%- macro install_asset_items_shared(asset, spaces, github_ref_name) %}
 {%- set shared_size_kb = (asset._size_in_bytes / 1024) | int  %}    
 {{ spaces }}    AddSize {{ shared_size_kb }}
-{{ spaces }}    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR" "{{ asset_basename}}"
+{{ spaces }}    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}.7z" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR" "{{ asset.basename }}"
 {%- endmacro -%}
 
 
@@ -124,7 +124,7 @@
     {%- set roughmet_size_kb = (asset._roughmets_sizes[roughmet_dir] / 1024) | int  %}    
 {{ spaces }}    Section  "Roughmet {{ roughmet_dir }}" "{{ section_id_roughmet_install }}"
 {{ spaces }}        AddSize {{ roughmet_size_kb }}
-{{ spaces }}        !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ roughmet_dir | replace(" ", ".") }}" "$TEMP\{{ roughmet_dir }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ roughmet_dir }}"
+{{ spaces }}        !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ roughmet_dir | replace(" ", ".") }}.7z" "$TEMP\{{ roughmet_dir }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ roughmet_dir }}"
 {{ spaces }}    SectionEnd
 {%- endfor %}
 {%- endmacro -%}
