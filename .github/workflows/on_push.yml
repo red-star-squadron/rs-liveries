@@ -22,4 +22,4 @@ jobs:
       runner: self-hosted
     secrets:
       GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
-      GOOGLE_DRIVE_FOLDERS: ${{ secrets.GOOGLE_DRIVE_FOLDERS }}
+      ASSETS: ${{ secrets.ASSETS }}
