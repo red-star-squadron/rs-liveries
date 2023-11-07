@@ -20,6 +20,7 @@ from time import time
 from pickle import dumps as pickle_dumps
 from pickle import load as pickle_load
 from uuid import uuid4
+from json import dumps as json_dumps
 
 
 class LiveryAssets:
@@ -52,6 +53,7 @@ class LiveryAssets:
         self.asset_type = asset_type
         self.category_name = category_name
         self._dl_dir = None
+        self._parent = None
         self._size_in_bytes = None
         self._roughmets_dirs = None
         self._roughmets_files = None
@@ -60,29 +62,32 @@ class LiveryAssets:
         self._asset_dirs = None
         self._uuid = dict(
             {
-                "install": uuid4(),
-                "uninstall": uuid4(),
+                "install": str(uuid4()),
+                "uninstall": str(uuid4()),
             }
         )
         self._dependants = None
 
     def __str__(self):
-        return f"basename: {self.basename}\n\
-                 gdrive_id: {self.gdrive_id}\n\
-                 dcs_codename: {self.dcs_codename}\n\
-                 must_contain_strings: {self.must_contain_strings}\n\
-                 must_not_contain_strings: {self.must_not_contain_strings}\n\
-                 asset_type: {self.asset_type}\n\
-                 category_name: {self.category_name}\n\
-                 _dl_dir: {str(self._dl_dir)}\n\
-                 _size_in_bytes: {self._size_in_bytes}\n\
-                 _roughmets_dirs: {self._roughmets_dirs}\n\
-                 _roughmets_files: {self._roughmets_files}\n\
-                 _roughmets_sizes: {self._roughmets_sizes}\n\
-                 _roughmets_uuids: {self._roughmets_uuids}\n\
-                 _asset_dirs: {self._asset_dirs}\n\
-                 _uuid: {self._uuid}\n\
-                 _dependants: {self._dependants}"
+        return (
+            f"basename: {self.basename}"
+            "\ngdrive_id: {self.gdrive_id}"
+            "\ndcs_codename: {self.dcs_codename}"
+            "\nmust_contain_strings: {self.must_contain_strings}"
+            "\nmust_not_contain_strings: {self.must_not_contain_strings}"
+            "\nasset_type: {self.asset_type}"
+            "\ncategory_name: {self.category_name}"
+            "\n_dl_dir: {str(self._dl_dir)}"
+            "\n_parent: {self._parent}"
+            "\n_size_in_bytes: {self._size_in_bytes}"
+            "\n_roughmets_dirs: {self._roughmets_dirs}"
+            "\n_roughmets_files: {self._roughmets_files}"
+            "\n_roughmets_sizes: {self._roughmets_sizes}"
+            "\n_roughmets_uuids: {self._roughmets_uuids}"
+            "\n_asset_dirs: {self._asset_dirs}"
+            "\n_uuid: {self._uuid}"
+            "\n_dependants: {self._dependants}"
+        )
 
     def __iter__(self):
         yield "basename", self.basename
@@ -93,6 +98,7 @@ class LiveryAssets:
         yield "asset_type", self.asset_type
         yield "category_name", self.category_name
         yield "_dl_dir", self._dl_dir
+        yield "_parent", self._parent
         yield "_size_in_bytes", self._size_in_bytes
         yield "_roughmets_dirs", self._roughmets_dirs
         yield "_roughmets_files", self._roughmets_files
@@ -142,8 +148,12 @@ class LiveryAssets:
             return False
 
     @classmethod
-    def get__all_assets(cls):
+    def get_all_assets(cls):
         return cls._all_assets
+
+    @classmethod
+    def print_json(cls):
+        print(json_dumps([dict(d) for d in cls.get_all_assets()], indent=4))
 
     @classmethod
     def get_all_downloaded_assets(cls):
@@ -226,7 +236,7 @@ class LiveryAssets:
                     os_join(asset._dl_dir, asset.basename, roughmet_dir)
                 )
                 asset._roughmets_uuids[roughmet_dir] = dict(
-                    {"install": uuid4(), "uninstall": uuid4()}
+                    {"install": str(uuid4()), "uninstall": str(uuid4())}
                 )
 
     @classmethod
@@ -249,6 +259,14 @@ class LiveryAssets:
                     {directory.removeprefix(asset._dl_dir).strip().replace("/", "")}
                 )
             asset._asset_dirs = sorted(asset_dirs)
+
+    # from_config_file handles this, but we can keep it as a utility I guess
+    @classmethod
+    def _update_assets_parents(cls):
+        for asset_parent in cls.get_all_assets():
+            if asset_parent._dependants:
+                for asset_child in asset_parent._dependants:
+                    asset_child.parent = asset_parent
 
     @classmethod
     def _download_and_parse_assets(cls):
@@ -347,7 +365,7 @@ class LiveryAssets:
         if asset_type not in cls._supported_types:
             raise ValueError(
                 f"type must be one of {cls._supported_types}."
-                + f"\nYou provided {config_item}"
+                f"\nYou provided {config_item}"
             )
 
         # If gdrive_id is provided, we expect basename as well
@@ -355,7 +373,7 @@ class LiveryAssets:
             if not basename:
                 raise ValueError(
                     "If you provide 'gdrive_id', please also provide 'basename'"
-                    + f"\nYou provided: {config_item}"
+                    f"\nYou provided: {config_item}"
                 )
 
         # Livery asset type inferrence and check
@@ -367,22 +385,22 @@ class LiveryAssets:
             if dcs_codename is None or gdrive_id is None or basename is None:
                 raise ValueError(
                     "If 'asset_type' is 'livery', please also provide 'dcs_codename' "
-                    + "'gdrive_id' and 'basename'"
-                    + f"\nYou provided: {config_item}"
+                    "'gdrive_id' and 'basename'"
+                    f"\nYou provided: {config_item}"
                 )
         if asset_type is None:
             if category_name is None:
                 raise ValueError(
                     "If 'asset_type' is not set, you must provide 'category_name'"
-                    + f"\nYou provided: {config_item}"
+                    f"\nYou provided: {config_item}"
                 )
         # Roughmets_multi not suppoerted as category
         # It breaks out into children.
         if asset_type == "roughmets_multi" and config_dependants is not None:
             raise NotImplementedError(
                 "We currently don't support roughmets_multi asset type "
-                + "as an asset with dependants."
-                + f"\nYou provided: {config_item}"
+                "as an asset with dependants."
+                f"\nYou provided: {config_item}"
             )
 
         new_instance = cls(
@@ -396,8 +414,8 @@ class LiveryAssets:
         )
 
         if config_dependants is not None:
-            new_instance._uuid["install_hidden"] = uuid4()
-            new_instance._uuid["uninstall_hidden"] = uuid4()
+            new_instance._uuid["install_hidden"] = str(uuid4())
+            new_instance._uuid["uninstall_hidden"] = str(uuid4())
             new_instance._dependants = []
             for config_dependant in config_dependants:
                 new_instance.add_dependant(

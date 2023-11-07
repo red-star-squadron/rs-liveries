@@ -30,56 +30,64 @@ FunctionEnd
 
 {# Essential resource for this work: https://nsis.sourceforge.io/Managing_Sections_on_Runtime #}
 
-{%- macro  render(assets) %}
+{%- macro render(all_assets) %}
 Function .onSelChange
-{%- for asset in assets %}
-    {{- render_single(asset, none, "install") }}
-    {{- render_single(asset, none, "uninstall") }}
+{%- for asset in all_assets %}
+    {%- if asset._dependants is not none %} {#- Is asset a parent?#}
+
+
+    ; Hidden section install ACTIVATIONS for: {{print_available_name (asset)}}
+        {{- activate_hidden(asset, "install") }}
+
+    ; Hidden section UNinstall ACTIVATIONS for: {{print_available_name (asset)}}
+        {{- activate_hidden(asset, "uninstall") }}
+
+    ; Hidden section install DE-ACTIVATIONS for: {{print_available_name (asset)}}
+        {{- deactivate_hidden(asset, "install") }}
+
+    ; Hidden section UNinstall DE-ACTIVATIONS for: {{print_available_name (asset)}}
+        {{- deactivate_hidden(asset, "uninstall") }}
+    {%- endif %}
 {%- endfor %}
 FunctionEnd
 {%- endmacro%}
 
 
-{%- macro  render_single(asset, parent, section_dict_key) %}
-{%- if asset._dependants is not none%}
-    {%- if parent is not none%}
-        {{- activate_hidden(parent, section_dict_key) }}
-    {%- endif %}
-    {{- deactivate_hidden(asset, section_dict_key) }}
-    {%- for dependant in asset._dependants %}
-        {{- render_single(dependant, asset, section_dict_key) }}
+{%- macro deactivate_hidden(parent, install_uninstall_dict_key) %}
+    {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
+    {%- for child in parent._dependants %}
+        {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
+        {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
+    ${IfNot} ${SectionIsSelected}  {{ '${' }}{{child._uuid[install_uninstall_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+        {%- else %}
+    ${AndIfNot} ${SectionIsSelected}  {{ '${' }}{{child._uuid[install_uninstall_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+        {%- endif %}
     {%- endfor %}
+        !insertmacro UnselectSection {{ '${' }}{{parent._uuid[install_uninstall_dict_key + "_hidden"]}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
+    ${EndIf}
+{%- endmacro %}
+
+
+{%- macro activate_hidden(parent, install_uninstall_dict_key) %}
+    {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
+    {%- for child in parent._dependants %}
+        {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
+        {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
+    ${If} ${SectionIsSelected}  {{ '${' }}{{child._uuid[install_uninstall_dict_key]}}{{ '}' }} ; Name: {{ print_available_name(child) }}
+        {%- else %}
+    ${OrIf} ${SectionIsSelected}  {{ '${' }}{{child._uuid[install_uninstall_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+        {%- endif %}
+    {%- endfor %}
+        !insertmacro SelectSection {{ '${' }}{{parent._uuid[install_uninstall_dict_key + "_hidden"]}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
+    ${EndIf}
+{%- endmacro %}
+
+
+{#- helper function to print the available name or category_name #}
+{%- macro print_available_name(asset) -%}
+{%- if asset.category_name is not none -%}
+{{- asset.category_name}}
+{%- else %}
+{{- asset.basename}}
 {%- endif %}
-{%- endmacro%}
-
-
-{%- macro deactivate_hidden(parent, section_dict_key) %}
-    {# ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
-    {%- for child in parent._dependants %}
-    {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
-        {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
-    ${IfNot} ${SectionIsSelected}  {{ '${' }}{{child._uuid[section_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
-        {%- else %}
-    ${AndIfNot} ${SectionIsSelected}  {{ '${' }}{{child._uuid[section_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
-        {%- endif %}
-    {%- endfor %}
-        !insertmacro UnselectSection {{ '${' }}{{parent._uuid[section_dict_key + "_hidden"]}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
-    ${EndIf}      
-{%- endmacro -%}
-
-
-
-
-{%- macro activate_hidden(parent, section_dict_key) %}
-    {# ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
-    {%- for child in parent._dependants %}
-    {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
-        {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
-    ${If} ${SectionIsSelected}  {{ '${' }}{{child._uuid[section_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
-        {%- else %}
-    ${OrIf} ${SectionIsSelected}  {{ '${' }}{{child._uuid[section_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
-        {%- endif %}
-    {%- endfor %}
-        !insertmacro SelectSection {{ '${' }}{{parent._uuid[section_dict_key + "_hidden"]}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
-    ${EndIf}      
-{%- endmacro -%}
+{%- endmacro %}

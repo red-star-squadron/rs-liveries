@@ -17,7 +17,7 @@ Icon "rs.ico"
 ;--------------------------------
 
 ; This might help with large installs
-FileBufSize 256
+; FileBufSize 256
 
 ; Let's compress as much as possible. /SOLID breaks the installer in case of too many big files (2gb +)!
 ; SetCompressor /FINAL zlib
@@ -228,19 +228,8 @@ Section "-Clean up our mistakes"
 SectionEnd
 
 {%- import 'asset_handler.j2' as asset_handler %}
+{{- asset_handler.render(top_level_assets, github_ref_name) }}
 
-
-SectionGroup "Installation"
-{%- for asset in assets %}
-{{- asset_handler.process_asset(asset, "    ", github_ref_name, "install" ) }}
-{%- endfor %}
-SectionGroupEnd
-
-SectionGroup "Removal"
-{%- for asset in assets %}
-{{- asset_handler.process_asset(asset, "    ", github_ref_name, "uninstall") }}
-{%- endfor %}
-SectionGroupEnd
 
 Section "Modify Pilot Priority"
   DetailPrint "Modifying pilot priorities..."
@@ -254,4 +243,4 @@ SectionEnd
 
 {# Must come after all Sections or we'll get an error #}
 {%- import "onclick_handler.j2" as onclick_handler %}
-{{- onclick_handler.render(assets) }}
+{{- onclick_handler.render(all_assets) }}

@@ -28,7 +28,8 @@ def main():
 
     template = jinja_env.get_template("rs-liveries.nsi.j2")
     output = template.render(
-        assets=[dict(a) for a in LiveryAssets._top_level_assets],
+        top_level_assets=[dict(a) for a in LiveryAssets._top_level_assets],
+        all_assets=[dict(a) for a in LiveryAssets._all_assets],
         pilots=LiveryAssets.get_all_pilots(),
         github_ref_name=GITHUB_REF_NAME,
         size_bin_kb=LiveryAssets.get_total_size_in_bytes(),

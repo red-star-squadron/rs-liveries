@@ -1,3 +1,18 @@
+
+{%- macro render(top_level_assets, github_ref_name)%}
+SectionGroup "Installation"
+{%- for asset in top_level_assets %}
+{{- process_asset(asset, "    ", github_ref_name, "install" ) }}
+{%- endfor %}
+SectionGroupEnd
+
+SectionGroup "Removal"
+{%- for asset in top_level_assets %}
+{{- process_asset(asset, "    ", github_ref_name, "uninstall") }}
+{%- endfor %}
+SectionGroupEnd
+{%- endmacro%}
+
 {%- macro process_asset(asset, spaces, github_ref_name, install_or_uninstall) %}
     {{- section_or_section_group_open(asset, spaces, install_or_uninstall) }}
     {{- process_asset_items_wrapper(asset, spaces, github_ref_name, install_or_uninstall) }}
