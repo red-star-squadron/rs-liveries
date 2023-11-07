@@ -67,6 +67,8 @@ jobs:
         run: echo "$GOOGLE_CREDS" > credentials.json
       - name: gdrive_secret.yml
         run: echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
+      - name: assets.yml
+        run: echo "$ASSETS" > assets.yml
       - name: Run the downloader
         run: pipenv run python rs_liveries_downloader.py
       - uses: actions/upload-artifact@v3
