@@ -1,0 +1,85 @@
+{# Render function should accept a list of ALL assets, not just the top-level ones #}
+
+{# We are trying to simulate this:
+
+SectionGroup "Parent Group" parentGroupId
+    Section "-hiddenBoi" hiddenBoiId
+    SectionEnd
+    Section "visible boi 1" visibleBoi1
+    SectionEnd
+    Section "visible boi 2" visibleBoi2
+    SectionEnd
+SectionGroupEnd
+
+Function .onSelChange
+
+    ${IfNot} ${SectionIsSelected}  ${visibleBoi1}
+    ${AndIfNot} ${SectionIsSelected}  ${visibleBoi2}
+        !insertmacro UnselectSection ${hiddenBoiId}
+        MessageBox MB_OK "Auto DESELECTED HiddenBoi"
+    ${EndIf}
+
+    ${If} ${SectionIsPartiallySelected}  ${parentGroupId}
+    ${OrIf} ${SectionIsSelected}  ${parentGroupId}
+        !insertmacro SelectSection ${hiddenBoiId}
+        MessageBox MB_OK "AutoSelected HiddenBoi"
+    ${EndIf}
+
+FunctionEnd
+#}
+
+{# Essential resource for this work: https://nsis.sourceforge.io/Managing_Sections_on_Runtime #}
+
+{%- macro  render(assets) %}
+Function .onSelChange
+{%- for asset in assets %}
+    {{- render_single(asset, none, "install") }}
+    {{- render_single(asset, none, "uninstall") }}
+{%- endfor %}
+FunctionEnd
+{%- endmacro%}
+
+
+{%- macro  render_single(asset, parent, section_dict_key) %}
+{%- if asset._dependants is not none%}
+    {%- if parent is not none%}
+        {{- activate_hidden(parent, section_dict_key) }}
+    {%- endif %}
+    {{- deactivate_hidden(asset, section_dict_key) }}
+    {%- for dependant in asset._dependants %}
+        {{- render_single(dependant, asset, section_dict_key) }}
+    {%- endfor %}
+{%- endif %}
+{%- endmacro%}
+
+
+{%- macro deactivate_hidden(parent, section_dict_key) %}
+    {# ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
+    {%- for child in parent._dependants %}
+    {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
+        {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
+    ${IfNot} ${SectionIsSelected}  {{ '${' }}{{child._uuid[section_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+        {%- else %}
+    ${AndIfNot} ${SectionIsSelected}  {{ '${' }}{{child._uuid[section_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+        {%- endif %}
+    {%- endfor %}
+        !insertmacro UnselectSection {{ '${' }}{{parent._uuid[section_dict_key + "_hidden"]}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
+    ${EndIf}      
+{%- endmacro -%}
+
+
+
+
+{%- macro activate_hidden(parent, section_dict_key) %}
+    {# ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
+    {%- for child in parent._dependants %}
+    {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
+        {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
+    ${If} ${SectionIsSelected}  {{ '${' }}{{child._uuid[section_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+        {%- else %}
+    ${OrIf} ${SectionIsSelected}  {{ '${' }}{{child._uuid[section_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+        {%- endif %}
+    {%- endfor %}
+        !insertmacro SelectSection {{ '${' }}{{parent._uuid[section_dict_key + "_hidden"]}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
+    ${EndIf}      
+{%- endmacro -%}

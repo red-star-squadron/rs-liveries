@@ -47,9 +47,9 @@ function DescriptionLuaReplace {
     }
 }
 
-{%- for livery in liveries %}
-DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ livery["livery_base_dirname"] }}\description.lua" -is_basename $true
-    {%- for pilot_dir in livery["livery_pilot_dirs"] %}
-DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ livery["dcs_airframe_codename"] }}\{{ pilot_dir }}\description.lua" -is_basename $false
+{%- for asset in assets %}
+DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ asset.dcs_codename }}\{{ asset.basename }}\description.lua" -is_basename $true
+    {%- for pilot_dir in asset.get_pilot_dirs() %}
+DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ asset.dcs_codename }}\{{ pilot_dir }}\description.lua" -is_basename $false
     {%- endfor %}
 {%- endfor %}

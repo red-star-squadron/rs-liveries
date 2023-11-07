@@ -73,11 +73,9 @@ jobs:
         with:
           name: Rendered scripts
           path: |
-            Staging/rs-liveries-rendered.nsi
-            Staging/rs-liveries-pilot-priorities.ps1
+            Staging/*.nsi
+            Staging/*.ps1
 
-      - name: Compress and checksum bin, roughmets and liveries
-        run: pipenv run python rs_liveries_compress_and_checksum.py
       - uses: actions/upload-artifact@v3
         with:
           name: Checksums

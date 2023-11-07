@@ -1,7 +1,27 @@
 from os.path import dirname as os_dirname
 from os.path import join as os_join
-from inspect import getsourcefile
+from os.path import getsize as os_getsize
+from os.path import isdir as os_isdir
+from os.path import islink as os_islink
+
+from os import sep as os_sep
 from os import environ
+from os import walk as os_walk
+from os import remove as os_remove
+
+from inspect import getsourcefile
+from shutil import rmtree
+from glob import glob
+
+import logging
+
+LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.INFO)
+logger_console_handler = logging.StreamHandler()
+logger_console_handler.setLevel(logging.DEBUG)
+logger_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+logger_console_handler.setFormatter(logger_formatter)
+LOGGER.addHandler(logger_console_handler)
 
 
 SCRIPT_DIR = os_dirname(getsourcefile(lambda: 0))  # type: ignore
@@ -30,6 +50,44 @@ if environ["DELETE_AFTER_COMPRESS"].lower() == "true":
     DELETE_AFTER_COMPRESS = True
 else:
     DELETE_AFTER_COMPRESS = False
+
+
+def dir_list_one_deep(dirname):
+    dirlist = []
+    max_depth = 2
+    min_depth = 1
+    for root, dirs, _ in os_walk(dirname, topdown=True):
+        if root.count(os_sep) - dirname.count(os_sep) < min_depth:
+            continue
+        if root.count(os_sep) - dirname.count(os_sep) == max_depth - 1:
+            del dirs[:]
+        dirlist.append(root)
+    return dirlist
+
+
+def single_dir_size(dirname):
+    """
+    Returns size of a single dir in bytes
+    Stolen from: https://stackoverflow.com/a/1392549
+    """
+    total_size = 0
+    for dirpath, _, filenames in os_walk(dirname):
+        for fileee in filenames:
+            filepath = os_join(dirpath, fileee)
+            # skip if it is symbolic link
+            if not os_islink(filepath):
+                total_size += os_getsize(filepath)
+    return total_size
+
+
+def nuke_dir_contents(dirname):
+    if dirname:  # Failsafe so we don't nuke the root dir
+        files = glob(dirname + "/*")  # We just nuke regular files
+        for f in files:
+            if os_isdir(f):
+                rmtree(f)
+            else:
+                os_remove(f)
 
 
 def main():
