@@ -232,7 +232,7 @@ SectionEnd
 
 SectionGroup "Installation"
 {%- for asset in assets %}
-{{- asset_handler.process_asset(asset, "    ", githgithub_ref_name, "install" ) }}
+{{- asset_handler.process_asset(asset, "    ", github_ref_name, "install" ) }}
 {%- endfor %}
 SectionGroupEnd
 
