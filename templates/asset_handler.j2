@@ -50,9 +50,9 @@ SectionGroupEnd
 {#- We need this wrapper because NSIS won't let us do actions inside a SectionGroup#}
 {#- So we're making a category child Section for any asset that has dependants (SectionGroup). #}
 {%- macro process_asset_items_wrapper(asset, spaces, github_ref_name, install_or_uninstall) %}
-{%- set section_id_category =  asset._id.uninstall_bespoke if install_or_uninstall == "uninstall" else asset._id.install_bespoke%}
+{%- set section_id_bespoke =  asset._id.uninstall_bespoke if install_or_uninstall == "uninstall" else asset._id.install_bespoke%}
     {%- if asset._dependants is not none and asset._dl_dir is not none %}
-{{ spaces }}    Section {{ "/o" if install_or_uninstall =="uninstall" else pass }} "DEPENDANCY: {{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ section_id_category }}"
+{{ spaces }}    Section {{ "/o" if install_or_uninstall =="uninstall" else pass }} "DEPENDANCY: {{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ section_id_bespoke }}"
         {{- process_asset_items(asset, spaces + "    ", github_ref_name, install_or_uninstall) }}
 {{ spaces }}    SectionEnd
     {%- else %}

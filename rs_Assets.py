@@ -135,18 +135,6 @@ class LiveryAssets:
             pilot_dir for pilot_dir in self._asset_dirs if self.basename != pilot_dir
         ]
 
-    def is_category(self):
-        if self._dependants is not None:
-            return True
-        else:
-            return False
-
-    def is_category_with_a_download(self):
-        if self._dependants is not None and self._dl_dir is not None:
-            return True
-        else:
-            return False
-
     @classmethod
     def get_all_assets(cls):
         return cls._all_assets
@@ -184,14 +172,6 @@ class LiveryAssets:
         assets = []
         for asset in cls._all_assets:
             if asset.dcs_codename:
-                assets.append(asset)
-        return assets
-
-    @classmethod
-    def get_assets_with_dependants(cls):
-        assets = []
-        for asset in cls._all_assets:
-            if asset._dependants:
                 assets.append(asset)
         return assets
 
