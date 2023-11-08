@@ -178,8 +178,11 @@ Page custom nsDialogsPage nsDialogsPageLeave
     ${Endif}
   ${EndIf}
   DetailPrint "Deleting previous version of ${BaseName}"
-  ; This won't actually clean up roughmets but will work for BIN and liveries. Only a problem if a newer version has fewer files than the older version.
+  ; This won't actually clean up individual roughmets but will work for shared folders and livery folders.
+  ; It will remove the roughmets checksum dir, though
+  ; potential problem if we get a roughmets update with less files than the original
   RMDir /r "${ExtractPath}\${BaseName}"
+  CreateDirectory "${ExtractPath}"
   DetailPrint "Downloading ${URL}.7z to ${ArchivePath}"
   NScurl::http GET "${URL}.7z" "${ArchivePath}" /INSIST /POPUP /END
   Pop $0 ; Status text ("OK" for success)

@@ -121,7 +121,6 @@ SectionGroupEnd
 {%- macro install_asset_items_livery(asset, spaces, github_ref_name) %}
 {%- set livery_size_kb = (asset._size_in_bytes / 1024) | int  %}
 {{ spaces }}    AddSize {{ livery_size_kb }}
-{{ spaces }}    CreateDirectory "$INSTDIR\{{ asset.dcs_codename }}"
 {{ spaces }}    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR\{{ asset.dcs_codename }}" "{{ asset.basename }}"
 {%- endmacro -%}
 
