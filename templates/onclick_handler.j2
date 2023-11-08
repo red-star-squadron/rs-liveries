@@ -1,0 +1,88 @@
+{# Render function should accept a list of ALL assets, not just the top-level ones #}
+
+{# We are trying to simulate this:
+
+SectionGroup "Parent Group" parentGroupId
+    Section "-hiddenBoi" hiddenBoiId
+    SectionEnd
+    Section "visible boi 1" visibleBoi1
+    SectionEnd
+    Section "visible boi 2" visibleBoi2
+    SectionEnd
+SectionGroupEnd
+
+Function .onSelChange
+
+    ${IfNot} ${SectionIsSelected}  ${visibleBoi1}
+    ${AndIfNot} ${SectionIsSelected}  ${visibleBoi2}
+        !insertmacro UnselectSection ${hiddenBoiId}
+        MessageBox MB_OK "Auto DESELECTED HiddenBoi"
+    ${EndIf}
+
+    ${If} ${SectionIsPartiallySelected}  ${parentGroupId}
+    ${OrIf} ${SectionIsSelected}  ${parentGroupId}
+        !insertmacro SelectSection ${hiddenBoiId}
+        MessageBox MB_OK "AutoSelected HiddenBoi"
+    ${EndIf}
+
+FunctionEnd
+#}
+
+{# Essential resource for this work: https://nsis.sourceforge.io/Managing_Sections_on_Runtime #}
+
+{%- macro render(all_assets) %}
+Function .onSelChange
+{%- for asset in all_assets %}
+    {%- if asset._dependants is not none %} {#- Is asset a parent?#}
+        {%- if asset._dl_dir is not none%} {#- Does the parent have a downloadable?#}
+    ; Hidden section install ACTIVATIONS for: {{print_available_name(asset)}}
+            {{- dependancy_install_select_parent(asset) }}
+
+
+    ; Hidden section uninstall DE-ACTIVATIONS for: {{print_available_name(asset)}}
+            {{- dependancy_uninstall_select_children(asset) }}
+            {%- endif %}
+    {%- endif %}
+{%- endfor %}
+FunctionEnd
+{%- endmacro%}
+
+
+{#- Selects a dependancy if any of the dependants are clicked #}
+{#- Applies to install items only #}
+{%- macro dependancy_install_select_parent(parent) %}
+    {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
+    {%- for child in parent._dependants %}
+        {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
+        {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
+    ${If} ${SectionIsSelected}  {{ '${' }}{{child._id.install}}{{ '}' }} ; child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+        {%- else %}
+    ${OrIf} ${SectionIsSelected}  {{ '${' }}{{child._id.install}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+        {%- endif %}
+    {%- endfor %}
+        !insertmacro SelectSection {{ '${' }}{{parent._id.install_bespoke}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
+    ${EndIf}
+{%- endmacro %}
+
+
+{#- Selects all children if the dependancy is clicked #}
+{#- Applies to UN-install items only #}
+{%- macro dependancy_uninstall_select_children(parent) %}
+    {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
+    ${If} ${SectionIsSelected}  {{ '${' }}{{parent._id.uninstall_bespoke}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
+    {%- for child in parent._dependants %}
+        {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
+        !insertmacro SelectSection {{ '${' }}{{child._id.uninstall}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+    {%- endfor %}
+    ${EndIf}
+{%- endmacro %}
+
+
+{#- helper function to print the available name or category_name #}
+{%- macro print_available_name(asset) -%}
+{%- if asset.category_name is not none -%}
+{{- asset.category_name}}
+{%- else %}
+{{- asset.basename}}
+{%- endif %}
+{%- endmacro %}

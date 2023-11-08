@@ -12,12 +12,12 @@ on:
     secrets:
       GOOGLE_CREDS:
         required: true
-      GOOGLE_DRIVE_FOLDERS:
+      ASSETS:
         required: true
 
 env:
   GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
-  GOOGLE_DRIVE_FOLDERS: ${{ secrets.GOOGLE_DRIVE_FOLDERS }}
+  ASSETS: ${{ secrets.ASSETS }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -64,20 +64,18 @@ jobs:
       - name: sync pipenv
         run: pipenv sync
       - name: credentials.json
-        run: echo "$GOOGLE_CREDS" > credentials.json
-      - name: gdrive_secret.yml
-        run: echo "$GOOGLE_DRIVE_FOLDERS" > gdrive_secret.yml
+        run: echo "$ASSETS" > credentials.json
+      - name: assets.yml
+        run: echo "$ASSETS" > assets.yml
       - name: Run the downloader
         run: pipenv run python rs_liveries_downloader.py
       - uses: actions/upload-artifact@v3
         with:
           name: Rendered scripts
           path: |
-            Staging/rs-liveries-rendered.nsi
-            Staging/rs-liveries-pilot-priorities.ps1
+            Staging/*.nsi
+            Staging/*.ps1
 
-      - name: Compress and checksum bin, roughmets and liveries
-        run: pipenv run python rs_liveries_compress_and_checksum.py
       - uses: actions/upload-artifact@v3
         with:
           name: Checksums
@@ -122,6 +120,9 @@ jobs:
         with:
           prerelease: true
           tag: testing
+          makeLatest: false
+          body: "DO NOT USE"
+          name: "testing - do not use"
 
       - name: Upload Assets to Github Releases (non-main release)
         uses: softprops/action-gh-release@v1

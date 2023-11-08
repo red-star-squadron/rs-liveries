@@ -17,7 +17,7 @@ Icon "rs.ico"
 ;--------------------------------
 
 ; This might help with large installs
-FileBufSize 256
+; FileBufSize 256
 
 ; Let's compress as much as possible. /SOLID breaks the installer in case of too many big files (2gb +)!
 ; SetCompressor /FINAL zlib
@@ -178,8 +178,11 @@ Page custom nsDialogsPage nsDialogsPageLeave
     ${Endif}
   ${EndIf}
   DetailPrint "Deleting previous version of ${BaseName}"
-  ; This won't actually clean up roughmets but will work for BIN and liveries. Only a problem if a newer version has fewer files than the older version.
+  ; This won't actually clean up individual roughmets but will work for shared folders and livery folders.
+  ; It will remove the roughmets checksum dir, though
+  ; potential problem if we get a roughmets update with less files than the original
   RMDir /r "${ExtractPath}\${BaseName}"
+  CreateDirectory "${ExtractPath}"
   DetailPrint "Downloading ${URL}.7z to ${ArchivePath}"
   NScurl::http GET "${URL}.7z" "${ArchivePath}" /INSIST /POPUP /END
   Pop $0 ; Status text ("OK" for success)
@@ -225,66 +228,22 @@ Section "-Clean up our mistakes"
   RMDir /r "$InstDir\RED STAR CHECKSUMS"
 
   ; next mistake cleanup below
-
 SectionEnd
 
-SectionGroup "Remove Red Star Liveries"
-  Section /o "Remove Red Star Bin"
-    RMDir /r "$INSTDIR\RED STAR BIN"
-  SectionEnd
-  SectionGroup "Remove RoughMets"
-  {%- for roughmet in roughmets %}
-    Section /o "{{ roughmet['roughmet_directory_basename'] }}"
-    {%- for roughmet_filename in roughmet['files'] %}
-      Delete "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_filename }}"
-    {%- endfor %}
-    RMDir /r "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet['roughmet_directory_basename'] }}"
-    SectionEnd
-  {%- endfor %}
-  SectionGroupEnd
-  SectionGroup "Remove Red Star Camo Liveries"
-  {%- for livery in rs_liveries %}
-    {%- include 'rs-liveries.nsi_removal.j2' %}
-  {%- endfor %}
-  SectionGroupEnd
-  SectionGroup "Remove Red Star Competitive Liveries"
-  {%- for livery in rsc_liveries %}
-    {%- include 'rs-liveries.nsi_removal.j2' %}
-  {%- endfor %}
-  SectionGroupEnd
-SectionGroupEnd
+{%- import 'asset_handler.j2' as asset_handler %}
+{{- asset_handler.render(top_level_assets, github_ref_name) }}
 
-SectionGroup "!Red Star Required Assets"
-  Section "Red Star Bin (shared) Directory"
-    AddSize {{ size_bin_kb }}
-    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/RED.STAR.BIN" "$TEMP\RED STAR BIN.7z" "$INSTDIR" "RED STAR BIN"
-  SectionEnd
-  SectionGroup "Red Star RoughMets"
-  {%- for roughmet in roughmets %}
-    Section "{{ roughmet['roughmet_directory_basename'] }}"
-      AddSize {{ roughmet['size'] }}
-      !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ roughmet['roughmet_directory_basename'] | replace(" ", ".") }}" "$TEMP\{{ roughmet['roughmet_directory_basename'] }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ roughmet['roughmet_directory_basename'] }}"
-    SectionEnd
-  {%- endfor %}
-  SectionGroupEnd
-SectionGroupEnd
-
-SectionGroup "Red Star"
-  {%- for livery in rs_liveries %}
-    {%- include 'rs-liveries.nsi_livery_section.j2' %}
-  {%- endfor %}
-SectionGroupEnd
-
-SectionGroup "Red Star BLACK SQUADRON"
-  {%- for livery in rsc_liveries %}
-  {%- include 'rs-liveries.nsi_livery_section.j2' %}
-  {%- endfor %}
-SectionGroupEnd
 
 Section "Modify Pilot Priority"
+  DetailPrint "Modifying pilot priorities..."
   ${PowerShellExecFileLog} '"$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   IfErrors 0 +2
     Abort "There was a problem with the pilot priorities script. Aborting. You can probably use the liveries as normal."
   ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
   ; MessageBox MB_OK "$PilotSelected"
 SectionEnd
+
+
+{# Must come after all Sections or we'll get an error #}
+{%- import "onclick_handler.j2" as onclick_handler %}
+{{- onclick_handler.render(all_assets) }}

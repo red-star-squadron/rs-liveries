@@ -17,8 +17,6 @@ sudo mount -t tmpfs -o uid=1000 tmpfs Compressed/
 
 pipenv run python rs_liveries_downloader.py
 
-pipenv run python rs_liveries_compress_and_checksum.py
-
 cp 7za.exe Staging/
 
 pushd Staging || exit 1

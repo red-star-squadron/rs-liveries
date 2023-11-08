@@ -46,7 +46,6 @@ from os import sched_getaffinity
 
 # Our includes
 from rs_util_shared import MINIMAL_SAMPLE_SIZE
-from rs_util_shared import STAGING_DIR
 from rs_util_shared import CHECKSUMS_DIR
 from rs_util_shared import COMPRESSED_DIR
 from rs_util_shared import DELETE_AFTER_COMPRESS
@@ -107,39 +106,38 @@ def sevenz_archive(entrypoint, files_and_or_dirs, destination_file):
     return
 
 
-def main():
-    rs_var_dump = load_rs_var_dump()
-    rs_liveries = rs_var_dump["rs_liveries"]
-    rsc_liveries = rs_var_dump["rsc_liveries"]
-    roughmets = rs_var_dump["roughmets"]
+def compress_and_checksum(assets):
+    for asset in assets:
+        if asset.asset_type == "shared":
+            EXECUTOR.submit(
+                sevenz_archive,
+                asset._dl_dir,
+                [asset.basename],
+                os_join(COMPRESSED_DIR, f"{asset.basename}.7z"),
+            )
 
-    # Red Star BIN
-    EXECUTOR.submit(
-        sevenz_archive,
-        STAGING_DIR,
-        ["RED STAR BIN"],
-        os_join(COMPRESSED_DIR, "RED STAR BIN.7z"),
-    )
+        if asset.asset_type == "roughmets_multi":
+            for roughmets_dir, roughmets_files in asset._roughmets_files.items():
+                EXECUTOR.submit(
+                    sevenz_archive,
+                    os_join(asset._dl_dir, asset.basename, roughmets_dir),
+                    roughmets_files,
+                    os_join(COMPRESSED_DIR, f"{roughmets_dir}.7z"),
+                )
 
-    # Red Star ROUGHMETS
-    for roughmet in roughmets:
-        EXECUTOR.submit(
-            sevenz_archive,
-            roughmet["roughmet_directory"],
-            roughmet["files"],
-            os_join(COMPRESSED_DIR, f'{roughmet["roughmet_directory_basename"]}.7z'),
-        )
-
-    # Red Star Liveries (camo and black)
-    for livery in rs_liveries + rsc_liveries:
-        EXECUTOR.submit(
-            sevenz_archive,
-            os_join(STAGING_DIR, livery["dcs_airframe_codename"]),
-            [livery["livery_base_dirname"]] + livery["livery_pilot_dirs"],
-            os_join(COMPRESSED_DIR, f'{livery["livery_base_dirname"]}.7z'),
-        )
+        if asset.asset_type == "livery":
+            EXECUTOR.submit(
+                sevenz_archive,
+                asset._dl_dir,
+                asset._asset_dirs,
+                os_join(COMPRESSED_DIR, f"{asset.basename}.7z"),
+            )
 
     EXECUTOR.shutdown(wait=True)
+
+
+def main():
+    pass
 
 
 if __name__ == "__main__":

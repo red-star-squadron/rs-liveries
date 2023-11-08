@@ -6,3 +6,5 @@ Compress*
 gdrive_secret.yml
 7za.exe
 *.pickle
+assets.yml
+__pycache__
