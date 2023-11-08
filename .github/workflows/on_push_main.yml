@@ -14,7 +14,7 @@ jobs:
   call_reusable_workflow:
     uses: ./.github/workflows/reusable_workflow.yml
     with:
-      runner: self-hosted
+      runner: 'ubuntu-22.04'
       minimal_sample_size: true
     secrets:
       GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
