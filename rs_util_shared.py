@@ -34,18 +34,19 @@ GITHUB_REF_NAME = "no_GITHUB_REF_NAME"
 if "GITHUB_REF_NAME" in environ:
     GITHUB_REF_NAME = environ["GITHUB_REF_NAME"]
 
-
 if not GITHUB_REF_NAME.startswith("v"):
     GITHUB_REF_NAME = "testing"
 
-MINIMAL_SAMPLE_SIZE = False
-if environ["MINIMAL_SAMPLE_SIZE"].lower() == "true":
-    MINIMAL_SAMPLE_SIZE = True
 
+MINIMAL_SAMPLE_SIZE = False
+if "MINIMAL_SAMPLE_SIZE" in environ:
+    if environ["MINIMAL_SAMPLE_SIZE"].lower() == "true":
+        MINIMAL_SAMPLE_SIZE = True
 
 DELETE_AFTER_COMPRESS = True
-if environ["DELETE_AFTER_COMPRESS"].lower() == "false":
-    DELETE_AFTER_COMPRESS = False
+if "DELETE_AFTER_COMPRESS" in environ:
+    if environ["DELETE_AFTER_COMPRESS"].lower() == "false":
+        DELETE_AFTER_COMPRESS = False
 
 
 def dir_list_one_deep(dirname):
