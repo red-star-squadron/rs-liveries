@@ -4,7 +4,9 @@ Staging*
 Compress*
 .DS_Store
 gdrive_secret.yml
-7za.exe
+*.exe
 *.pickle
 assets.yml
 __pycache__
+sample.nsi
+
