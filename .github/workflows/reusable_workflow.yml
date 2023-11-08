@@ -31,8 +31,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Remove .env file
-        run: rm .env
       - name: Maximize build space
         if: ${{ inputs.runner != 'self-hosted' }}
         uses: easimon/maximize-build-space@master
@@ -48,6 +46,8 @@ jobs:
         run: sudo apt install -y nsis wget unzip p7zip-full git
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Remove .env file
+        run: rm .env
       - name: Install the newadvsplash plugin
         run: |
           wget https://nsis.sourceforge.io/mediawiki/images/c/cf/NewAdvSplash.zip
