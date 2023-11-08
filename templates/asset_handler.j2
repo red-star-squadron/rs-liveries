@@ -21,7 +21,9 @@
 
 {%- macro section_or_section_group_open(asset, spaces) %}
 {%- if asset._dependants is not none or asset.asset_type == "roughmets_multi"%}
-{{ spaces }}SectionGroup "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install }}"
+{%- set prefix_bold = "!" if asset._dl_dir is not none and asset.asset_type != "roughmets_multi" else "" %}
+{%- set prefix_dependancy = "DEPENDANCY: " if asset._dl_dir is not none else ""%}
+{{ spaces }}SectionGroup "{{ prefix_bold }}{{ prefix_dependancy }}{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install }}"
 {%- else%}
 {{ spaces }}Section "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install }}"
 {%- endif%}
@@ -41,7 +43,7 @@
 {#- So we're making a category child Section for any asset that has dependants (SectionGroup). #}
 {%- macro process_asset_items_wrapper(asset, spaces) %}
     {%- if asset._dependants is not none and asset._dl_dir is not none %}
-{{ spaces }}    Section  "DEPENDANCY: {{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install_bespoke }}"
+{{ spaces }}    Section  "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install_bespoke }}"
         {{- process_asset_items(asset, spaces + "    ") }}
 {{ spaces }}    SectionEnd
     {%- else %}
