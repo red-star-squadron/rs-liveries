@@ -73,10 +73,10 @@ FunctionEnd
 {%- macro dependancy_uninstall_select_children(parent) %}
     {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
     ${If} ${SectionIsSelected}  {{ '${' }}{{parent._id.uninstall_bespoke}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
-    {% for child in parent._dependants %}
+    {%- for child in parent._dependants %}
         {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
         !insertmacro SelectSection {{ '${' }}{{child._id.uninstall}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
-    {% endfor %}
+    {%- endfor %}
     ${EndIf}
 {%- endmacro %}
 
