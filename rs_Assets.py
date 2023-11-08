@@ -60,7 +60,7 @@ class LiveryAssets:
         self._roughmets_sizes = None
         self._roughmets_ids = None
         self._asset_dirs = None
-        self._id = dict(
+        self._ids = dict(
             {
                 "install": str(uuid4()),
                 "uninstall": str(uuid4()),
@@ -85,7 +85,7 @@ class LiveryAssets:
             "\n_roughmets_sizes: {self._roughmets_sizes}"
             "\n_roughmets_ids: {self._roughmets_ids}"
             "\n_asset_dirs: {self._asset_dirs}"
-            "\n_id: {self._id}"
+            "\n_ids: {self._ids}"
             "\n_dependants: {self._dependants}"
         )
 
@@ -105,7 +105,7 @@ class LiveryAssets:
         yield "_roughmets_sizes", self._roughmets_sizes
         yield "_roughmets_ids", self._roughmets_ids
         yield "_asset_dirs", self._asset_dirs
-        yield "_id", self._id
+        yield "_ids", self._ids
         if self._dependants:
             yield "_dependants", [dict(d) for d in self._dependants]
         else:
@@ -394,8 +394,8 @@ class LiveryAssets:
         )
 
         if config_dependants is not None:
-            new_instance._id["install_bespoke"] = str(uuid4())
-            new_instance._id["uninstall_bespoke"] = str(uuid4())
+            new_instance._ids["install_bespoke"] = str(uuid4())
+            new_instance._ids["uninstall_bespoke"] = str(uuid4())
             new_instance._dependants = []
             for config_dependant in config_dependants:
                 new_instance.add_dependant(
