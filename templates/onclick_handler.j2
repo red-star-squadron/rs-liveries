@@ -43,7 +43,7 @@ FunctionEnd
 {%- endmacro%}
 
 
-{#- Selects a dependancy if any of the dependants are clicked #}
+{#- Selects a parent if any of the children are clicked #}
 {#- Applies to install items only #}
 {%- macro dependancy_install_select_parent(parent) %}
     {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
@@ -51,24 +51,13 @@ FunctionEnd
         {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
         {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
     ${If} ${SectionIsSelected}  {{ '${' }}{{child._ids.install}}{{ '}' }} ; child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+    ${OrIf} ${SectionIsPartiallySelected}  {{ '${' }}{{child._ids.install}}{{ '}' }} ; child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
         {%- else %}
     ${OrIf} ${SectionIsSelected}  {{ '${' }}{{child._ids.install}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+    ${OrIf} ${SectionIsPartiallySelected}  {{ '${' }}{{child._ids.install}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
         {%- endif %}
     {%- endfor %}
         !insertmacro SelectSection {{ '${' }}{{parent._ids.install_bespoke}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
-    ${EndIf}
-{%- endmacro %}
-
-
-{#- Selects all children if the dependancy is clicked #}
-{#- Applies to UN-install items only #}
-{%- macro dependancy_uninstall_select_children(parent) %}
-    {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
-    ${If} ${SectionIsSelected}  {{ '${' }}{{parent._ids.uninstall_bespoke}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
-    {%- for child in parent._dependants %}
-        {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
-        !insertmacro SelectSection {{ '${' }}{{child._ids.uninstall}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
-    {%- endfor %}
     ${EndIf}
 {%- endmacro %}
 
