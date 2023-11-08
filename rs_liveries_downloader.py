@@ -14,7 +14,7 @@ from jinja2 import Environment
 from locale import getpreferredencoding
 from os.path import join as os_join
 from shutil import copy as su_copy
-from rs_liveries_compress_and_checksum import compress_and_checksum
+from rs_util_archive import compress_and_checksum
 
 
 def main():
