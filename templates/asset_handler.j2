@@ -1,14 +1,17 @@
 
 {%- macro render(top_level_assets, github_ref_name)%}
-SectionGroup "Installation"
-{%- for asset in top_level_assets %}
-{{- process_asset(asset, "    ", github_ref_name, "install" ) }}
-{%- endfor %}
-SectionGroupEnd
+
 
 SectionGroup "Removal"
 {%- for asset in top_level_assets %}
 {{- process_asset(asset, "    ", github_ref_name, "uninstall") }}
+{%- endfor %}
+SectionGroupEnd
+
+
+SectionGroup "Installation"
+{%- for asset in top_level_assets %}
+{{- process_asset(asset, "    ", github_ref_name, "install" ) }}
 {%- endfor %}
 SectionGroupEnd
 {%- endmacro%}
