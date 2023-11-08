@@ -242,5 +242,5 @@ Function .onSelChange
 {{- onclick_handler.render(all_assets) }}
 FunctionEnd
 
-{%- import "hidden_operational_section_resolver.j2" as hidden_operational_section_resolver %}
-{{- hidden_operational_section_resolver.render(all_assets, github_ref_name) }}
+{%- import "effective_user_choice.j2" as effective_user_choice %}
+{{- effective_user_choice.render(all_assets, github_ref_name) }}
