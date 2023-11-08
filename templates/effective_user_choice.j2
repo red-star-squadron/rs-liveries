@@ -1,0 +1,71 @@
+{#- Generate a final and hidden section which will "resolve" the status of all the checkboxes into a installer solution #}
+{%- macro render(all_assets, github_ref_name) %}
+Section "-Resolve checkboxes"
+{%- for asset in all_assets %}
+    {%- set asset_resolved_id = asset._ids.install %}
+    {%- if asset._ids.install_bespoke is defined %}
+        {%- set asset_resolved_id = asset._ids.install_bespoke %}
+    {%- endif %}
+    {%- if asset.asset_type == "livery" %}
+        {{- resolve_asset_items_livery(asset, asset_resolved_id, github_ref_name) }}
+    {%- elif asset.asset_type == "shared" %}
+        {{- resolve_asset_items_shared(asset, asset_resolved_id, github_ref_name) }}
+    {%- elif asset.asset_type == "roughmets_multi" %}
+        {{- resolve_asset_items_roughmets_multi(asset, github_ref_name) }}
+    {%- elif asset.asset_type == "roughmets_single" %}
+"roughmets_single" ASSET TYPE NOT IMPLEMENTED YET IN THIS TEMPLATE. FIXME.
+    {%- endif %}
+{%- endfor %}
+SectionEnd
+
+Section "-Resolve pilot priorities"
+    ${If} ${SectionIsSelected}  ${PILOTPRIO}
+        DetailPrint "Modifying pilot priorities..."
+        ${PowerShellExecFileLog} '"$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
+        IfErrors 0 +2
+            Abort "There was a problem with the pilot priorities script. Aborting. You can probably use the liveries as normal."
+        ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
+        ; MessageBox MB_OK "$PilotSelected"
+    ${Endif}
+SectionEnd
+{%- endmacro %}
+
+
+{%- macro resolve_asset_items_livery(asset, asset_resolved_id, github_ref_name) %}
+{%- set livery_size_kb = (asset._size_in_bytes / 1024) | int  %}
+    ${If} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
+        !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z"  "$INSTDIR\{{ asset.dcs_codename}}" "{{ asset.basename }}"
+    ${ElseIfNot} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
+    {%- for asset_dir in asset._asset_dirs %}
+        RMDir /r "$InstDir\{{ asset.dcs_codename }}\{{ asset_dir }}"
+    {%- endfor %}
+        !insertmacro RemoveEmptyDir "$InstDir\{{ asset.dcs_codename }}"
+    ${EndIf}
+{%- endmacro -%}
+
+
+{%- macro resolve_asset_items_shared(asset, asset_resolved_id, github_ref_name) %}
+{%- set shared_size_kb = (asset._size_in_bytes / 1024) | int  %}    
+    ${If} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
+        !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR" "{{ asset.basename }}"
+    ${ElseIfNot} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
+        RMDir /r "$InstDir\{{ asset.basename }}"
+        !insertmacro RemoveEmptyDir "$InstDir\{{ asset.basename }}"
+    ${EndIf}
+{%- endmacro -%}
+
+
+{%- macro resolve_asset_items_roughmets_multi(asset, github_ref_name) %}
+{%- for roughmet_dir, roughmet_files in asset._roughmets_files.items() %}
+    {%- set asset_resolved_id = asset._roughmets_ids[roughmet_dir].install %}
+    {%- set roughmet_size_kb = (asset._roughmets_sizes[roughmet_dir] / 1024) | int  %}    
+    ${If} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
+        !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ roughmet_dir | replace(" ", ".") }}" "$TEMP\{{ roughmet_dir }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ roughmet_dir }}"
+    ${ElseIfNot} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
+    {%- for roughmet_file in roughmet_files %}
+            Delete "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_file}}"
+    {%- endfor %}
+            RMDir /r "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_dir}}"   {#- This removes the cheksum dir for roughmets #}
+    ${EndIf}
+{%- endfor %}
+{%- endmacro -%}

@@ -60,7 +60,7 @@ class LiveryAssets:
         self._roughmets_sizes = None
         self._roughmets_ids = None
         self._asset_dirs = None
-        self._id = dict(
+        self._ids = dict(
             {
                 "install": str(uuid4()),
                 "uninstall": str(uuid4()),
@@ -85,7 +85,7 @@ class LiveryAssets:
             "\n_roughmets_sizes: {self._roughmets_sizes}"
             "\n_roughmets_ids: {self._roughmets_ids}"
             "\n_asset_dirs: {self._asset_dirs}"
-            "\n_id: {self._id}"
+            "\n_ids: {self._ids}"
             "\n_dependants: {self._dependants}"
         )
 
@@ -105,7 +105,7 @@ class LiveryAssets:
         yield "_roughmets_sizes", self._roughmets_sizes
         yield "_roughmets_ids", self._roughmets_ids
         yield "_asset_dirs", self._asset_dirs
-        yield "_id", self._id
+        yield "_ids", self._ids
         if self._dependants:
             yield "_dependants", [dict(d) for d in self._dependants]
         else:
@@ -135,18 +135,6 @@ class LiveryAssets:
             pilot_dir for pilot_dir in self._asset_dirs if self.basename != pilot_dir
         ]
 
-    def is_category(self):
-        if self._dependants is not None:
-            return True
-        else:
-            return False
-
-    def is_category_with_a_download(self):
-        if self._dependants is not None and self._dl_dir is not None:
-            return True
-        else:
-            return False
-
     @classmethod
     def get_all_assets(cls):
         return cls._all_assets
@@ -154,14 +142,6 @@ class LiveryAssets:
     @classmethod
     def print_json(cls):
         print(json_dumps([dict(d) for d in cls.get_all_assets()], indent=4))
-
-    @classmethod
-    def get_all_downloaded_assets(cls):
-        assets = []
-        for asset in cls._all_assets:
-            if asset._dl_dir:
-                assets.append(asset)
-        return assets
 
     @classmethod
     def get_assets_with_gdrive_id(cls):
@@ -184,14 +164,6 @@ class LiveryAssets:
         assets = []
         for asset in cls._all_assets:
             if asset.dcs_codename:
-                assets.append(asset)
-        return assets
-
-    @classmethod
-    def get_assets_with_dependants(cls):
-        assets = []
-        for asset in cls._all_assets:
-            if asset._dependants:
                 assets.append(asset)
         return assets
 
@@ -241,7 +213,7 @@ class LiveryAssets:
 
     @classmethod
     def _update_sizes(cls):
-        for asset in cls.get_all_downloaded_assets():
+        for asset in cls.get_assets_with_gdrive_id():
             asset._size_in_bytes = single_dir_size(asset._dl_dir)
             if asset.asset_type == "roughmets_multi":
                 asset._roughmets_sizes = dict()
@@ -414,8 +386,8 @@ class LiveryAssets:
         )
 
         if config_dependants is not None:
-            new_instance._id["install_bespoke"] = str(uuid4())
-            new_instance._id["uninstall_bespoke"] = str(uuid4())
+            new_instance._ids["install_bespoke"] = str(uuid4())
+            new_instance._ids["uninstall_bespoke"] = str(uuid4())
             new_instance._dependants = []
             for config_dependant in config_dependants:
                 new_instance.add_dependant(

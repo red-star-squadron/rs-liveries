@@ -231,19 +231,16 @@ Section "-Clean up our mistakes"
 SectionEnd
 
 {%- import 'asset_handler.j2' as asset_handler %}
-{{- asset_handler.render(top_level_assets, github_ref_name) }}
+{{- asset_handler.render(top_level_assets) }}
 
-
-Section "Modify Pilot Priority"
-  DetailPrint "Modifying pilot priorities..."
-  ${PowerShellExecFileLog} '"$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
-  IfErrors 0 +2
-    Abort "There was a problem with the pilot priorities script. Aborting. You can probably use the liveries as normal."
-  ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
-  ; MessageBox MB_OK "$PilotSelected"
+Section "Modify Pilot Priority" PILOTPRIO
 SectionEnd
 
-
-{# Must come after all Sections or we'll get an error #}
+{#- Click handlers must come after all DOWNLOAD sections or we'll get an error #}
+Function .onSelChange
 {%- import "onclick_handler.j2" as onclick_handler %}
 {{- onclick_handler.render(all_assets) }}
+FunctionEnd
+
+{%- import "effective_user_choice.j2" as effective_user_choice %}
+{{- effective_user_choice.render(all_assets, github_ref_name) }}
