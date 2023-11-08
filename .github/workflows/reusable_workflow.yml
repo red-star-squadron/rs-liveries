@@ -70,7 +70,7 @@ jobs:
       - name: sync pipenv
         run: pipenv sync
       - name: credentials.json
-        run: echo "$ASSETS" > credentials.json
+        run: echo "$GOOGLE_CREDS" > credentials.json
       - name: assets.yml
         run: echo "$ASSETS" > assets.yml
       - name: Run the downloader
