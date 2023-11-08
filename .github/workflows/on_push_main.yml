@@ -1,5 +1,5 @@
 ---
-name: Bake the installer (non-main release - on push)
+name: Bake the installer (main - on push)
 
 on:
 
