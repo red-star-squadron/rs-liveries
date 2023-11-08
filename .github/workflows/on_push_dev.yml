@@ -20,6 +20,7 @@ jobs:
     uses: ./.github/workflows/reusable_workflow.yml
     with:
       runner: self-hosted
+      minimal_sample_size: true
     secrets:
       GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
       ASSETS: ${{ secrets.ASSETS }}

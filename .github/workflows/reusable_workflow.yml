@@ -9,6 +9,9 @@ on:
         required: true
         type: string
         # For example "ubuntu-22.04" or "self-hosted"
+      minimal_sample_size:
+        required: true
+        type: boolean
     secrets:
       GOOGLE_CREDS:
         required: true
@@ -18,6 +21,7 @@ on:
 env:
   GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
   ASSETS: ${{ secrets.ASSETS }}
+  MINIMAL_SAMPLE_SIZE: ${{ inputs.MINIMAL_SAMPLE_SIZE }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -27,6 +31,8 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Remove .env file
+        run: rm .env
       - name: Maximize build space
         if: ${{ inputs.runner != 'self-hosted' }}
         uses: easimon/maximize-build-space@master
@@ -120,6 +126,7 @@ jobs:
         with:
           prerelease: true
           tag: testing
+          draft: true
           makeLatest: false
           body: "DO NOT USE"
           name: "testing - do not use"
@@ -135,7 +142,7 @@ jobs:
 
       - name: Upload Assets to Github Releases (main release)
         uses: softprops/action-gh-release@v1
-        if: ${{ ! inputs.runner == 'self-hosted' }}
+        if: ${{ ! inputs.runner == 'self-hosted' && ! inputs.minimal_sample_size }}
         with:
           files: |
             Staging/RS_Liveries_${{ github.ref_name }}.exe

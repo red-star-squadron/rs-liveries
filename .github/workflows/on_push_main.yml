@@ -1,10 +1,11 @@
 ---
-name: Bake the installer - On release
+name: Bake the installer (non-main release - on push)
 
 on:
 
-  release:
-    types: [published]
+  push:
+    branches:
+      - 'main'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -13,8 +14,8 @@ jobs:
   call_reusable_workflow:
     uses: ./.github/workflows/reusable_workflow.yml
     with:
-      runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
-      minimal_sample_size: false
+      runner: self-hosted
+      minimal_sample_size: true
     secrets:
       GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
       ASSETS: ${{ secrets.ASSETS }}

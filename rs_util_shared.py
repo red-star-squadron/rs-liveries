@@ -30,25 +30,21 @@ CHECKSUMS_DIR = os_join(STAGING_DIR, "Checksums")
 COMPRESSED_DIR = os_join(SCRIPT_DIR, "Compressed")
 
 
+GITHUB_REF_NAME = "no_GITHUB_REF_NAME"
 if "GITHUB_REF_NAME" in environ:
     GITHUB_REF_NAME = environ["GITHUB_REF_NAME"]
-else:
-    GITHUB_REF_NAME = "no_GITHUB_REF_NAME"
 
 
 if not GITHUB_REF_NAME.startswith("v"):
     GITHUB_REF_NAME = "testing"
 
-
+MINIMAL_SAMPLE_SIZE = False
 if environ["MINIMAL_SAMPLE_SIZE"].lower() == "true":
     MINIMAL_SAMPLE_SIZE = True
-else:
-    MINIMAL_SAMPLE_SIZE = False
 
 
-if environ["DELETE_AFTER_COMPRESS"].lower() == "true":
-    DELETE_AFTER_COMPRESS = True
-else:
+DELETE_AFTER_COMPRESS = True
+if environ["DELETE_AFTER_COMPRESS"].lower() == "false":
     DELETE_AFTER_COMPRESS = False
 
 
