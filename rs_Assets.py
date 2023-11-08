@@ -144,14 +144,6 @@ class LiveryAssets:
         print(json_dumps([dict(d) for d in cls.get_all_assets()], indent=4))
 
     @classmethod
-    def get_all_downloaded_assets(cls):
-        assets = []
-        for asset in cls._all_assets:
-            if asset._dl_dir:
-                assets.append(asset)
-        return assets
-
-    @classmethod
     def get_assets_with_gdrive_id(cls):
         assets = []
         for asset in cls._all_assets:
@@ -221,7 +213,7 @@ class LiveryAssets:
 
     @classmethod
     def _update_sizes(cls):
-        for asset in cls.get_all_downloaded_assets():
+        for asset in cls.get_assets_with_gdrive_id():
             asset._size_in_bytes = single_dir_size(asset._dl_dir)
             if asset.asset_type == "roughmets_multi":
                 asset._roughmets_sizes = dict()

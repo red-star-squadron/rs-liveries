@@ -31,20 +31,15 @@ FunctionEnd
 {# Essential resource for this work: https://nsis.sourceforge.io/Managing_Sections_on_Runtime #}
 
 {%- macro render(all_assets) %}
-Function .onSelChange
 {%- for asset in all_assets %}
     {%- if asset._dependants is not none %} {#- Is asset a parent?#}
         {%- if asset._dl_dir is not none%} {#- Does the parent have a downloadable?#}
     ; Hidden section install ACTIVATIONS for: {{print_available_name(asset)}}
             {{- dependancy_install_select_parent(asset) }}
 
-
-    ; Hidden section uninstall DE-ACTIVATIONS for: {{print_available_name(asset)}}
-            {{- dependancy_uninstall_select_children(asset) }}
             {%- endif %}
     {%- endif %}
 {%- endfor %}
-FunctionEnd
 {%- endmacro%}
 
 

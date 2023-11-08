@@ -1,39 +1,29 @@
+{#- From top_level_assets we recursively create the installer checkbox structure #}
+{%- macro render(top_level_assets)%}
 
-{%- macro render(top_level_assets, github_ref_name)%}
 
-
-SectionGroup "Removal"
 {%- for asset in top_level_assets %}
-{{- process_asset(asset, "    ", github_ref_name, "uninstall") }}
+{{- process_asset(asset, "" ) }}
 {%- endfor %}
-SectionGroupEnd
-
-
-SectionGroup "Installation"
-{%- for asset in top_level_assets %}
-{{- process_asset(asset, "    ", github_ref_name, "install" ) }}
-{%- endfor %}
-SectionGroupEnd
 {%- endmacro%}
 
-{%- macro process_asset(asset, spaces, github_ref_name, install_or_uninstall) %}
-    {{- section_or_section_group_open(asset, spaces, install_or_uninstall) }}
-    {{- process_asset_items_wrapper(asset, spaces, github_ref_name, install_or_uninstall) }}
+{%- macro process_asset(asset, spaces) %}
+    {{- section_or_section_group_open(asset, spaces) }}
+    {{- process_asset_items_wrapper(asset, spaces) }}
     {%- if asset._dependants is not none %}
         {%- for dependant in asset._dependants %}
-            {{- process_asset(dependant, spaces + "    ", github_ref_name, install_or_uninstall) }}
+            {{- process_asset(dependant, spaces + "    ") }}
         {%- endfor %}
     {%- endif %}
     {{- section_or_section_group_close(asset, spaces) }}
 {%- endmacro -%}
 
 
-{%- macro section_or_section_group_open(asset, spaces, install_or_uninstall) %}
-{%- set section_id = asset._ids.uninstall if install_or_uninstall == "uninstall" else asset._ids.install%}
+{%- macro section_or_section_group_open(asset, spaces) %}
 {%- if asset._dependants is not none or asset.asset_type == "roughmets_multi"%}
-{{ spaces }}SectionGroup "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ section_id }}"
+{{ spaces }}SectionGroup "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install }}"
 {%- else%}
-{{ spaces }}Section {{ "/o" if install_or_uninstall =="uninstall" else "" }} "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ section_id }}"
+{{ spaces }}Section "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install }}"
 {%- endif%}
 {%- endmacro -%}
 
@@ -49,98 +39,48 @@ SectionGroupEnd
 
 {#- We need this wrapper because NSIS won't let us do actions inside a SectionGroup#}
 {#- So we're making a category child Section for any asset that has dependants (SectionGroup). #}
-{%- macro process_asset_items_wrapper(asset, spaces, github_ref_name, install_or_uninstall) %}
-{%- set section_id_bespoke =  asset._ids.uninstall_bespoke if install_or_uninstall == "uninstall" else asset._ids.install_bespoke%}
+{%- macro process_asset_items_wrapper(asset, spaces) %}
     {%- if asset._dependants is not none and asset._dl_dir is not none %}
-{{ spaces }}    Section {{ "/o" if install_or_uninstall =="uninstall" else pass }} "DEPENDANCY: {{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ section_id_bespoke }}"
-        {{- process_asset_items(asset, spaces + "    ", github_ref_name, install_or_uninstall) }}
+{{ spaces }}    Section  "DEPENDANCY: {{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install_bespoke }}"
+        {{- process_asset_items(asset, spaces + "    ") }}
 {{ spaces }}    SectionEnd
     {%- else %}
-        {{- process_asset_items(asset, spaces, github_ref_name, install_or_uninstall) }}
+        {{- process_asset_items(asset, spaces) }}
     {%- endif%}
 {%- endmacro -%}
 
 
-{%- macro process_asset_items(asset, spaces, github_ref_name, install_or_uninstall) %}
-    {#- Uninstalls here #}
-    {%- if install_or_uninstall == "uninstall" %}
-        {%- if asset.asset_type == "livery" %}
-            {{- uninstall_asset_items_livery(asset, spaces)}}
-        {%- elif asset.asset_type == "shared" %}
-            {{- uninstall_asset_items_shared(asset, spaces)}}
-        {%- elif asset.asset_type == "roughmets_multi" %}
-            {{- uninstall_asset_items_roughmets_multi(asset, spaces)}}
-        {%- endif %}
-    {#- Installs here #}
-    {%- elif install_or_uninstall == "install" %}
-        {%- if asset.asset_type == "livery" %}
-            {{- install_asset_items_livery(asset, spaces, github_ref_name) }}
-        {%- elif asset.asset_type == "shared" %}
-            {{- install_asset_items_shared(asset, spaces, github_ref_name) }}
-        {%- elif asset.asset_type == "roughmets_multi" %}
-            {{- install_asset_items_roughmets_multi(asset, spaces, github_ref_name) }}
-        {%- endif %}
-    {#- Handle roughmet_single type in the future if we get it #}
+{%- macro process_asset_items(asset, spaces) %}
+    {%- if asset.asset_type == "livery" %}
+        {{- install_asset_items_livery(asset, spaces) }}
+    {%- elif asset.asset_type == "shared" %}
+        {{- install_asset_items_shared(asset, spaces) }}
+    {%- elif asset.asset_type == "roughmets_multi" %}
+        {{- install_asset_items_roughmets_multi(asset, spaces) }}
     {%- elif asset_type == "roughmets_single" %}
 "roughmets_single" ASSET TYPE NOT IMPLEMENTED YET IN THIS TEMPLATE. FIXME.
     {%- endif %}
 {%- endmacro -%}
 
 
-{#                 #}
-{# Uninstall funcs #}
-{#                 #}
-{%- macro uninstall_asset_items_livery(asset, spaces) %}
-    {%- for asset_dir in asset._asset_dirs %}
-{{ spaces }}    RMDir /r "$InstDir\{{ asset.dcs_codename }}\{{ asset_dir }}"
-    {%- endfor %}
-{{ spaces }}    !insertmacro RemoveEmptyDir "$InstDir\{{ asset.dcs_codename }}"
-{%- endmacro -%}
-
-
-{%- macro uninstall_asset_items_shared(asset, spaces) %}
-{{ spaces }}    RMDir /r "$InstDir\{{ asset.basename }}"
-{{ spaces }}    !insertmacro RemoveEmptyDir "$InstDir\{{ asset.basename }}"
-{%- endmacro -%}
-
-
-{%- macro uninstall_asset_items_roughmets_multi(asset, spaces) %}
-        {%- for roughmet_dir, roughmet_files in asset._roughmets_files.items() %}
-            {%- set section_id_roughmet_uninstall = asset._roughmets_ids[roughmet_dir].uninstall %}
-{{ spaces }}    Section /o "Roughmet {{ roughmet_dir }}" "{{ section_id_roughmet_uninstall }}"
-            {%- for roughmet_file in roughmet_files %}
-{{ spaces }}        Delete "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_file}}"
-            {%- endfor %}
-{{ spaces }}        RMDir /r "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_dir}}"   {#- This removes the cheksum dir for roughmets #}
-{{ spaces }}    SectionEnd
-        {%- endfor %}
-{%- endmacro -%}
-
-
-{#               #}
-{# Install funcs #}
-{#               #}
-{%- macro install_asset_items_livery(asset, spaces, github_ref_name) %}
+{%- macro install_asset_items_livery(asset, spaces) %}
 {%- set livery_size_kb = (asset._size_in_bytes / 1024) | int  %}
 {{ spaces }}    AddSize {{ livery_size_kb }}
-{{ spaces }}    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR\{{ asset.dcs_codename }}" "{{ asset.basename }}"
 {%- endmacro -%}
 
 
-{%- macro install_asset_items_shared(asset, spaces, github_ref_name) %}
+{%- macro install_asset_items_shared(asset, spaces) %}
 {%- set shared_size_kb = (asset._size_in_bytes / 1024) | int  %}    
 {{ spaces }}    AddSize {{ shared_size_kb }}
-{{ spaces }}    !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR" "{{ asset.basename }}"
 {%- endmacro -%}
 
 
-{%- macro install_asset_items_roughmets_multi(asset, spaces, github_ref_name) %}
+{%- macro install_asset_items_roughmets_multi(asset, spaces) %}
 {%- for roughmet_dir, roughmet_files in asset._roughmets_files.items() %}
     {%- set section_id_roughmet_install = asset._roughmets_ids[roughmet_dir].install %}
     {%- set roughmet_size_kb = (asset._roughmets_sizes[roughmet_dir] / 1024) | int  %}    
 {{ spaces }}    Section  "Roughmet {{ roughmet_dir }}" "{{ section_id_roughmet_install }}"
 {{ spaces }}        AddSize {{ roughmet_size_kb }}
-{{ spaces }}        !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ roughmet_dir | replace(" ", ".") }}" "$TEMP\{{ roughmet_dir }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ roughmet_dir }}"
 {{ spaces }}    SectionEnd
 {%- endfor %}
 {%- endmacro -%}
