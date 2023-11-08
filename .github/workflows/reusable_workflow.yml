@@ -126,7 +126,6 @@ jobs:
         with:
           prerelease: true
           tag: testing
-          draft: true
           makeLatest: false
           body: "DO NOT USE"
           name: "testing - do not use"
