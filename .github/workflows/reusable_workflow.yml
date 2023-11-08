@@ -120,6 +120,9 @@ jobs:
         with:
           prerelease: true
           tag: testing
+          makeLatest: false
+          body: "DO NOT USE"
+          name: "testing - do not use"
 
       - name: Upload Assets to Github Releases (non-main release)
         uses: softprops/action-gh-release@v1

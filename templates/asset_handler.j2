@@ -29,7 +29,7 @@ SectionGroupEnd
 
 
 {%- macro section_or_section_group_open(asset, spaces, install_or_uninstall) %}
-{%- set section_id = asset._uuid.uninstall if install_or_uninstall == "uninstall" else asset._uuid.install%}
+{%- set section_id = asset._id.uninstall if install_or_uninstall == "uninstall" else asset._id.install%}
 {%- if asset._dependants is not none or asset.asset_type == "roughmets_multi"%}
 {{ spaces }}SectionGroup "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ section_id }}"
 {%- else%}
@@ -48,12 +48,12 @@ SectionGroupEnd
 
 
 {#- We need this wrapper because NSIS won't let us do actions inside a SectionGroup#}
-{#- So we're making a hidden child Section for any asset that has dependants (SectionGroup). #}
-{#- Note that some "assets" are just a category with nothing to action, so we'll end up with empty hidden Sections which is fine #}
+{#- So we're making a category child Section for any asset that has dependants (SectionGroup). #}
+{#- Note that some "assets" are just a category with nothing to action, so we'll end up with empty category Sections which is fine #}
 {%- macro process_asset_items_wrapper(asset, spaces, github_ref_name, install_or_uninstall) %}
-{%- set section_id_hidden =  asset._uuid.uninstall_hidden if install_or_uninstall == "uninstall" else asset._uuid.install_hidden%}
-    {%- if asset._dependants is not none%}
-{{ spaces }}    Section {{ "/o" if install_or_uninstall =="uninstall" else pass }} "-{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ section_id_hidden }}"
+{%- set section_id_category =  asset._id.uninstall_bespoke if install_or_uninstall == "uninstall" else asset._id.install_bespoke%}
+    {%- if asset._dependants is not none and asset._dl_dir is not none %}
+{{ spaces }}    Section {{ "/o" if install_or_uninstall =="uninstall" else pass }} "DEPENDANCY: {{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ section_id_category }}"
         {{- process_asset_items(asset, spaces + "    ", github_ref_name, install_or_uninstall) }}
 {{ spaces }}    SectionEnd
     {%- else %}
@@ -107,7 +107,7 @@ SectionGroupEnd
 
 {%- macro uninstall_asset_items_roughmets_multi(asset, spaces) %}
         {%- for roughmet_dir, roughmet_files in asset._roughmets_files.items() %}
-            {%- set section_id_roughmet_uninstall = asset._roughmets_uuids[roughmet_dir].uninstall %}
+            {%- set section_id_roughmet_uninstall = asset._roughmets_ids[roughmet_dir].uninstall %}
 {{ spaces }}    Section /o "Roughmet {{ roughmet_dir }}" "{{ section_id_roughmet_uninstall }}"
             {%- for roughmet_file in roughmet_files %}
 {{ spaces }}        Delete "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_file}}"
@@ -137,7 +137,7 @@ SectionGroupEnd
 
 {%- macro install_asset_items_roughmets_multi(asset, spaces, github_ref_name) %}
 {%- for roughmet_dir, roughmet_files in asset._roughmets_files.items() %}
-    {%- set section_id_roughmet_install = asset._roughmets_uuids[roughmet_dir].install %}
+    {%- set section_id_roughmet_install = asset._roughmets_ids[roughmet_dir].install %}
     {%- set roughmet_size_kb = (asset._roughmets_sizes[roughmet_dir] / 1024) | int  %}    
 {{ spaces }}    Section  "Roughmet {{ roughmet_dir }}" "{{ section_id_roughmet_install }}"
 {{ spaces }}        AddSize {{ roughmet_size_kb }}

@@ -58,9 +58,9 @@ class LiveryAssets:
         self._roughmets_dirs = None
         self._roughmets_files = None
         self._roughmets_sizes = None
-        self._roughmets_uuids = None
+        self._roughmets_ids = None
         self._asset_dirs = None
-        self._uuid = dict(
+        self._id = dict(
             {
                 "install": str(uuid4()),
                 "uninstall": str(uuid4()),
@@ -83,9 +83,9 @@ class LiveryAssets:
             "\n_roughmets_dirs: {self._roughmets_dirs}"
             "\n_roughmets_files: {self._roughmets_files}"
             "\n_roughmets_sizes: {self._roughmets_sizes}"
-            "\n_roughmets_uuids: {self._roughmets_uuids}"
+            "\n_roughmets_ids: {self._roughmets_ids}"
             "\n_asset_dirs: {self._asset_dirs}"
-            "\n_uuid: {self._uuid}"
+            "\n_id: {self._id}"
             "\n_dependants: {self._dependants}"
         )
 
@@ -103,9 +103,9 @@ class LiveryAssets:
         yield "_roughmets_dirs", self._roughmets_dirs
         yield "_roughmets_files", self._roughmets_files
         yield "_roughmets_sizes", self._roughmets_sizes
-        yield "_roughmets_uuids", self._roughmets_uuids
+        yield "_roughmets_ids", self._roughmets_ids
         yield "_asset_dirs", self._asset_dirs
-        yield "_uuid", self._uuid
+        yield "_id", self._id
         if self._dependants:
             yield "_dependants", [dict(d) for d in self._dependants]
         else:
@@ -215,7 +215,7 @@ class LiveryAssets:
         return sorted(pilots)
 
     @classmethod
-    def _update_roughmets_files_and_uuids(cls):
+    def _update_roughmets_files_and_ids(cls):
         """
         Run before Asset._update_sizes
         because "roughmets_multi" size calculations depend on it
@@ -223,7 +223,7 @@ class LiveryAssets:
         for asset in cls.get_roughmets_assets():
             asset._roughmets_dirs = os_listdir(os_join(asset._dl_dir, asset.basename))
             asset._roughmets_files = dict()
-            asset._roughmets_uuids = dict()
+            asset._roughmets_ids = dict()
             for roughmet_dir in asset._roughmets_dirs:
                 # Essentially building a dict for this asset
                 # Key is the roughmet dir name, and the value is all the files in a single roughmets dir
@@ -235,7 +235,7 @@ class LiveryAssets:
                 asset._roughmets_files[roughmet_dir] = os_listdir(
                     os_join(asset._dl_dir, asset.basename, roughmet_dir)
                 )
-                asset._roughmets_uuids[roughmet_dir] = dict(
+                asset._roughmets_ids[roughmet_dir] = dict(
                     {"install": str(uuid4()), "uninstall": str(uuid4())}
                 )
 
@@ -302,7 +302,7 @@ class LiveryAssets:
 
         # We do the following after downloads completed
         cls._remove_all_readme_files()
-        cls._update_roughmets_files_and_uuids()
+        cls._update_roughmets_files_and_ids()
         cls._update_sizes()
         cls._update_assets_dirs()
 
@@ -414,8 +414,8 @@ class LiveryAssets:
         )
 
         if config_dependants is not None:
-            new_instance._uuid["install_hidden"] = str(uuid4())
-            new_instance._uuid["uninstall_hidden"] = str(uuid4())
+            new_instance._id["install_bespoke"] = str(uuid4())
+            new_instance._id["uninstall_bespoke"] = str(uuid4())
             new_instance._dependants = []
             for config_dependant in config_dependants:
                 new_instance.add_dependant(

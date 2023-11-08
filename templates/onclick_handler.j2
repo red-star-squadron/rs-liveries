@@ -34,51 +34,49 @@ FunctionEnd
 Function .onSelChange
 {%- for asset in all_assets %}
     {%- if asset._dependants is not none %} {#- Is asset a parent?#}
+        {%- if asset._dl_dir is not none%} {#- Does the parent have a downloadable?#}
 
 
-    ; Hidden section install ACTIVATIONS for: {{print_available_name (asset)}}
-        {{- activate_hidden(asset, "install") }}
+    ; Hidden section install ACTIVATIONS for: {{print_available_name(asset)}}
+            {{- dependancy_install_select_parent(asset) }}
 
-    ; Hidden section UNinstall ACTIVATIONS for: {{print_available_name (asset)}}
-        {{- activate_hidden(asset, "uninstall") }}
 
-    ; Hidden section install DE-ACTIVATIONS for: {{print_available_name (asset)}}
-        {{- deactivate_hidden(asset, "install") }}
+    ; Hidden section uninstall DE-ACTIVATIONS for: {{print_available_name(asset)}}
+            {{- dependancy_uninstall_select_children(asset) }}
 
-    ; Hidden section UNinstall DE-ACTIVATIONS for: {{print_available_name (asset)}}
-        {{- deactivate_hidden(asset, "uninstall") }}
+            {%- endif %}
     {%- endif %}
 {%- endfor %}
 FunctionEnd
 {%- endmacro%}
 
 
-{%- macro deactivate_hidden(parent, install_uninstall_dict_key) %}
+{#- Selects a dependancy if any of the dependants are clicked #}
+{#- Applies to install items only #}
+{%- macro dependancy_install_select_parent(parent) %}
     {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
     {%- for child in parent._dependants %}
         {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
         {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
-    ${IfNot} ${SectionIsSelected}  {{ '${' }}{{child._uuid[install_uninstall_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+    ${If} ${SectionIsSelected}  {{ '${' }}{{child._id.install}}{{ '}' }} ; child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
         {%- else %}
-    ${AndIfNot} ${SectionIsSelected}  {{ '${' }}{{child._uuid[install_uninstall_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+    ${OrIf} ${SectionIsSelected}  {{ '${' }}{{child._id.install}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
         {%- endif %}
     {%- endfor %}
-        !insertmacro UnselectSection {{ '${' }}{{parent._uuid[install_uninstall_dict_key + "_hidden"]}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
+        !insertmacro SelectSection {{ '${' }}{{parent._id.install_bespoke}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
     ${EndIf}
 {%- endmacro %}
 
 
-{%- macro activate_hidden(parent, install_uninstall_dict_key) %}
+{#- Selects all children if the dependancy is clicked #}
+{#- Applies to UN-install items only #}
+{%- macro dependancy_uninstall_select_children(parent) %}
     {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
-    {%- for child in parent._dependants %}
+    ${If} ${SectionIsSelected}  {{ '${' }}{{parent._id.uninstall_bespoke}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
+    {% for child in parent._dependants %}
         {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
-        {%- if child == parent._dependants[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
-    ${If} ${SectionIsSelected}  {{ '${' }}{{child._uuid[install_uninstall_dict_key]}}{{ '}' }} ; Name: {{ print_available_name(child) }}
-        {%- else %}
-    ${OrIf} ${SectionIsSelected}  {{ '${' }}{{child._uuid[install_uninstall_dict_key]}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
-        {%- endif %}
-    {%- endfor %}
-        !insertmacro SelectSection {{ '${' }}{{parent._uuid[install_uninstall_dict_key + "_hidden"]}}{{ '}' }} ;  parent.basename: {{parent.basename}} // parent.category_name: {{parent.category_name}}
+        !insertmacro SelectSection {{ '${' }}{{child._id.uninstall}}{{ '}' }} ;  child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
+    {% endfor %}
     ${EndIf}
 {%- endmacro %}
 
