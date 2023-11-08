@@ -49,7 +49,6 @@ SectionGroupEnd
 
 {#- We need this wrapper because NSIS won't let us do actions inside a SectionGroup#}
 {#- So we're making a category child Section for any asset that has dependants (SectionGroup). #}
-{#- Note that some "assets" are just a category with nothing to action, so we'll end up with empty category Sections which is fine #}
 {%- macro process_asset_items_wrapper(asset, spaces, github_ref_name, install_or_uninstall) %}
 {%- set section_id_category =  asset._id.uninstall_bespoke if install_or_uninstall == "uninstall" else asset._id.install_bespoke%}
     {%- if asset._dependants is not none and asset._dl_dir is not none %}
@@ -88,9 +87,9 @@ SectionGroupEnd
 {%- endmacro -%}
 
 
-{#               #}
+{#                 #}
 {# Uninstall funcs #}
-{#               #}
+{#                 #}
 {%- macro uninstall_asset_items_livery(asset, spaces) %}
     {%- for asset_dir in asset._asset_dirs %}
 {{ spaces }}    RMDir /r "$InstDir\{{ asset.dcs_codename }}\{{ asset_dir }}"
