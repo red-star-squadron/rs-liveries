@@ -16,16 +16,6 @@ Section "-Resolve checkboxes"
 {%- endfor %}
 SectionEnd
 
-Section "-Resolve pilot priorities"
-    ${If} ${SectionIsSelected}  ${PILOTPRIO}
-        DetailPrint "Modifying pilot priorities..."
-        ${PowerShellExecFileLog} '"$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
-        IfErrors 0 +2
-            Abort "There was a problem with the pilot priorities script. Aborting. You can probably use the liveries as normal."
-        ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
-        ; MessageBox MB_OK "$PilotSelected"
-    ${Endif}
-SectionEnd
 {%- endmacro %}
 
 

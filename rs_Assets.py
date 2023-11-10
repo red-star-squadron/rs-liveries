@@ -156,7 +156,7 @@ class LiveryAsset:
                 os_join(self._dl_dir, self.basename, roughmets_dir)
             )
             new_instance = LiveryAsset(
-                basename=f"Roughmet {roughmets_dir}",
+                basename=f"Roughmets {roughmets_dir}",
                 gdrive_id=self.gdrive_id,
                 asset_type="roughmets_single",
             )

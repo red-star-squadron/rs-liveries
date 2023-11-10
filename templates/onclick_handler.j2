@@ -44,10 +44,8 @@ FunctionEnd
 {#- Selects a parent if any of the children are clicked #}
 {#- Applies to install items only #}
 {%- macro dependancy_install_select_parent(parent) %}
-    {#- ; PARENT: {{parent.basename}} // {{parent.category_name}} #}
     {%- for child in parent._children %}
-        {#- ; CHILD:  {{child.basename}} // {{child.category_name}} #}
-        {%- if child == parent._children[0] %} {# First element in the loop has 'IfNot', others have 'AndIfNot'#}
+        {%- if child == parent._children[0] %} {# First element in the loop has 'If', others have 'OrIf'#}
     ${If} ${SectionIsSelected}  {{ '${' }}{{child._uuid + "_install"}}{{ '}' }} ; child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
     ${OrIf} ${SectionIsPartiallySelected}  {{ '${' }}{{child._uuid + "_install"}}{{ '}' }} ; child.basename: {{child.basename}} // child.category_name: {{child.category_name}}
         {%- else %}
