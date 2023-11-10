@@ -28,10 +28,8 @@ environ["GOOGLE_APPLICATION_CREDENTIALS"] = os_join(
 
 THREAD_LOCAL = threading_local()
 
-if MINIMAL_SAMPLE_SIZE:
-    THREADPOOL = ThreadPoolExecutor(max_workers=64)
-else:
-    THREADPOOL = ThreadPoolExecutor(max_workers=16)
+THREADPOOL = ThreadPoolExecutor(max_workers=16)
+THREADPOOL_FAKE_DL = ThreadPoolExecutor(max_workers=64)
 
 
 class BaseNameError(Exception):
@@ -80,7 +78,7 @@ def download_gdrive_folder(
     items = results.get("files", [])
     if len(items) == 0 and is_rootfolder:
         raise ValueError(f"Google Drive folder empty or other issue: {gdrive_id}")
-    dl_statuses = []
+    dl_futures = []
     # Check if our prefix matches any of the top-level dirs/files
     items_to_check = [
         i["name"].upper()
@@ -119,37 +117,45 @@ def download_gdrive_folder(
             LOGGER.info(f"Created directory {parentdir}")
         # Download in background if dir
         if item["mimeType"] == "application/vnd.google-apps.folder":
-            dl_statuses += download_gdrive_folder(item["id"], fullpath, False)
+            dl_futures += download_gdrive_folder(item["id"], fullpath, False)
         # Download in background if file
-        else:
-            dl_statuses.append(
+        elif not MINIMAL_SAMPLE_SIZE or fullpath.lower().endswith(
+            "lua"
+        ):  # Fake file download
+            dl_futures.append(
                 THREADPOOL.submit(download_gdrive_file, item["id"], fullpath)
             )
-    return dl_statuses
+        else:  # Actual file download
+            dl_futures.append(
+                THREADPOOL_FAKE_DL.submit(fake_download_gdrive_file, fullpath)
+            )
+    return dl_futures
+
+
+def fake_download_gdrive_file(dfilespath):
+    Path(dfilespath).touch()
+    LOGGER.warn(f"FAKE Downloaded: {dfilespath}")
+    return dfilespath
 
 
 def download_gdrive_file(dowid, dfilespath):
     """
     Downloads a single google drive file
     """
-    if not MINIMAL_SAMPLE_SIZE or dfilespath.lower().endswith("lua"):
-        service = get_service()
-        request = service.files().get_media(fileId=dowid)
-        file_handler = io_BytesIO()
-        downloader = MediaIoBaseDownload(file_handler, request)
-        done = False
-        while done is False:
-            _, done = downloader.next_chunk()
-            # NOTE: replace above _ with status
-            # logger.info("Download %d%%." % int(status.progress() * 100))
-        with io_open(dfilespath, "wb") as file:
-            file_handler.seek(0)
-            file.write(file_handler.read())
-        LOGGER.info(f"Downloaded: {dfilespath}")
-
-    else:
-        Path(dfilespath).touch()
-        LOGGER.warn(f"FAKE Downloaded: {dfilespath}")
+    service = get_service()
+    request = service.files().get_media(fileId=dowid)
+    file_handler = io_BytesIO()
+    downloader = MediaIoBaseDownload(file_handler, request)
+    done = False
+    while done is False:
+        _, done = downloader.next_chunk()
+        # NOTE: replace above _ with status
+        # logger.info("Download %d%%." % int(status.progress() * 100))
+    with io_open(dfilespath, "wb") as file:
+        file_handler.seek(0)
+        file.write(file_handler.read())
+    LOGGER.info(f"Downloaded: {dfilespath}")
+    return dfilespath
 
 
 def main():

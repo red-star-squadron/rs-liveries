@@ -2,18 +2,16 @@
 {%- macro render(all_assets, github_ref_name) %}
 Section "-Resolve checkboxes"
 {%- for asset in all_assets %}
-    {%- set asset_resolved_id = asset._ids.install %}
-    {%- if asset._ids.install_bespoke is defined %}
-        {%- set asset_resolved_id = asset._ids.install_bespoke %}
+    {%- set asset_resolved_id = asset._uuid + "_install" %}
+    {%- if asset._children is not none and asset._dl_dir is not none %}
+        {%- set asset_resolved_id = asset._uuid + "_install_bespoke" %}
     {%- endif %}
     {%- if asset.asset_type == "livery" %}
         {{- resolve_asset_items_livery(asset, asset_resolved_id, github_ref_name) }}
     {%- elif asset.asset_type == "shared" %}
         {{- resolve_asset_items_shared(asset, asset_resolved_id, github_ref_name) }}
     {%- elif asset.asset_type == "roughmets_multi" %}
-        {{- resolve_asset_items_roughmets_multi(asset, github_ref_name) }}
-    {%- elif asset.asset_type == "roughmets_single" %}
-"roughmets_single" ASSET TYPE NOT IMPLEMENTED YET IN THIS TEMPLATE. FIXME.
+        {{- resolve_asset_items_roughmets_single(asset, asset_resolved_id, github_ref_name) }}
     {%- endif %}
 {%- endfor %}
 SectionEnd
@@ -32,7 +30,6 @@ SectionEnd
 
 
 {%- macro resolve_asset_items_livery(asset, asset_resolved_id, github_ref_name) %}
-{%- set livery_size_kb = (asset._size_in_bytes / 1024) | int  %}
     ${If} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
         !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z"  "$INSTDIR\{{ asset.dcs_codename}}" "{{ asset.basename }}"
     ${ElseIfNot} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
@@ -45,7 +42,6 @@ SectionEnd
 
 
 {%- macro resolve_asset_items_shared(asset, asset_resolved_id, github_ref_name) %}
-{%- set shared_size_kb = (asset._size_in_bytes / 1024) | int  %}    
     ${If} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
         !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR" "{{ asset.basename }}"
     ${ElseIfNot} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
@@ -55,17 +51,13 @@ SectionEnd
 {%- endmacro -%}
 
 
-{%- macro resolve_asset_items_roughmets_multi(asset, github_ref_name) %}
-{%- for roughmet_dir, roughmet_files in asset._roughmets_files.items() %}
-    {%- set asset_resolved_id = asset._roughmets_ids[roughmet_dir].install %}
-    {%- set roughmet_size_kb = (asset._roughmets_sizes[roughmet_dir] / 1024) | int  %}    
+{%- macro resolve_asset_items_roughmets_single(asset, asset_resolved_id, github_ref_name) %}
     ${If} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
-        !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ roughmet_dir | replace(" ", ".") }}" "$TEMP\{{ roughmet_dir }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ roughmet_dir }}"
+        !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ asset.basename }}"
     ${ElseIfNot} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
-    {%- for roughmet_file in roughmet_files %}
+{%- for roughmet_file in roughmet_files %}
             Delete "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_file}}"
-    {%- endfor %}
-            RMDir /r "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_dir}}"   {#- This removes the cheksum dir for roughmets #}
-    ${EndIf}
 {%- endfor %}
+            RMDir /r "$ProgramFilesDir\Bazar\TempTextures\{{ asset.basename }}"   {#- This removes the cheksum dir for roughmets #}
+    ${EndIf}
 {%- endmacro -%}

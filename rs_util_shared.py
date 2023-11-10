@@ -18,7 +18,7 @@ import logging
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 logger_console_handler = logging.StreamHandler()
-logger_console_handler.setLevel(logging.DEBUG)
+logger_console_handler.setLevel(logging.INFO)
 logger_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 logger_console_handler.setFormatter(logger_formatter)
 LOGGER.addHandler(logger_console_handler)

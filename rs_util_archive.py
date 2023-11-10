@@ -116,14 +116,13 @@ def compress_and_checksum(assets):
                 os_join(COMPRESSED_DIR, f"{asset.basename}.7z"),
             )
 
-        if asset.asset_type == "roughmets_multi":
-            for roughmets_dir, roughmets_files in asset._roughmets_files.items():
-                EXECUTOR.submit(
-                    sevenz_archive,
-                    os_join(asset._dl_dir, asset.basename, roughmets_dir),
-                    roughmets_files,
-                    os_join(COMPRESSED_DIR, f"{roughmets_dir}.7z"),
-                )
+        if asset.asset_type == "roughmets_single":
+            EXECUTOR.submit(
+                sevenz_archive,
+                os_join(asset._dl_dir),
+                asset._roughmets_files,
+                os_join(COMPRESSED_DIR, f"{asset.basename}.7z"),
+            )
 
         if asset.asset_type == "livery":
             EXECUTOR.submit(

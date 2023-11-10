@@ -10,9 +10,9 @@
 {%- macro process_asset(asset, spaces) %}
     {{- section_or_section_group_open(asset, spaces) }}
     {{- process_asset_items_wrapper(asset, spaces) }}
-    {%- if asset._dependants is not none %}
-        {%- for dependant in asset._dependants %}
-            {{- process_asset(dependant, spaces + "    ") }}
+    {%- if asset._children is not none %}
+        {%- for child in asset._children %}
+            {{- process_asset(child, spaces + "    ") }}
         {%- endfor %}
     {%- endif %}
     {{- section_or_section_group_close(asset, spaces) }}
@@ -20,18 +20,18 @@
 
 
 {%- macro section_or_section_group_open(asset, spaces) %}
-{%- if asset._dependants is not none or asset.asset_type == "roughmets_multi"%}
-{%- set prefix_bold = "!" if asset._dl_dir is not none and asset.asset_type != "roughmets_multi" else "" %}
-{%- set prefix_dependancy = "DEPENDANCY: " if asset._dl_dir is not none else ""%}
-{{ spaces }}SectionGroup "{{ prefix_bold }}{{ prefix_dependancy }}{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install }}"
-{%- else%}
-{{ spaces }}Section "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install }}"
+{%- if asset._children is not none%}
+    {%- set prefix_bold = "!" if asset._dl_dir is not none else "" %}
+    {%- set prefix_dependancy = "DEPENDANCY: " if asset._dl_dir is not none else ""%}
+{{ spaces }}SectionGroup "{{ prefix_bold }}{{ prefix_dependancy }}{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._uuid + "_install" }}"
+    {%- else%}
+{{ spaces }}Section "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._uuid + "_install" }}"
 {%- endif%}
 {%- endmacro -%}
 
 
 {%- macro section_or_section_group_close(asset, spaces) %}
-{%- if asset._dependants is not none or asset.asset_type == "roughmets_multi"%}
+{%- if asset._children is not none %}
 {{ spaces }}SectionGroupEnd
 {%- else%}
 {{ spaces }}SectionEnd
@@ -40,10 +40,10 @@
 
 
 {#- We need this wrapper because NSIS won't let us do actions inside a SectionGroup#}
-{#- So we're making a category child Section for any asset that has dependants (SectionGroup). #}
+{#- So we're making a category child Section for any asset that has children (SectionGroup). #}
 {%- macro process_asset_items_wrapper(asset, spaces) %}
-    {%- if asset._dependants is not none and asset._dl_dir is not none %}
-{{ spaces }}    Section  "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._ids.install_bespoke }}"
+    {%- if asset._children is not none and asset._dl_dir is not none %}
+{{ spaces }}    Section  "{{ asset.basename if asset.category_name is none else asset.category_name }}" "{{ asset._uuid + "_install_bespoke" }}"
         {{- process_asset_items(asset, spaces + "    ") }}
 {{ spaces }}    SectionEnd
     {%- else %}
@@ -53,36 +53,13 @@
 
 
 {%- macro process_asset_items(asset, spaces) %}
-    {%- if asset.asset_type == "livery" %}
-        {{- install_asset_items_livery(asset, spaces) }}
-    {%- elif asset.asset_type == "shared" %}
-        {{- install_asset_items_shared(asset, spaces) }}
-    {%- elif asset.asset_type == "roughmets_multi" %}
-        {{- install_asset_items_roughmets_multi(asset, spaces) }}
-    {%- elif asset_type == "roughmets_single" %}
-"roughmets_single" ASSET TYPE NOT IMPLEMENTED YET IN THIS TEMPLATE. FIXME.
+    {%- if asset.asset_type in ["livery", "shared", "roughmets_single"] %}
+            {{- asset_section(asset, spaces) }}
     {%- endif %}
 {%- endmacro -%}
 
 
-{%- macro install_asset_items_livery(asset, spaces) %}
-{%- set livery_size_kb = (asset._size_in_bytes / 1024) | int  %}
-{{ spaces }}    AddSize {{ livery_size_kb }}
-{%- endmacro -%}
-
-
-{%- macro install_asset_items_shared(asset, spaces) %}
-{%- set shared_size_kb = (asset._size_in_bytes / 1024) | int  %}    
-{{ spaces }}    AddSize {{ shared_size_kb }}
-{%- endmacro -%}
-
-
-{%- macro install_asset_items_roughmets_multi(asset, spaces) %}
-{%- for roughmet_dir, roughmet_files in asset._roughmets_files.items() %}
-    {%- set section_id_roughmet_install = asset._roughmets_ids[roughmet_dir].install %}
-    {%- set roughmet_size_kb = (asset._roughmets_sizes[roughmet_dir] / 1024) | int  %}    
-{{ spaces }}    Section  "Roughmet {{ roughmet_dir }}" "{{ section_id_roughmet_install }}"
-{{ spaces }}        AddSize {{ roughmet_size_kb }}
-{{ spaces }}    SectionEnd
-{%- endfor %}
+{%- macro asset_section(asset, spaces) %}
+{%- set asset_size = (asset._size_in_bytes / 1024) | int  %}
+{{ spaces }}    AddSize {{ asset_size }}
 {%- endmacro -%}

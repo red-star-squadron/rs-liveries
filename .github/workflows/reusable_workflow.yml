@@ -41,7 +41,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install nsis, wget and unzip
         run: sudo apt install -y nsis wget unzip p7zip-full git
       - name: Checkout

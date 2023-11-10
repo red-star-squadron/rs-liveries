@@ -7,27 +7,35 @@ from rs_util_shared import nuke_dir_contents
 from rs_util_google import download_gdrive_folder
 from rs_util_google import THREADPOOL
 
+from typing import Dict, Any, List
 from os.path import join as os_join
-
 from os import remove as os_remove
 from os import listdir as os_listdir
 from os import walk as os_walk
 from fnmatch import fnmatch
 from yaml import safe_load
 from locale import getpreferredencoding
-from threading import Lock
-from time import time
 from pickle import dumps as pickle_dumps
 from pickle import load as pickle_load
 from uuid import uuid4
 from json import dumps as json_dumps
 
 
-class LiveryAssets:
-    _lock = Lock
+# Typing aliases
+JSONDict = Dict[str, Any]
+JSONArray = List[Any]
+
+
+class LiveryAsset:
     _all_assets = []
     _top_level_assets = []
-    _supported_types = ["livery", "roughmets_single", "roughmets_multi", "shared", None]
+    _supported_config_asset_types = [
+        "livery",
+        "roughmets_single",
+        "roughmets_multi",
+        "shared",
+        None,
+    ]
 
     def __init__(
         self,
@@ -39,11 +47,6 @@ class LiveryAssets:
         asset_type=None,
         category_name=None,
     ):
-        # Add newly created instance to the list in our asset
-        # variable. Thread-safe
-        with LiveryAssets._lock():
-            LiveryAssets._all_assets.append(self)
-
         # Initialize self vars
         self.basename = basename
         self.gdrive_id = gdrive_id
@@ -53,40 +56,31 @@ class LiveryAssets:
         self.asset_type = asset_type
         self.category_name = category_name
         self._dl_dir = None
-        self._parent = None
+        self._dl_future = None
+        self.__parent = None
         self._size_in_bytes = None
-        self._roughmets_dirs = None
-        self._roughmets_files = None
-        self._roughmets_sizes = None
-        self._roughmets_ids = None
         self._asset_dirs = None
-        self._ids = dict(
-            {
-                "install": str(uuid4()),
-                "uninstall": str(uuid4()),
-            }
-        )
-        self._dependants = None
+        self._roughmets_files = None
+        self._uuid = str(uuid4())
+        self._children = None
 
     def __str__(self):
         return (
             f"basename: {self.basename}"
-            "\ngdrive_id: {self.gdrive_id}"
-            "\ndcs_codename: {self.dcs_codename}"
-            "\nmust_contain_strings: {self.must_contain_strings}"
-            "\nmust_not_contain_strings: {self.must_not_contain_strings}"
-            "\nasset_type: {self.asset_type}"
-            "\ncategory_name: {self.category_name}"
-            "\n_dl_dir: {str(self._dl_dir)}"
-            "\n_parent: {self._parent}"
-            "\n_size_in_bytes: {self._size_in_bytes}"
-            "\n_roughmets_dirs: {self._roughmets_dirs}"
-            "\n_roughmets_files: {self._roughmets_files}"
-            "\n_roughmets_sizes: {self._roughmets_sizes}"
-            "\n_roughmets_ids: {self._roughmets_ids}"
-            "\n_asset_dirs: {self._asset_dirs}"
-            "\n_ids: {self._ids}"
-            "\n_dependants: {self._dependants}"
+            f"\ngdrive_id: {self.gdrive_id}"
+            f"\ndcs_codename: {self.dcs_codename}"
+            f"\nmust_contain_strings: {self.must_contain_strings}"
+            f"\nmust_not_contain_strings: {self.must_not_contain_strings}"
+            f"\nasset_type: {self.asset_type}"
+            f"\ncategory_name: {self.category_name}"
+            f"\n_dl_dir: {str(self._dl_dir)}"
+            f"\n_dl_future: {self._dl_future}"
+            f"\n__parent: {self.__parent}"
+            f"\n_size_in_bytes: {self._size_in_bytes}"
+            f"\n_asset_dirs: {self._asset_dirs}"
+            f"\n_roughmets_files: {self._roughmets_files}"
+            f"\n_uuid: {self._uuid}"
+            f"\n_children: {self._children}"
         )
 
     def __iter__(self):
@@ -98,22 +92,20 @@ class LiveryAssets:
         yield "asset_type", self.asset_type
         yield "category_name", self.category_name
         yield "_dl_dir", self._dl_dir
-        yield "_parent", self._parent
+        yield "_dl_future", self._dl_future
+        yield "__parent", self.__parent
         yield "_size_in_bytes", self._size_in_bytes
-        yield "_roughmets_dirs", self._roughmets_dirs
-        yield "_roughmets_files", self._roughmets_files
-        yield "_roughmets_sizes", self._roughmets_sizes
-        yield "_roughmets_ids", self._roughmets_ids
         yield "_asset_dirs", self._asset_dirs
-        yield "_ids", self._ids
-        if self._dependants:
-            yield "_dependants", [dict(d) for d in self._dependants]
+        yield "_roughmets_files", self._roughmets_files
+        yield "_uuid", self._uuid,
+        if self._children:
+            yield "_children", [dict(d) for d in self._children]
         else:
-            yield "_dependants", self._dependants
+            yield "_children", self._children
 
-    def add_dependant(self, config_item, parent):
+    def add_child_from_config_item(self, config_item, parent):
         config_item_copy = config_item.copy()
-        # When adding a dependant, we want to ensure we pass down the
+        # When adding a child, we want to ensure we pass down the
         # "must_contain_strings" and "must_not_contain_strings" attributes.
         # This is to maintain inheritance for sanity checks.
         try:
@@ -127,21 +119,87 @@ class LiveryAssets:
         except KeyError:
             config_item_copy["must_not_contain_strings"] = self.must_not_contain_strings
 
-        dependant = LiveryAssets.from_config_item(config_item_copy)
-        self._dependants.append(dependant)
+        child = self.from_config_item(config_item_copy)
+        self._children.append(child)
 
     def get_pilot_dirs(self):
         return [
             pilot_dir for pilot_dir in self._asset_dirs if self.basename != pilot_dir
         ]
 
+    def _download_asset(self) -> "LiveryAsset":
+        if self.gdrive_id is None:
+            return None
+        nuke_dir_contents(self._dl_dir)
+        if self.dcs_codename:
+            desination_dir = os_join(
+                STAGING_DIR, self.dcs_codename.lower(), self.basename
+            )
+        else:
+            desination_dir = os_join(STAGING_DIR, self.basename)
+        self._dl_dir = desination_dir
+        self._dl_future = THREADPOOL.submit(
+            download_gdrive_folder,
+            gdrive_id=self.gdrive_id,
+            des=self._dl_dir,
+            is_rootfolder=True,
+            verify_basename=self.basename,
+            must_contain_strings=self.must_contain_strings,
+            must_not_contain_strings=self.must_not_contain_strings,
+        )
+        return self
+
+    def _process_roughmets_multi(self) -> List["LiveryAsset"]:
+        roughmets_multi_children = []
+        for roughmets_dir in os_listdir(os_join(self._dl_dir, self.basename)):
+            roughmets_files = os_listdir(
+                os_join(self._dl_dir, self.basename, roughmets_dir)
+            )
+            new_instance = LiveryAsset(
+                basename=f"Roughmet {roughmets_dir}",
+                gdrive_id=self.gdrive_id,
+                asset_type="roughmets_single",
+            )
+            new_instance.gdrive_id = self.gdrive_id
+            new_instance._dl_dir = os_join(self._dl_dir, self.basename, roughmets_dir)
+            new_instance._parent = self
+            new_instance._roughmets_files = roughmets_files
+            new_instance._update_size()
+            roughmets_multi_children.append(new_instance)
+            self._all_assets.append(new_instance)
+        self._children = roughmets_multi_children
+        # This essentially convers the asset_multi into a category without a download,
+        # because it now has children of type roughmets_single
+        self.gdrive_id = None
+        self._dl_dir = None
+        self._size_in_bytes = None
+        return roughmets_multi_children
+
+    def _update_size(self):
+        self._size_in_bytes = single_dir_size(self._dl_dir)
+
+    def _update_assets_dirs(self):
+        asset_dirs = set()
+        for directory in dir_list_one_deep(self._dl_dir):
+            asset_dirs.update(
+                {directory.removeprefix(self._dl_dir).strip().replace("/", "")}
+            )
+        self._asset_dirs = sorted(asset_dirs)
+
     @classmethod
-    def get_all_assets(cls):
-        return cls._all_assets
+    def get_all_assets_from_top_level_assets(
+        cls, top_level_assets: List["LiveryAsset"]
+    ) -> List["LiveryAsset"]:
+        assets = []
+        for asset in top_level_assets:
+            assets.append(asset)
+            if asset._children:
+                assets += cls.get_all_assets_from_top_level_assets(asset._children)
+        return assets
 
     @classmethod
     def print_json(cls):
-        print(json_dumps([dict(d) for d in cls.get_all_assets()], indent=4))
+        return json_dumps([dict(d) for d in cls._all_assets], indent=4)
 
     @classmethod
     def get_assets_with_gdrive_id(cls):
@@ -187,98 +245,6 @@ class LiveryAssets:
         return sorted(pilots)
 
     @classmethod
-    def _update_roughmets_files_and_ids(cls):
-        """
-        Run before Asset._update_sizes
-        because "roughmets_multi" size calculations depend on it
-        """
-        for asset in cls.get_roughmets_assets():
-            asset._roughmets_dirs = os_listdir(os_join(asset._dl_dir, asset.basename))
-            asset._roughmets_files = dict()
-            asset._roughmets_ids = dict()
-            for roughmet_dir in asset._roughmets_dirs:
-                # Essentially building a dict for this asset
-                # Key is the roughmet dir name, and the value is all the files in a single roughmets dir
-                #
-                # {
-                #     "dirname1": ["file1", "file2"...],
-                #     "dirname2": ["file3", "file4"...]
-                # }
-                asset._roughmets_files[roughmet_dir] = os_listdir(
-                    os_join(asset._dl_dir, asset.basename, roughmet_dir)
-                )
-                asset._roughmets_ids[roughmet_dir] = dict(
-                    {"install": str(uuid4()), "uninstall": str(uuid4())}
-                )
-
-    @classmethod
-    def _update_sizes(cls):
-        for asset in cls.get_assets_with_gdrive_id():
-            asset._size_in_bytes = single_dir_size(asset._dl_dir)
-            if asset.asset_type == "roughmets_multi":
-                asset._roughmets_sizes = dict()
-                for roughmet_dir in asset._roughmets_dirs:
-                    asset._roughmets_sizes[roughmet_dir] = single_dir_size(
-                        os_join(asset._dl_dir, asset.basename, roughmet_dir)
-                    )
-
-    @classmethod
-    def _update_assets_dirs(cls):
-        for asset in cls.get_assets_with_gdrive_id():
-            asset_dirs = set()
-            for directory in dir_list_one_deep(asset._dl_dir):
-                asset_dirs.update(
-                    {directory.removeprefix(asset._dl_dir).strip().replace("/", "")}
-                )
-            asset._asset_dirs = sorted(asset_dirs)
-
-    # from_config_file handles this, but we can keep it as a utility I guess
-    @classmethod
-    def _update_assets_parents(cls):
-        for asset_parent in cls.get_all_assets():
-            if asset_parent._dependants:
-                for asset_child in asset_parent._dependants:
-                    asset_child.parent = asset_parent
-
-    @classmethod
-    def _download_and_parse_assets(cls):
-        nuke_dir_contents(STAGING_DIR)
-        dl_statuses = []
-        gdrive_id_assets = cls.get_assets_with_gdrive_id()
-        timer_start = time()
-        for asset in gdrive_id_assets:
-            # This block is to handle downloads that don't have a dcs_codename,
-            # like shared items or roughmets
-            if asset.dcs_codename:
-                desination_dir = os_join(
-                    STAGING_DIR, asset.dcs_codename.lower(), asset.basename
-                )
-            else:
-                desination_dir = os_join(STAGING_DIR, asset.basename)
-            asset._dl_dir = desination_dir
-            dl_status = THREADPOOL.submit(
-                download_gdrive_folder,
-                gdrive_id=asset.gdrive_id,
-                des=asset._dl_dir,
-                is_rootfolder=True,
-                verify_basename=asset.basename,
-                must_contain_strings=asset.must_contain_strings,
-                must_not_contain_strings=asset.must_not_contain_strings,
-            )
-            dl_statuses.append(dl_status)
-
-        for dl_status_local in dl_statuses:
-            for dl_status_google in dl_status_local.result():
-                dl_status_google.result()  # Wait for everything in THREADPOOL to finish
-        LOGGER.info(f"Downloads took: {time() - timer_start}")
-
-        # We do the following after downloads completed
-        cls._remove_all_readme_files()
-        cls._update_roughmets_files_and_ids()
-        cls._update_sizes()
-        cls._update_assets_dirs()
-
-    @classmethod
     def dump_pickle(cls, destination_file="asset.pickle"):
         with open(destination_file, "wb") as f:
             f.write(pickle_dumps(cls._all_assets))
@@ -289,17 +255,32 @@ class LiveryAssets:
             cls._all_assets = pickle_load(f)
 
     @classmethod
-    def from_config_file(cls, assetfile):
+    def from_config_file(cls, assetfile: str) -> List["LiveryAsset"]:
         with open(assetfile, "r", encoding=getpreferredencoding()) as file:
             assets_config = safe_load(file)
-
+        top_level_assets = []
         for asset_config_item in assets_config:
-            cls._top_level_assets.append(cls.from_config_item(asset_config_item))
-        # Once we parse the config, we download and parse directories:
-        cls._download_and_parse_assets()
+            asset = cls.from_config_item(asset_config_item)
+            top_level_assets.append(asset)
+
+        # Wait for downloads to finish, and the do post-download processing
+        for asset in cls.get_all_assets_from_top_level_assets(top_level_assets):
+            if asset._dl_dir is not None:
+                for futures in asset._dl_future.result():
+                    futures.result()
+                asset._remove_all_readme_files(asset._dl_dir)
+                if asset.asset_type == "roughmets_multi":
+                    asset._process_roughmets_multi()
+                else:
+                    asset._update_assets_dirs()
+                    asset._update_size()
+
+        cls._top_level_assets = top_level_assets
+
+        return top_level_assets
 
     @classmethod
-    def from_config_item(cls, config_item):
+    def from_config_item(cls, config_item: Dict[str, str]) -> "LiveryAsset":
         try:
             basename = config_item["basename"].upper()
         except KeyError:
@@ -321,9 +302,9 @@ class LiveryAssets:
         except KeyError:
             must_not_contain_strings = []
         try:
-            config_dependants = config_item["dependants"]
+            config_children = config_item["children"]
         except KeyError:
-            config_dependants = None
+            config_children = None
         try:
             asset_type = config_item["asset_type"]
         except KeyError:
@@ -334,9 +315,9 @@ class LiveryAssets:
             category_name = None
 
         # Check  if asset_type is one of supported types
-        if asset_type not in cls._supported_types:
+        if asset_type not in cls._supported_config_asset_types:
             raise ValueError(
-                f"type must be one of {cls._supported_types}."
+                f"type must be one of {cls._supported_config_asset_types}."
                 f"\nYou provided {config_item}"
             )
 
@@ -366,14 +347,6 @@ class LiveryAssets:
                     "If 'asset_type' is not set, you must provide 'category_name'"
                     f"\nYou provided: {config_item}"
                 )
-        # Roughmets_multi not suppoerted as category
-        # It breaks out into children.
-        if asset_type == "roughmets_multi" and config_dependants is not None:
-            raise NotImplementedError(
-                "We currently don't support roughmets_multi asset type "
-                "as an asset with dependants."
-                f"\nYou provided: {config_item}"
-            )
 
         new_instance = cls(
             basename=basename,
@@ -384,21 +357,20 @@ class LiveryAssets:
             asset_type=asset_type,
             category_name=category_name,
         )
-
-        if config_dependants is not None:
-            new_instance._ids["install_bespoke"] = str(uuid4())
-            new_instance._ids["uninstall_bespoke"] = str(uuid4())
-            new_instance._dependants = []
-            for config_dependant in config_dependants:
-                new_instance.add_dependant(
-                    config_item=config_dependant, parent=new_instance
+        new_instance._download_asset()
+        if config_children is not None:
+            new_instance._children = []
+            for config_child in config_children:
+                new_instance.add_child_from_config_item(
+                    config_item=config_child, parent=new_instance
                 )
+        cls._all_assets.append(new_instance)
 
         return new_instance
 
     @staticmethod
-    def _remove_all_readme_files():
-        for root, dirs, files in os_walk(STAGING_DIR):
+    def _remove_all_readme_files(directory):
+        for root, dirs, files in os_walk(directory):
             for name in files:
                 if fnmatch(name.lower(), "readme*.txt"):  # Remove readmes
                     LOGGER.info(f"Removing {os_join(root, name)}")
@@ -409,6 +381,10 @@ class LiveryAssets:
 
 def main():
     pass
+    LiveryAsset.from_config_file("assets.yml")
+    for asset in LiveryAsset._all_assets:
+        LOGGER.info(asset)
+        LOGGER.info("----------------")
 
 
 if __name__ == "__main__":

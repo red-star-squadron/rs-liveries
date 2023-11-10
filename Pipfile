@@ -13,6 +13,7 @@ jinja2 = "*"
 [dev-packages]
 flake8 = "*"
 pylint = "*"
+pytest = "*"
 
 [requires]
-python_version = "3.11"
+python_version = "3.12"
