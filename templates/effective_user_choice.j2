@@ -10,7 +10,7 @@ Section "-Resolve checkboxes"
         {{- resolve_asset_items_livery(asset, asset_resolved_id, github_ref_name) }}
     {%- elif asset.asset_type == "shared" %}
         {{- resolve_asset_items_shared(asset, asset_resolved_id, github_ref_name) }}
-    {%- elif asset.asset_type == "roughmets_multi" %}
+    {%- elif asset.asset_type == "roughmets_single" %}
         {{- resolve_asset_items_roughmets_single(asset, asset_resolved_id, github_ref_name) }}
     {%- endif %}
 {%- endfor %}

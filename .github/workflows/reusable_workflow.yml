@@ -120,9 +120,6 @@ jobs:
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_testing.exe"
 
-      - name: Sleep 10 seconds
-        run: sleep 10
-
       - name: Create 'testing' tag (non-main release)
         if: ${{ inputs.runner == 'self-hosted' }}
         uses: EndBug/latest-tag@latest
