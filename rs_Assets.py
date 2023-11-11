@@ -95,7 +95,7 @@ class LiveryAsset:
         else:
             yield "_children", self._children
 
-    def add_child_from_config_item(self, config_item, parent) -> "LiveryAsset":
+    def add_child_from_config_item(self, config_item: Dict[str, Any], parent: "LiveryAsset") -> "LiveryAsset":
         config_item_copy = config_item.copy()
         # When adding a child, we want to ensure we pass down the
         # "must_contain_strings" and "must_not_contain_strings" attributes.
@@ -140,7 +140,7 @@ class LiveryAsset:
     def _update_size(self) -> None:
         self._size_in_bytes = single_dir_size(self._dl_dir)
 
-    def _update_asset_items(self):
+    def _update_asset_items(self) -> None:
         asset_items = set()
         entrypoint = self._dl_dir
         if self.asset_type == "roughmets":
@@ -182,7 +182,7 @@ class LiveryAsset:
         return future
 
     @classmethod
-    def from_config_item(cls, config_item: Dict[str, str]) -> "LiveryAsset":
+    def from_config_item(cls, config_item: Dict[str, Any]) -> "LiveryAsset":
         try:
             basename = config_item["basename"]
         except KeyError:
@@ -249,7 +249,6 @@ class LiveryAsset:
                     "If 'asset_type' is not set, you must provide 'category_name'"
                     f"\nYou provided: {config_item}"
                 )
-
         new_instance = cls(
             basename=basename,
             gdrive_id=gdrive_id,
@@ -269,9 +268,8 @@ class LiveryAsset:
 
         return new_instance
 
-    @staticmethod
-    def _remove_all_readme_files(directory) -> None:
-        for root, dirs, files in os_walk(directory):
+    def _remove_all_readme_files(self) -> None:
+        for root, dirs, files in os_walk(self._dl_dir):
             for name in files:
                 if fnmatch(name.lower(), "readme*.txt"):  # Remove readmes
                     LOGGER.info(f"Removing {os_join(root, name)}")
@@ -379,7 +377,7 @@ class LiveryAssetCollection:
             if asset._dl_future is not None:
                 for nested_future in asset._dl_future.result():
                     nested_future.result()
-                asset._remove_all_readme_files(asset._dl_dir)
+                asset._remove_all_readme_files()
                 asset._update_asset_items()
                 asset._update_size()
                 compress_and_checksum_futures.append(asset._compress_and_checksum())

@@ -48,11 +48,13 @@ def calculate_and_write_checksum(destination_dir: str, input_7z_file: str) -> No
         check=True,
         text=False,
     )
+    if z_subprocess.stderr:
+        LOGGER.error(f"7z error: {z_subprocess.stderr}")
     chksum = sha256(z_subprocess.stdout).hexdigest()
     dest_chksumfile = os_join(
         destination_dir, PurePath(input_7z_file).stem + ".sha256sum"
     )
-    LOGGER(f"Checksum: '{chksum}' -> '{dest_chksumfile}'")
+    LOGGER.info(f"Checksum: '{chksum}' -> '{dest_chksumfile}'")
     Path(Path(dest_chksumfile).resolve().parents[0]).mkdir(parents=True, exist_ok=True)
     with open(dest_chksumfile, "w", encoding=getpreferredencoding()) as file_final:
         file_final.write(chksum)
@@ -72,7 +74,7 @@ def sevenz_and_checksum_archive(
     appended_files_and_or_dirs = []
     for file in files_and_or_dirs:
         appended_files_and_or_dirs.append(os_join(entrypoint, file))
-    LOGGER(f"Compressing: {destination_file}")
+    LOGGER.info(f"Compressing: {destination_file}")
     sp_run(
         sevenz_exec + [destination_file] + appended_files_and_or_dirs,
         capture_output=False,
@@ -81,7 +83,7 @@ def sevenz_and_checksum_archive(
 
     if DELETE_AFTER_COMPRESS:
         for target in appended_files_and_or_dirs:
-            LOGGER(f"Removing: {target}")
+            LOGGER.info(f"Removing: {target}")
             my_file = Path(target)
             if my_file.is_dir():
                 rmtree(target)
