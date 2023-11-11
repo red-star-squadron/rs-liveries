@@ -1,17 +1,13 @@
 from os.path import dirname as os_dirname
 from os.path import join as os_join
 from os.path import getsize as os_getsize
-from os.path import isdir as os_isdir
 from os.path import islink as os_islink
 
 from os import sep as os_sep
 from os import environ
 from os import walk as os_walk
-from os import remove as os_remove
 
 from inspect import getsourcefile
-from shutil import rmtree
-from glob import glob
 
 import logging
 
@@ -75,16 +71,6 @@ def single_dir_size(dirname):
             if not os_islink(filepath):
                 total_size += os_getsize(filepath)
     return total_size
-
-
-def nuke_dir_contents(dirname):
-    if dirname:  # Failsafe so we don't nuke the root dir
-        files = glob(dirname + "/*")  # We just nuke regular files
-        for f in files:
-            if os_isdir(f):
-                rmtree(f)
-            else:
-                os_remove(f)
 
 
 def main():

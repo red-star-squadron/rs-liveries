@@ -3,7 +3,6 @@ from rs_util_shared import COMPRESSED_DIR
 from rs_util_shared import CHECKSUMS_DIR
 from rs_util_shared import LOGGER
 from rs_util_shared import single_dir_size
-from rs_util_shared import nuke_dir_contents
 
 from rs_util_google import download_gdrive_folder
 from rs_util_google import THREADPOOL
@@ -15,6 +14,7 @@ from os.path import join as os_join
 from os import remove as os_remove
 from os import walk as os_walk
 from os import listdir as os_listdir
+from shutil import rmtree
 from pathlib import PurePath
 from fnmatch import fnmatch
 from yaml import safe_load
@@ -125,7 +125,7 @@ class LiveryAsset:
         else:
             desination_dir = os_join(STAGING_DIR, self.basename)
         self._dl_dir = desination_dir
-        nuke_dir_contents(self._dl_dir)
+        rmtree(self._dl_dir)
         self._dl_future = THREADPOOL.submit(
             download_gdrive_folder,
             gdrive_id=self.gdrive_id,
@@ -370,6 +370,15 @@ class LiveryAssetCollection:
         for asset_config_item in assets_config:
             asset = LiveryAsset.from_config_item(asset_config_item)
             self._top_level_assets.append(asset)
+
+        # Check if we have any duplicate basenames
+        basenames = []
+        for asset in self.all_assets:
+            basenames.append(asset.basename)
+        if len(basenames) != len(set(basenames)):
+            raise ValueError(
+                f"Duplicate basenames found in config file: {asset_config_file}"
+            )
 
         # Wait for downloads to finish, and the do post-download processing
         compress_and_checksum_futures = []
