@@ -171,7 +171,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
     ; DetailPrint $R8
     ; DetailPrint $8
     ${If} "$8" == "$R8"
-      DetailPrint "${BaseName} already installed. Skipping. Use Cleanup to reinstall if there are issues."
+      DetailPrint "${BaseName} already installed. Skipping."
       Goto SkipToEnd_${ID}
     ${Else}
       DetailPrint "${BaseName} cheksum differs from the current version. Installing"
@@ -227,6 +227,22 @@ Section "-Clean up our mistakes"
   ; Deprecating RED STAR CHECKSUMS directory. We're putting checksum files together with liveries
   RMDir /r "$InstDir\RED STAR CHECKSUMS"
 
+  ; Deprecating the A-10 roughmets
+  Delete "$ProgramFilesDir\Bazar\TempTextures\a-10a-canopy-glass_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\a-10c-canopy-glass_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-a_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-b_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-c_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-d_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-e_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-f_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-g_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-h_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-i_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-j_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-k_RoughMet.dds"
+  Delete "$ProgramFilesDir\Bazar\TempTextures\A-10C_def_1-l_RoughMet.dds"
+
   ; next mistake cleanup below
 SectionEnd
 
@@ -244,3 +260,14 @@ FunctionEnd
 
 {%- import "effective_user_choice.j2" as effective_user_choice %}
 {{- effective_user_choice.render(all_assets, github_ref_name) }}
+
+Section "-Resolve pilot priorities"
+    ${If} ${SectionIsSelected}  ${PILOTPRIO}
+        DetailPrint "Modifying pilot priorities..."
+        ${PowerShellExecFileLog} '"$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
+        IfErrors 0 +2
+            Abort "There was a problem with the pilot priorities script. Aborting. You can probably use the liveries as normal."
+        ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
+        ; MessageBox MB_OK "$PilotSelected"
+    ${Endif}
+SectionEnd
