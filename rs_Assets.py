@@ -379,13 +379,12 @@ class LiveryAssetCollection:
             self._top_level_assets.append(asset)
 
         # Check if we have any duplicate basenames
-        basenames = []
         for asset in self.all_assets:
-            basenames.append(asset.basename)
-        if len(basenames) != len(set(basenames)):
-            raise ValueError(
-                f"Duplicate basenames found in config file: {asset_config_file}"
-            )
+            for asset_compare in self.all_assets:
+                if asset.basename == asset_compare.basename:
+                    raise ValueError(
+                        f"Duplicate basenames found in config file: {asset.basename}"
+                    )
 
         # Wait for downloads to finish, and the do post-download processing
         compress_and_checksum_futures = []
