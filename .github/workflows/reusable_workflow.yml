@@ -155,7 +155,7 @@ jobs:
 
       - name: Upload Assets to Github Releases (main release)
         uses: softprops/action-gh-release@v1
-        if: ${{ inputs.runner != 'self-hosted' && inputs.minimal_sample_size == true }}
+        if: ${{ inputs.runner != 'self-hosted' && inputs.minimal_sample_size == false }}
         with:
           files: |
             Staging/RS_Liveries_${{ github.ref_name }}.exe
