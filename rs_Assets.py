@@ -95,7 +95,9 @@ class LiveryAsset:
         else:
             yield "_children", self._children
 
-    def add_child_from_config_item(self, config_item: Dict[str, Any], parent: "LiveryAsset") -> "LiveryAsset":
+    def add_child_from_config_item(
+        self, config_item: Dict[str, Any], parent: "LiveryAsset"
+    ) -> "LiveryAsset":
         config_item_copy = config_item.copy()
         # When adding a child, we want to ensure we pass down the
         # "must_contain_strings" and "must_not_contain_strings" attributes.
@@ -125,7 +127,12 @@ class LiveryAsset:
         else:
             desination_dir = os_join(STAGING_DIR, self.basename)
         self._dl_dir = desination_dir
-        rmtree(self._dl_dir, ignore_errors=True)
+
+        try:
+            rmtree(self._dl_dir)
+        except FileNotFoundError:
+            pass
+
         self._dl_future = THREADPOOL.submit(
             download_gdrive_folder,
             gdrive_id=self.gdrive_id,
