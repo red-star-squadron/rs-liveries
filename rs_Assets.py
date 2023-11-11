@@ -169,7 +169,9 @@ class LiveryAsset:
         return pilot_dirs
 
     def _compress_and_checksum(self) -> Future:
-        entrypoint = os_join(self._dl_dir, PurePath(self._dl_dir).stem)
+        entrypoint = self._dl_dir
+        if self.asset_type == "roughmets":
+            entrypoint = os_join(self._dl_dir, PurePath(self._dl_dir).stem)
         archive = os_join(COMPRESSED_DIR, f"{self.basename}.7z")
         future = compress_and_checksum(
             entrypoint,
