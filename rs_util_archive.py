@@ -11,6 +11,7 @@ so we can utilize maximum resources of any given system this runs on.
 # Our includes
 from rs_util_shared import MINIMAL_SAMPLE_SIZE
 from rs_util_shared import DELETE_AFTER_COMPRESS
+from rs_util_shared import LOGGER
 
 # subprocess to run 7z outside of python
 from subprocess import run as sp_run
@@ -51,7 +52,7 @@ def calculate_and_write_checksum(destination_dir: str, input_7z_file: str) -> No
     dest_chksumfile = os_join(
         destination_dir, PurePath(input_7z_file).stem + ".sha256sum"
     )
-    print(f"Checksum: '{chksum}' -> '{dest_chksumfile}'")
+    LOGGER(f"Checksum: '{chksum}' -> '{dest_chksumfile}'")
     Path(Path(dest_chksumfile).resolve().parents[0]).mkdir(parents=True, exist_ok=True)
     with open(dest_chksumfile, "w", encoding=getpreferredencoding()) as file_final:
         file_final.write(chksum)
@@ -71,7 +72,7 @@ def sevenz_and_checksum_archive(
     appended_files_and_or_dirs = []
     for file in files_and_or_dirs:
         appended_files_and_or_dirs.append(os_join(entrypoint, file))
-    print(f"Compressing: {destination_file}")
+    LOGGER(f"Compressing: {destination_file}")
     sp_run(
         sevenz_exec + [destination_file] + appended_files_and_or_dirs,
         capture_output=False,
@@ -80,7 +81,7 @@ def sevenz_and_checksum_archive(
 
     if DELETE_AFTER_COMPRESS:
         for target in appended_files_and_or_dirs:
-            print(f"Removing: {target}")
+            LOGGER(f"Removing: {target}")
             my_file = Path(target)
             if my_file.is_dir():
                 rmtree(target)
