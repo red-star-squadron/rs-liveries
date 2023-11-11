@@ -378,12 +378,12 @@ class LiveryAssetCollection:
             asset = LiveryAsset.from_config_item(asset_config_item)
             self._top_level_assets.append(asset)
 
-        # Check if we have any duplicate basenames
-        for asset in self.all_assets:
-            for asset_compare in self.all_assets:
+        # Check if we have any duplicate basenames for downloadable assets
+        for asset in self.get_assets_with_gdrive_id():
+            for asset_compare in self.get_assets_with_gdrive_id():
                 if asset.basename == asset_compare.basename:
                     raise ValueError(
-                        f"Duplicate basenames found in config file: {asset.basename}"
+                        f"Duplicate basenames for downloadable assets found in config file: {asset.basename}"
                     )
 
         # Wait for downloads to finish, and the do post-download processing
