@@ -125,7 +125,7 @@ class LiveryAsset:
         else:
             desination_dir = os_join(STAGING_DIR, self.basename)
         self._dl_dir = desination_dir
-        rmtree(self._dl_dir)
+        rmtree(self._dl_dir, ignore_errors=True)
         self._dl_future = THREADPOOL.submit(
             download_gdrive_folder,
             gdrive_id=self.gdrive_id,
