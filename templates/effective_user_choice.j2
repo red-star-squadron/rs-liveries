@@ -23,7 +23,7 @@ SectionEnd
     ${If} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
         !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}.7z" "$TEMP\{{ asset.basename }}.7z"  "$INSTDIR\{{ asset.dcs_codename}}" "{{ asset.basename }}"
     ${ElseIfNot} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
-    {%- for asset_dir in asset._asset_dirs %}
+    {%- for asset_dir in asset._asset_items %}
         RMDir /r "$InstDir\{{ asset.dcs_codename }}\{{ asset_dir }}"
     {%- endfor %}
         !insertmacro RemoveEmptyDir "$InstDir\{{ asset.dcs_codename }}"
@@ -45,7 +45,7 @@ SectionEnd
     ${If} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
         !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}.7z" "$TEMP\{{ asset.basename }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ asset.basename }}"
     ${ElseIfNot} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
-{%- for roughmet_file in asset._roughmets_files %}
+{%- for roughmet_file in asset._asset_items %}
             Delete "$ProgramFilesDir\Bazar\TempTextures\{{ roughmet_file}}"
 {%- endfor %}
             RMDir /r "$ProgramFilesDir\Bazar\TempTextures\{{ asset.basename }}"   {#- This removes the cheksum dir for roughmets #}
