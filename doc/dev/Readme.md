@@ -10,7 +10,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=credentials.json
 
 The program expects to see a yaml file in assets.yml. In the github pipeline, we get this via the ASSETS secret.
 
-Format respects hierarchy via the "dependants" values
+Format respects hierarchy via the "children" values
 
 Format is as follows:
 
@@ -21,17 +21,17 @@ Format is as follows:
   gdrive_id: REDACTED
   must_contain_strings: ["RED STAR"]
   asset_type: shared
-  dependants:
-    - category_name: Fixed Wing - Red Star Camo (BIN dependant)
+  children:
+    - category_name: Fixed Wing - Red Star Camo (BIN child)
       must_not_contain_strings: ["BLACK SQUADRON"]
-      dependants:
+      children:
         - basename: RED STAR MiG-29S
           dcs_codename: mig-29s
           gdrive_id: REDACTED
         - basename:  RED STAR MiG-29A
           dcs_codename: mig-29a
           gdrive_id: REDACTED
-          dependants:
+          children:
           - basename: RED STAR MiG-29G
             dcs_codename: mig-29g
             gdrive_id: REDACTED
@@ -41,7 +41,7 @@ Format is as follows:
         - basename:  RED STAR SU-27
           dcs_codename: su-27
           gdrive_id: REDACTED
-          dependants:
+          children:
           - basename:  RED STAR J-11A
             dcs_codename: j-11a
             gdrive_id: REDACTED
@@ -49,16 +49,16 @@ Format is as follows:
           dcs_codename: su-33
           gdrive_id: REDACTED
 
-    - category_name: Fixed Wing - Red Star Competitive (BIN dependant)
+    - category_name: Fixed Wing - Red Star Competitive (BIN child)
       must_contain_strings: ["BLACK SQUADRON"]
-      dependants:
+      children:
         - basename:  RED STAR MiG-29S BLACK SQUADRON
           dcs_codename: mig-29s
           gdrive_id: REDACTED
         - basename:  RED STAR MiG-29A BLACK SQUADRON
           dcs_codename: mig-29a
           gdrive_id: REDACTED
-          dependants:
+          children:
           - basename: RED STAR MiG-29G BLACK SQUADRON
             dcs_codename: mig-29g
             gdrive_id: REDACTED
@@ -68,7 +68,7 @@ Format is as follows:
         - basename:  RED STAR SU-27 BLACK SQUADRON
           dcs_codename: su-27
           gdrive_id: REDACTED
-          dependants:
+          children:
           - basename:  RED STAR J-11A BLACK SQUADRON
             dcs_codename: j-11a
             gdrive_id: REDACTED
@@ -85,7 +85,7 @@ Format is as follows:
 - category_name: Fixed Wing - Red Star Camo
   must_not_contain_strings: ["BLACK SQUADRON"]
   must_contain_strings: ["RED STAR"]
-  dependants:
+  children:
     - basename:  RED STAR F-16C_50
       dcs_codename: f-16c_50
       gdrive_id: REDACTED
@@ -98,7 +98,7 @@ Format is as follows:
     - basename:  RED STAR F-14B
       dcs_codename: f-14b
       gdrive_id: REDACTED
-      dependants:
+      children:
         - basename:  RED STAR F-14A-135-GR
           dcs_codename: f-14a-135-gr
           gdrive_id: REDACTED
@@ -117,7 +117,7 @@ Format is as follows:
     - basename:  RED STAR Mirage-F1CE
       dcs_codename: mirage-f1ce
       gdrive_id: REDACTED
-      dependants:
+      children:
         - basename:  RED STAR Mirage-F1EE
           dcs_codename: mirage-f1ee
           gdrive_id: REDACTED
@@ -133,7 +133,7 @@ Format is as follows:
 
 - category_name: Fixed Wing - Red Star Competitive
   must_contain_strings: ["BLACK SQUADRON", "RED STAR"]
-  dependants:
+  children:
     - basename:  RED STAR MIG-21 BLACK SQUADRON
       dcs_codename: mig-21bis
       gdrive_id: REDACTED
@@ -146,7 +146,7 @@ Format is as follows:
     - basename:  RED STAR F-14B BLACK SQUADRON 
       dcs_codename: f-14b
       gdrive_id: REDACTED
-      dependants:
+      children:
         - basename:  RED STAR F-14A-135-GR BLACK SQUADRON
           dcs_codename: f-14a-135-gr
           gdrive_id: REDACTED
@@ -156,7 +156,7 @@ Format is as follows:
     - basename:  RED STAR A-10CII BLACK SQUADRON
       dcs_codename: A-10cii
       gdrive_id: REDACTED
-      dependants:
+      children:
         - basename:  RED STAR A-10A BLACK SQUADRON
           dcs_codename: A-10A
           gdrive_id: REDACTED
@@ -178,7 +178,7 @@ Format is as follows:
     - basename:  RED STAR Mirage-F1CE BLACK SQUADRON
       dcs_codename: mirage-f1ce
       gdrive_id: REDACTED
-      dependants:
+      children:
         - basename:  RED STAR Mirage-F1EE BLACK SQUADRON
           dcs_codename: mirage-f1ee
           gdrive_id: REDACTED
@@ -197,7 +197,7 @@ Format is as follows:
 
 - category_name: Rotary Wing - Red Star Competitive
   must_contain_strings: ["BLACK SQUADRON", "RED STAR"]
-  dependants:
+  children:
     - basename:  RED STAR AH-64D_BLK_II BLACK SQUADRON
       dcs_codename: AH-64D_BLK_II
       gdrive_id: REDACTED
@@ -212,18 +212,29 @@ Format is as follows:
       gdrive_id: REDACTED
 
 
-- basename: RED STAR ROUGHMETS
-  category_name: Roughmets (Optional)
-  asset_type: roughmets_multi
-  gdrive_id: REDACTED
+- category_name: Roughmets (Optional)
+  must_contain_strings: ["RoughMet"]
+  children:
+    - basename: F-15C RoughMet
+      asset_type: roughmets
+      gdrive_id: REDACTED
+    - basename: SU-25 RoughMet
+      asset_type: roughmets
+      gdrive_id: REDACTED
+    - basename: SU-25T RoughMet
+      asset_type: roughmets
+      gdrive_id: REDACTED
+    - basename: SU-33 RoughMet
+      asset_type: roughmets
+      gdrive_id: REDACTED
 
 
 ```
 
 
 
-* BIN folder: It contains various assets shared across multiple aircraft
-* RoughMets folder: Reason why we need admin privileges - those files end up in the DCS installation instead of the "Saved Games" location. They are also flat files in a already used dir, so handling install/uninstall of Roughmets needed some more doing.
+* `shared` asset type: It contains various assets shared across multiple aircraft
+* `roughmets` asset type: Reason why we need admin privileges - those files end up in the DCS installation instead of the "Saved Games" location.
 
 
 ## Iterative process
@@ -233,16 +244,15 @@ Format is as follows:
 
 Self explanatory. You should be on a non-main branch.
 
-We'll hold off the push for later, because that triggers a pipeline run on specific branches.
-
+Pushes to certain branches trigger a GitHub workflow. See the `.github` directory for more info.
 
 ### Temporarily set `MINIMAL_SAMPLE_SIZE` to true in `.env`
 
-This is to significantly reduce the run time.
-
-What this env var does is reduce so that every livery will get 1 .dds file and the lua file.
+With MINIMAL_SAMPLE_SIZE, we just download the lua files, and instead of downloading all the other files, we just touch them - touching a file means creating a file with a 0 byte contents.
 
 The lua file is significant if you are testing the installer. The powershell sciprt which changes pilot priorities needs it.
+
+Keep in mind that sizes will not show correctly if you are testing the installer with MINIMAL_SAMPLE_SIZE, nor will the downloads be usable.
 
 
 ### Run locally
@@ -251,8 +261,6 @@ The lua file is significant if you are testing the installer. The powershell sci
 
 Before running it. you will need nsis, relevant nsis plugins etc. Check the github workflow file to see how to set up your machine.
 
-We could rework this script so it runs in docker with everything set-up, but it was a personal preference to have a local-run enbabled.
-
 Unfortunately, the .exe file we get this way can be tested for everything except downloading liveries.
 
 We require a Github release for downloads to work.
@@ -260,8 +268,6 @@ We require a Github release for downloads to work.
 Assuming the exe was created and you ran initial tests, you can proceed to the next step. Otherwise back to the start and iterate!
 
 TODO: Maybe make it source files locally so the exe can "download" stuff? Potentially too much work. Idea: web server in a docker container!
-
-TODO: also give a docker option
 
 
 ### Run the local github runner
@@ -280,12 +286,10 @@ Sidenote: Local runner will use tmpfs for it's run. I think 32GB of ram is a req
 
 ### Trigger a non-main workflow run
 
-This is done by pushing to branches such as `wip**`, `feature**` etc. Check `.github/on_push.yml` to see which branch names are valid.
+This is done by pushing to branches such as `wip**`, `feature**` etc. Check files in `.github` to see which branch names are valid.
 
 
 ### Sit and wait.
-
-Workflow will take about 15 minutes. A much better alternative to ~1h that it takes on the github-hosted runner.
 
 Once done, it will produce a "Testing" release where you should go grab the exe
 
