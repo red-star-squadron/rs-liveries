@@ -47,6 +47,13 @@ jobs:
       - name: Install nsis, wget and unzip
         run: sudo apt install -y nsis wget unzip p7zip-full git
 
+      - name: Download 7-zip
+        run: |
+          wget https://www.7-zip.org/a/7z2201-extra.7z
+          mkdir Staging
+          cd Staging
+          7z x ../7z2201-extra.7z
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -99,12 +106,6 @@ jobs:
           name: Checksums
           path: |
             Staging/Checksums/*.sha256sum
-
-      - name: Download 7-zip
-        run: |
-          wget https://www.7-zip.org/a/7z2201-extra.7z
-          cd Staging
-          7z x ../7z2201-extra.7z
 
       - name: Package to Exe installer (release)
         if: ${{ inputs.runner != 'self-hosted' }}
