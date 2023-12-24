@@ -51,6 +51,7 @@ jobs:
         run: |
           wget https://www.7-zip.org/a/7z2201-extra.7z
           7z x 7z2201-extra.7z
+          ls 7za.exe
 
       - name: Checkout
         uses: actions/checkout@v4
