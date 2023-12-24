@@ -45,6 +45,7 @@ def main() -> None:
     su_copy("rs.ico", os_join(STAGING_DIR, "rs.ico"))
     su_copy("rssplash.bmp", os_join(STAGING_DIR, "rssplash.bmp"))
     su_copy("mig29flyby.wav", os_join(STAGING_DIR, "mig29flyby.wav"))
+    su_copy("7za.exe", os_join(STAGING_DIR, "7za.exe"))
     su_copy("extract-file.ps1", os_join(STAGING_DIR, "extract-file.ps1"))
 
 

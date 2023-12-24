@@ -17,8 +17,6 @@ sudo mount -t tmpfs -o uid=1000 tmpfs Compressed/
 
 pipenv run python rs_liveries_downloader.py
 
-cp 7za.exe Staging/
-
 pushd Staging || exit 1
 makensis -V4 rs-liveries-rendered.nsi
 popd || exit 1
