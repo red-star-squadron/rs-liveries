@@ -1,4 +1,5 @@
 # RS Liveries
+DCS liveries for the RED STAR SQUADRON by STRIKER45acp (RS ✯ | Striker 45)
 
 ## DISCLAIMER
 This software comes with absolutely no warranty. Use at your own risk.
