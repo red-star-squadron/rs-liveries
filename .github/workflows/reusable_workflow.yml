@@ -47,14 +47,13 @@ jobs:
       - name: Install nsis, wget and unzip
         run: sudo apt install -y nsis wget unzip p7zip-full git
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download 7-zip
         run: |
           wget https://www.7-zip.org/a/7z2201-extra.7z
           7z x 7z2201-extra.7z
-          ls 7za.exe
-
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Remove .env file
         run: rm .env
