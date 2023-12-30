@@ -21,6 +21,8 @@ jobs:
     with:
       runner: self-hosted
       minimal_sample_size: true
+      testing_release: true
+      main_release: false
     secrets:
       GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
       ASSETS: ${{ secrets.ASSETS }}

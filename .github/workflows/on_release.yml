@@ -10,11 +10,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  call_reusable_workflow:
+  dry_run:
+    uses: ./.github/workflows/reusable_workflow.yml
+    with:
+      runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
+      minimal_sample_size: true
+      testing_release: true
+      main_release: false
+    secrets:
+      GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
+      ASSETS: ${{ secrets.ASSETS }}
+  main_release:
     uses: ./.github/workflows/reusable_workflow.yml
     with:
       runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
       minimal_sample_size: false
+      testing_release: false
+      main_release: true
     secrets:
       GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
       ASSETS: ${{ secrets.ASSETS }}
