@@ -12,6 +12,12 @@ on:
       minimal_sample_size:
         required: true
         type: boolean
+      testing_release:
+        required: true
+        type: boolean
+      main_release:
+        required: true
+        type: boolean      
     secrets:
       GOOGLE_CREDS:
         required: true
@@ -106,21 +112,21 @@ jobs:
             Staging/Checksums/*.sha256sum
 
       - name: Package to Exe installer (release)
-        if: ${{ inputs.runner != 'self-hosted' }}
+        if: ${{ inputs.main_release }}
         run: |
           cd Staging
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_$GITHUB_REF_NAME.exe"
 
       - name: Package to Exe installer (non-main release)
-        if: ${{ inputs.runner == 'self-hosted' }}
+        if: ${{ inputs.testing_release }}
         run: |
           cd Staging
           makensis -V4 -DVERSION=$GITHUB_REF rs-liveries-rendered.nsi
           mv "RS Liveries.exe" "RS_Liveries_testing.exe"
 
       - name: Create 'testing' tag (non-main release)
-        if: ${{ inputs.runner == 'self-hosted' }}
+        if: ${{ inputs.testing_release }}
         uses: EndBug/latest-tag@latest
         with:
           # You can change the name of the tag or branch with this input.
@@ -128,13 +134,13 @@ jobs:
           ref: testing
 
       - name: Delete testing release (non-main release)
-        if: ${{ inputs.runner == 'self-hosted' }}
+        if: ${{ inputs.testing_release }}
         uses: cb80/delrel@latest
         with:
           tag: testing
 
       - name: Create a "testing" release (non-main release)
-        if: ${{ inputs.runner == 'self-hosted' }}
+        if: ${{ inputs.testing_release }}
         uses: ncipollo/release-action@v1
         with:
           prerelease: true
@@ -145,7 +151,7 @@ jobs:
 
       - name: Upload Assets to Github Releases (non-main release)
         uses: softprops/action-gh-release@v1
-        if: ${{ inputs.runner == 'self-hosted' }}
+        if: ${{ inputs.testing_release }}
         with:
           tag_name: testing
           files: |
@@ -154,7 +160,7 @@ jobs:
 
       - name: Upload Assets to Github Releases (main release)
         uses: softprops/action-gh-release@v1
-        if: ${{ inputs.runner != 'self-hosted' && inputs.minimal_sample_size == false }}
+        if: ${{ inputs.main_release }}
         with:
           files: |
             Staging/RS_Liveries_${{ github.ref_name }}.exe
