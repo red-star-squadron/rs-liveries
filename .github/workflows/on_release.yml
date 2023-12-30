@@ -15,7 +15,7 @@ jobs:
     with:
       runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
       minimal_sample_size: true
-      testing_release: true
+      testing_release: false
       main_release: false
     secrets:
       GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
