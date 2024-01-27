@@ -46,7 +46,7 @@ jobs:
           remove-dotnet: 'true'
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -98,14 +98,14 @@ jobs:
       - name: Run the downloader
         run: pipenv run python rs_liveries_downloader.py
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Rendered scripts
           path: |
             Staging/*.nsi
             Staging/*.ps1
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Checksums
           path: |
