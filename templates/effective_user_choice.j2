@@ -6,7 +6,7 @@ Section "-Resolve checkboxes"
     {%- if asset._children is not none and asset._dl_dir is not none %}
         {%- set asset_resolved_id = asset._uuid + "_install_bespoke" %}
     {%- endif %}
-    {%- if asset.asset_type == "livery" %}
+    {%- if asset.asset_type == "livery" or asset.asset_type == "cockpit" %}
         {{- resolve_asset_items_livery(asset, asset_resolved_id, github_ref_name) }}
     {%- elif asset.asset_type == "shared" %}
         {{- resolve_asset_items_shared(asset, asset_resolved_id, github_ref_name) }}

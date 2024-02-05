@@ -48,8 +48,10 @@ function DescriptionLuaReplace {
 }
 
 {%- for asset in assets %}
+    {%- if asset.asset_type == "livery"%}
 DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ asset.dcs_codename }}\{{ asset.basename }}\description.lua" -is_basename $true
-    {%- for pilot_dir in asset.pilot_dirs %}
+        {%- for pilot_dir in asset.pilot_dirs %}
 DescriptionLuaReplace -pilot "$pilot" -luafile "$dcs_liveries_root_dir\{{ asset.dcs_codename }}\{{ pilot_dir }}\description.lua" -is_basename $false
-    {%- endfor %}
+        {%- endfor %}
+    {%- endif %}
 {%- endfor %}

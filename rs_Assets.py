@@ -27,6 +27,7 @@ from concurrent.futures import Future
 class LiveryAsset:
     _supported_config_asset_types = [
         "livery",
+        "cockpit",  # Very similar to livery
         "roughmets",
         "shared",
         None,
@@ -248,6 +249,18 @@ class LiveryAsset:
                 raise ValueError(
                     "If 'asset_type' is 'livery', please also provide 'dcs_codename' "
                     "'gdrive_id' and 'basename'"
+                    f"\nYou provided: {config_item}"
+                )
+        if asset_type == "cockpit":
+            if dcs_codename is None or gdrive_id is None or basename is None:
+                raise ValueError(
+                    "If 'asset_type' is 'cockpit', please also provide 'dcs_codename' "
+                    "'gdrive_id' and 'basename'"
+                    f"\nYou provided: {config_item}"
+                )
+            if not dcs_codename.upper().startswith("COCKPIT_"):
+                raise ValueError(
+                    "'dcs_codename' must start with 'Cockpit_' for asset_type 'cockpit' "
                     f"\nYou provided: {config_item}"
                 )
         if asset_type is None:
