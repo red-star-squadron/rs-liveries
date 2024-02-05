@@ -1,6 +1,6 @@
 ## Google credentials
 
-Assumes you have the credentials.json. I think I used  google's IAM console to create a user with no permissions which can be assumed to use anonymous-access google drives.
+Assumes you have the credentials.json. I used  google's IAM console to create a  service account with no permissions which can be assumed to use anonymous-access google drives.
 
 ```shell
 export GOOGLE_APPLICATION_CREDENTIALS=credentials.json
