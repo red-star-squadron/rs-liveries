@@ -1,6 +1,7 @@
 """
 This is where we keep all our google related functions
 """
+
 # Our includes
 from rs_util_shared import MINIMAL_SAMPLE_SIZE
 from rs_util_shared import SCRIPT_DIR
@@ -80,17 +81,18 @@ def download_gdrive_folder(
         raise ValueError(f"Google Drive folder empty or other issue: {gdrive_id}")
     dl_futures = []
     # Check if our prefix matches any of the top-level dirs/files
+    # This needs some work in case our directory structure grows deeper than 1-deep
     items_to_check = [
         i["name"].upper()
         for i in items
         if i["mimeType"] == "application/vnd.google-apps.folder"
     ]
     if verify_basename:
-        if verify_basename.upper() not in items_to_check:
-            raise BaseNameError(
-                f"Prefix {verify_basename.upper()} not found in any of: "
-                + str(items_to_check)
-            )
+        for item_to_check in items_to_check:
+            if verify_basename.upper() not in item_to_check:
+                raise BaseNameError(
+                    f"Prefix {verify_basename.upper()} not found in {item_to_check} "
+                )
 
     if must_contain_strings:
         for must_contain_string in must_contain_strings:
