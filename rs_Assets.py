@@ -171,7 +171,7 @@ class LiveryAsset:
         else:
             for asset_dir in self._asset_items:
                 pilot_dir = PurePath(asset_dir).stem
-                if pilot_dir != self.basename:
+                if pilot_dir.upper() != self.basename.upper():
                     pilot_dirs.append(pilot_dir)
         return pilot_dirs
 
