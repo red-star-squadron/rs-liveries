@@ -21,10 +21,10 @@ Icon "rs.ico"
 
 ; Let's compress as much as possible. /SOLID breaks the installer in case of too many big files (2gb +)!
 ; SetCompressor /FINAL zlib
-; SetCompressor /SOLID /FINAL lzma ; This gave us a trojan false positive... trying without
+SetCompressor /SOLID /FINAL lzma ; Toggle this if you get a trojan false positive.
 
 ; LZMA compression only
-; SetCompressorDictSize 128
+SetCompressorDictSize 128
 
 
 ; The name of the installer
