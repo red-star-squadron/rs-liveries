@@ -336,3 +336,11 @@ Once a release is created on the main branch, a workflow will trigger. It curren
 ### Et voila
 
 Once the release is done, do another test, and then distribute to folks waiting for their fancy planes!
+
+
+## VirusTotal automated scanning
+
+This required setting up a free VirusTotal account and then using the [virustotal][virustotal-gh-action] github action in the workflow.
+We are scanning all released `.exe` files at the time of writing this.
+
+[virustotal-gh-action]: https://github.com/marketplace/actions/virustotal-github-action
