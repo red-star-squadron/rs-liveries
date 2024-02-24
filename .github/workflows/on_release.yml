@@ -32,3 +32,19 @@ jobs:
     secrets:
       GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
       ASSETS: ${{ secrets.ASSETS }}
+  virustotal:
+    needs: main_release
+    runs-on: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
+    steps:
+      - name: Sleep for 60 seconds
+        run: sleep 60s
+        shell: bash
+      
+      - name: VirusTotal Scan
+        uses: crazy-max/ghaction-virustotal@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          update_release_body: true
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          files: |
+            .exe$
