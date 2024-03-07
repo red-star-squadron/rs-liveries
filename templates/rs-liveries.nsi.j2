@@ -214,6 +214,18 @@ ${If} $0 == 1
 ${EndIf}
 !macroend
 
+; RS member retirement (hidden section)
+Section "-RS member retirement"
+{% set retirees = ["boonster", "pana", "fruitcake", "athena"] %}
+{%- for asset in all_assets %}
+    {%- if asset.asset_type == "livery" %}
+      {%- for retiree in retirees %}
+  RMDir /r "$InstDir\{{ asset.dcs_codename }}\{{ asset.basename }} {{ retiree }}"
+      {%- endfor %}
+    {%- endif %}
+{%- endfor %}
+SectionEnd
+
 ; This is a secret section that's not visible to the user
 Section "-Clean up our mistakes"
   ;
