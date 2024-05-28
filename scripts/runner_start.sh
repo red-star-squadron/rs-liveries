@@ -14,20 +14,20 @@ gh_get_token() {
     /repos/$ORG/$REPO/actions/runners/registration-token
 }
 
-mydocker() {
-  docker -l error "$@"
+mypodman() {
+  podman --log-level error "$@"
 }
 
-if mydocker inspect -f '{{.State.Running}}' "runner" > /dev/null 2>&1
+if mypodman inspect -f '{{.State.Running}}' "runner" > /dev/null 2>&1
   then
-  echo "Clean up existing docker resources"
-  mydocker stop runner > /dev/null
-  mydocker rm runner > /dev/null
-  mydocker volume rm gh_tmpfs_vol > /dev/null
+  echo "Clean up existing podman resources"
+  mypodman stop runner > /dev/null
+  mypodman rm runner > /dev/null
+  mypodman volume rm gh_tmpfs_vol > /dev/null
 fi
 
-echo "Create the docker volume"
-mydocker volume create --driver local \
+echo "Create the podman volume"
+mypodman volume create --driver local \
     --opt type=tmpfs \
     --opt device=tmpfs \
     gh_tmpfs_vol > /dev/null
@@ -36,8 +36,8 @@ mydocker volume create --driver local \
 echo "Grab GH hosted runner token"
 REG_TOKEN="$(gh_get_token | jq -r .token)"
 
-echo "Start the gh hosted runner in docker"
-mydocker run \
+echo "Start the gh hosted runner in podman"
+mypodman run \
   --detach \
   --env ORGANIZATION="${ORG}" \
   --env REG_TOKEN="${REG_TOKEN}" \
@@ -46,5 +46,5 @@ mydocker run \
   -v gh_tmpfs_vol:/home/docker/actions-runner/_work \
   gh-runner-image > /dev/null
 
-echo "Check the status of this docker container with:"
-echo "docker logs -f runner"
+echo "Check the status of this podman container with:"
+echo "podman logs -f runner"
