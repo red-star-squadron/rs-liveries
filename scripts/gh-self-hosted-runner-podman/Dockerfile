@@ -2,7 +2,7 @@
 FROM ubuntu:22.04
 
 # set the github runner version
-ARG RUNNER_VERSION="2.316.1"
+ARG RUNNER_VERSION="2.319.1"
 
 # update the base packages
 RUN apt-get update -y && apt-get upgrade -y
