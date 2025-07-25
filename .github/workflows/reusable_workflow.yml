@@ -62,8 +62,8 @@ jobs:
 
       - name: Download 7-zip
         run: |
-          wget https://www.7-zip.org/a/7z2301-extra.7z
-          7z x 7z2301-extra.7z
+          wget https://www.7-zip.org/a/7z2500-extra.7z
+          7z x 7z2500-extra.7z
 
       - name: Remove .env file
         run: rm .env
@@ -80,8 +80,9 @@ jobs:
         run: |
           mkdir nscurl
           cd nscurl
-          wget https://github.com/negrutiu/nsis-nscurl/releases/download/v1.2024.1.13/NScurl-1.2024.1.13.7z
-          7z x NScurl-1.2024.1.13.7z
+          wget https://github.com/negrutiu/nsis-nscurl/releases/download/v25.7.9.211/NScurl.zip
+          unzip NScurl.zip
+          cd Plugins
           sudo mkdir -p /usr/share/nsis/Contrib/amd64-unicode
           sudo cp -r x86-ansi/NScurl.dll         /usr/share/nsis/Plugins/x86-ansi/
           sudo cp -r x86-unicode/NScurl.dll      /usr/share/nsis/Plugins/x86-unicode/
