@@ -81,7 +81,7 @@ jobs:
           mkdir nscurl
           cd nscurl
           wget https://github.com/negrutiu/nsis-nscurl/releases/download/v25.7.9.211/NScurl.zip
-          unzip NScurl-1.2024.1.13.7z
+          unzip NScurl.7z
           cd Plugins
           sudo mkdir -p /usr/share/nsis/Contrib/amd64-unicode
           sudo cp -r x86-ansi/NScurl.dll         /usr/share/nsis/Plugins/x86-ansi/
