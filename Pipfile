@@ -9,6 +9,7 @@ google-auth-httplib2 = "*"
 google-auth-oauthlib = "*"
 PyYAML = "*"
 jinja2 = "*"
+retry = "*"
 
 [dev-packages]
 flake8 = "*"
@@ -16,4 +17,4 @@ pylint = "*"
 pytest = "*"
 
 [requires]
-python_version = "3.12"
+python_version = "3.14"
