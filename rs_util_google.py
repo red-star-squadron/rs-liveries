@@ -12,12 +12,14 @@ from io import BytesIO as io_BytesIO
 from io import open as io_open
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.discovery import build as google_build
+from googleapiclient.errors import HttpError
 from google.auth import default as google_default
 from os.path import join as os_join
 from os.path import exists as os_pexists
 from os import environ
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
+from retry import retry
 
 # I have no idea why i'd ever override this. Oh well.
 if "GOOGLE_APPLICATION_CREDENTIALS" not in environ:
@@ -53,6 +55,7 @@ def get_service():
     return THREAD_LOCAL.service
 
 
+@retry(HttpError, tries=3, delay=2, backoff=2)
 def download_gdrive_folder(
     gdrive_id,
     des,
