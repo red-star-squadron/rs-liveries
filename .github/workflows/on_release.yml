@@ -13,7 +13,7 @@ jobs:
   dry_run:
     uses: ./.github/workflows/reusable_workflow.yml
     with:
-      runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
+      runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-24.04' }}
       upload_artifact_suffix: " - Dry run"
       minimal_sample_size: true
       testing_release: false
@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/reusable_workflow.yml
     with:
       upload_artifact_suffix: " - Release"
-      runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
+      runner: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-24.04' }}
       minimal_sample_size: false
       testing_release: false
       main_release: true
@@ -34,7 +34,7 @@ jobs:
       ASSETS: ${{ secrets.ASSETS }}
   virustotal:
     needs: main_release
-    runs-on: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-22.04' }}
+    runs-on: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-24.04' }}
     steps:
       - name: Sleep for 60 seconds
         run: sleep 60s

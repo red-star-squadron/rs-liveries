@@ -16,7 +16,7 @@ jobs:
     uses: ./.github/workflows/reusable_workflow.yml
     with:
       upload_artifact_suffix: " - Main OnPush"
-      runner: 'ubuntu-22.04'
+      runner: 'ubuntu-24.04'
       minimal_sample_size: true
       testing_release: false
       main_release: false
