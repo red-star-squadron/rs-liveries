@@ -211,7 +211,9 @@ Format is as follows:
       dcs_codename: mi-24p
       gdrive_id: REDACTED
 
-
+# NOTE: Roughtmets are deprecated because we no longer modify 
+#       the TempTextures in the DCS install folder
+#       (or anything  else in the DCS install folder)
 - category_name: Roughmets (Optional)
   must_contain_strings: ["RoughMet"]
   children:
@@ -234,7 +236,7 @@ Format is as follows:
 
 
 * `shared` asset type: It contains various assets shared across multiple aircraft
-* `roughmets` asset type: Reason why we need admin privileges - those files end up in the DCS installation instead of the "Saved Games" location.
+* DEPRECATED `roughmets` asset type: Reason why we need admin privileges - those files end up in the DCS installation instead of the "Saved Games" location.
 
 
 ## Iterative process
