@@ -2,7 +2,6 @@
 name: Bake the installer (non-main release - on push)
 
 on:
-
   push:
     branches:
       - 'feature**'
@@ -14,6 +13,9 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   call_reusable_workflow:
