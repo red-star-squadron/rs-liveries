@@ -62,8 +62,8 @@ jobs:
 
       - name: Download 7-zip
         run: |
-          wget https://github.com/ip7z/7zip/releases/download/26.00/7z2600-extra.7z
-          7z x 7z2500-extra.7z
+          wget https://github.com/ip7z/7zip/releases/download/26.00/7z2600-extra.7z -O 7z-extra.7z
+          7z x 7z-extra.7z
 
       - name: Remove .env file
         run: rm .env
