@@ -10,8 +10,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  packages: read
+  contents: write
+  actions: read
+  packages: write
 
 jobs:
   dry_run:
