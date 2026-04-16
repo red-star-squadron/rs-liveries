@@ -9,6 +9,10 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   dry_run:
     uses: ./.github/workflows/reusable_workflow.yml
@@ -34,6 +38,8 @@ jobs:
       ASSETS: ${{ secrets.ASSETS }}
   virustotal:
     needs: main_release
+    permissions:
+      contents: write
     runs-on: ${{ startsWith( github.ref_name, 'test' ) && 'self-hosted' || 'ubuntu-24.04' }}
     steps:
       - name: Sleep for 60 seconds
