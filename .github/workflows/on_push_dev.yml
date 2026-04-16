@@ -2,7 +2,6 @@
 name: Bake the installer (non-main release - on push)
 
 on:
-
   push:
     branches:
       - 'feature**'
