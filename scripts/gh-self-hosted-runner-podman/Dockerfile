@@ -1,8 +1,8 @@
 # base
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # set the github runner version
-ARG RUNNER_VERSION="2.319.1"
+ARG RUNNER_VERSION="2.333.1"
 
 # update the base packages
 RUN apt-get update -y && apt-get upgrade -y
@@ -10,7 +10,7 @@ RUN apt-get update -y && apt-get upgrade -y
 # install python and the packages the your code depends on along with jq so we can parse JSON
 # add additional packages as necessary
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl jq build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip sudo
+    curl jq build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip sudo adduser
 
 # Add docker user and allow it to sudo to maintain parity with github hosted runners
 RUN adduser --disabled-password --gecos '' docker
