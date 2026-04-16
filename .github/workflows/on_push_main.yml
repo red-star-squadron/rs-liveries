@@ -1,6 +1,9 @@
 ---
 name: Bake the installer (main - on push)
 
+permissions:
+  contents: read
+
 on:
 
   push:
