@@ -10,9 +10,11 @@ Section "-Resolve checkboxes"
         {{- resolve_asset_items_livery(asset, asset_resolved_id, github_ref_name) }}
     {%- elif asset.asset_type == "shared" %}
         {{- resolve_asset_items_shared(asset, asset_resolved_id, github_ref_name) }}
+    {# Deprecated - Touching the program files dir (TempTextures) results in invalid client in DCS
     {%- elif asset.asset_type == "roughmets" %}
         {{- resolve_asset_items_roughmets(asset, asset_resolved_id, github_ref_name) }}
     {%- endif %}
+    #}
 {%- endfor %}
 SectionEnd
 
@@ -40,7 +42,7 @@ SectionEnd
     ${EndIf}
 {%- endmacro -%}
 
-
+{# Deprecated - Touching the program files dir (TempTextures) results in invalid client in DCS
 {%- macro resolve_asset_items_roughmets(asset, asset_resolved_id, github_ref_name) %}
     ${If} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
         !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$ProgramFilesDir\Bazar\TempTextures" "{{ asset.basename }}"
@@ -51,3 +53,4 @@ SectionEnd
             RMDir /r "$ProgramFilesDir\Bazar\TempTextures\{{ asset.basename }}"   {#- This removes the cheksum dir for roughmets #}
     ${EndIf}
 {%- endmacro -%}
+#}
