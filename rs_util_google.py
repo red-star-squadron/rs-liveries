@@ -143,6 +143,7 @@ def fake_download_gdrive_file(dfilespath):
     return dfilespath
 
 
+@retry(HttpError, tries=5, delay=2, backoff=2)
 def download_gdrive_file(dowid, dfilespath):
     """
     Downloads a single google drive file
