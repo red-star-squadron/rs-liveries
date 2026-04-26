@@ -103,14 +103,14 @@ jobs:
       - name: Run the downloader
         run: uv run python rs_liveries_downloader.py
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: "Rendered scripts${{ inputs.upload_artifact_suffix }}"
           path: |
             Staging/*.nsi
             Staging/*.ps1
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: "Checksums${{ inputs.upload_artifact_suffix }}"
           path: |
