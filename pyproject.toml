@@ -1,6 +1,6 @@
 [project]
-name = ""
-version = "0.0.1"
+name = "rs-liveries"
+version = "v0.14.2"
 requires-python = "~=3.14"
 dependencies = [
     "google-api-python-client",
