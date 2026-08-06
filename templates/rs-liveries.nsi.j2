@@ -419,7 +419,7 @@ FunctionEnd
 Section "-Resolve pilot priorities"
     ${If} ${SectionIsSelected}  ${PILOTPRIO}
         DetailPrint "Modifying pilot priorities..."
-        DetailPrint 'Command: powershell -inputformat none -ExecutionPolicy Bypass -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"'
+        ; DetailPrint 'Command: powershell -inputformat none -ExecutionPolicy Bypass -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"'
         nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy Bypass -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
         Pop $0
         Pop $1
