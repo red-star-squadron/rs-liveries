@@ -200,11 +200,15 @@ Page custom nsDialogsPage nsDialogsPageLeave
   ${If} "$0" != "OK"
     Abort "DOWNLOAD FAILED: ${URL}.7z // Aborting install. Download the latest release from: https://github.com/red-star-squadron/rs-liveries/releases/latest"
   ${EndIf}
-  ClearErrors
   DetailPrint "Extracting ${ArchivePath} to ${ExtractPath}"
-  ${PowerShellExecFileLog} '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "${ExtractPath}" -archive_path "${ArchivePath}"  '
-  IfErrors 0 +2
-    Abort "Problem extracting ${ArchivePath} to ${ExtractPath}"
+  nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy Bypass -File "$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "${ExtractPath}" -archive_path "${ArchivePath}"  '
+  Pop $0
+  Pop $1
+  DetailPrint "Extraction exit code: $0"
+  DetailPrint "Extraction output:$\r$\n$1"
+  ${If} $0 != 0
+    Abort "Problem extracting ${ArchivePath} to ${ExtractPath} (exit $0):$\r$\n$1"
+  ${EndIf}
   Delete "${ArchivePath}"
   ;; Deprecated We no longer touch the program files dir.
   ; The line below makes sense only for roughmets because their files go directly into ExtractPath
