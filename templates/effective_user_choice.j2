@@ -29,6 +29,7 @@ SectionEnd
     {%- for asset_dir in asset._asset_items %}
         RMDir /r "$InstDir\{{ asset.dcs_codename }}\{{ asset_dir }}"
     {%- endfor %}
+        Delete "$InstDir\{{ asset.dcs_codename }}\{{ asset.basename }}\{{ asset.basename }}.sha256sum"
         !insertmacro RemoveEmptyDir "$InstDir\{{ asset.dcs_codename }}"
     ${EndIf}
 {%- endmacro -%}
@@ -39,6 +40,7 @@ SectionEnd
         !insertmacro DownloadExtract "https://github.com/red-star-squadron/rs-liveries/releases/download/{{ github_ref_name }}/{{ asset.basename | replace(" ", ".") }}" "$TEMP\{{ asset.basename }}.7z" "$INSTDIR" "{{ asset.basename }}"
     ${ElseIfNot} ${SectionIsSelected}  {{ '${' }}{{asset_resolved_id}}{{ '}' }} ; asset.basename: {{asset.basename}} // asset.category_name: {{asset.category_name}}
         RMDir /r "$InstDir\{{ asset.basename }}"
+        Delete "$InstDir\{{ asset.basename }}\{{ asset.basename }}.sha256sum"
         !insertmacro RemoveEmptyDir "$InstDir\{{ asset.basename }}"
     ${EndIf}
 {%- endmacro -%}

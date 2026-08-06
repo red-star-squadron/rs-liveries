@@ -215,6 +215,10 @@ Page custom nsDialogsPage nsDialogsPageLeave
   ; In case of normal liveries nothing will happen because the previous extract already created the dir
   ; In case of roughmets, we will get a new directory with the roughmet['roughmet_directory_basename'] inside the Programfiles bazaar folder
   ; CreateDirectory "${ExtractPath}\${BaseName}"
+  ; Stored flat (not nested under a "${BaseName}" subfolder) because the archive's internal
+  ; folder structure depends on how the source content was organized (e.g. livery pilot
+  ; variants extract as siblings, not nested under a folder named after the basename), so a
+  ; "${ExtractPath}\${BaseName}\" directory isn't guaranteed to exist after extraction.
   Rename "$PluginsDir\${BaseName}.sha256sum" "${ExtractPath}\${BaseName}\${BaseName}.sha256sum"
   SkipToEnd_${ID}:
   !undef ID
