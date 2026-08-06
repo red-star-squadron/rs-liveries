@@ -32,7 +32,7 @@
   !define PSExecID ${__LINE__}
   Push $R0
 
-  nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File ${PSFileandParams}  '
+  nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy Bypass -File ${PSFileandParams}  '
 
   Pop $R0 ;return value is first on stack
   ;script output is second on stack, leave on top of it
@@ -49,7 +49,7 @@ finish_${PSExecID}:
   !define PSExecID ${__LINE__}
   Push $R0
 
-  nsExec::ExecToLog 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File ${PSFileandParams}  '
+  nsExec::ExecToLog 'powershell -inputformat none -ExecutionPolicy Bypass -File ${PSFileandParams}  '
   Pop $R0 ;return value is on stack
   IntCmp $R0 0 finish_${PSExecID}
   SetErrorLevel 2

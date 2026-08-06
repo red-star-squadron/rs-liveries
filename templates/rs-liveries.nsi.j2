@@ -144,6 +144,12 @@ Function .onInit
   File "livery-priorities.ps1"
   File "extract-file.ps1"
   File "Checksums\*.sha256sum"
+  ; Strip Mark-of-the-Web from the extracted scripts, in case it got propagated from the
+  ; installer exe. Without admin rights, a blocked/unsigned script can silently fail to run.
+  ClearErrors
+  Delete "$PluginsDir\livery-priorities.ps1:Zone.Identifier"
+  Delete "$PluginsDir\extract-file.ps1:Zone.Identifier"
+  ClearErrors
   newadvsplash::play "$PluginsDir\mig29flyby.wav"
   newadvsplash::show 8200 1000 1000 "0x333333" /PASSIVE $PluginsDir\rssplash.bmp
   ; If there is ever a problem with the newadvsplash download, use the old advsplash plugin
@@ -196,7 +202,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
   ${EndIf}
   ClearErrors
   DetailPrint "Extracting ${ArchivePath} to ${ExtractPath}"
-  ${PowerShellExecFileLog}  '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "${ExtractPath}" -archive_path "${ArchivePath}"  '
+  ${PowerShellExecFileLog} '"$PluginsDir\extract-file.ps1" -7a_exec_path "$PluginsDir\7za.exe" -destination_dir "${ExtractPath}" -archive_path "${ArchivePath}"  '
   IfErrors 0 +2
     Abort "Problem extracting ${ArchivePath} to ${ExtractPath}"
   Delete "${ArchivePath}"
@@ -409,10 +415,14 @@ FunctionEnd
 Section "-Resolve pilot priorities"
     ${If} ${SectionIsSelected}  ${PILOTPRIO}
         DetailPrint "Modifying pilot priorities..."
-        ${PowerShellExecFileLog} '"$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
-        IfErrors 0 +2
-            Abort "There was a problem with the pilot priorities script. Aborting. You can probably use the liveries as normal."
-        ; nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy RemoteSigned -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
-        ; MessageBox MB_OK "$PilotSelected"
+        DetailPrint 'Command: powershell -inputformat none -ExecutionPolicy Bypass -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"'
+        nsExec::ExecToStack 'powershell -inputformat none -ExecutionPolicy Bypass -File "$PLUGINSDIR\livery-priorities.ps1" -dcs_liveries_root_dir "$InstDir" -pilot "$PilotSelected"  '
+        Pop $0
+        Pop $1
+        DetailPrint "Pilot priority script exit code: $0"
+        DetailPrint "Pilot priority script output:$\r$\n$1"
+        ${If} $0 != 0
+            MessageBox MB_OK "Pilot priority script failed (exit $0):$\r$\n$1$\r$\n$\r$\nYou can probably use the liveries as normal."
+        ${EndIf}
     ${Endif}
 SectionEnd
