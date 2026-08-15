@@ -1,8 +1,8 @@
 # base
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 # set the github runner version
-ARG RUNNER_VERSION="2.333.1"
+ARG RUNNER_VERSION="2.336.0"
 
 # update the base packages
 RUN apt-get update -y && apt-get upgrade -y
